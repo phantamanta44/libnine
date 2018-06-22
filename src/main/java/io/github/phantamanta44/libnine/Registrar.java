@@ -36,7 +36,7 @@ public class Registrar {
     private List<L9Item> virtueItems = new LinkedList<>();
     
     public void begin(Virtue virtue) {
-        if (getBound() != null) {
+        if (bound != null) {
             throw new IllegalStateException(String.format("Could not bind virtue %s because %s was already bound!",
                             virtue.getModId(), getBound().getModId()));
         }
@@ -44,9 +44,7 @@ public class Registrar {
     }
 
     public void end() {
-        if (getBound() == null) {
-            throw new IllegalStateException("Nothing is bound!");
-        }
+        if (bound == null) throw new IllegalStateException("No virtue is bound!");
         virtueItems.forEach(L9Item::postInit);
         virtueItems.clear();
         virtueBlocks.forEach(L9Block::postInit);
@@ -55,6 +53,7 @@ public class Registrar {
     }
 
     public Virtue getBound() {
+        if (bound == null) throw new IllegalStateException("No virtue is bound!");
         return bound;
     }
 
@@ -86,11 +85,7 @@ public class Registrar {
     @SubscribeEvent
     @SuppressWarnings("unchecked")
     public void onRegisterBlocks(RegistryEvent.Register<Block> event) {
-//        rqBlocks.forEach(event.getRegistry()::register);
-        for (L9Block b : rqBlocks) {
-            System.out.println("Registering: " + b.getClass().getName());
-            event.getRegistry().register(b);
-        }
+        rqBlocks.forEach(event.getRegistry()::register);
         rqBlocks = null;
         rqTileEntities.forEach(t -> {
             t.register();
