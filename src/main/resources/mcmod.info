@@ -1,0 +1,15 @@
+[
+{
+  "modid": "libnine",
+  "name": "libnine",
+  "description": "It's a core mod, I guess",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["phantamanta44"],
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
