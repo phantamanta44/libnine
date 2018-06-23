@@ -53,7 +53,7 @@ public class ByteUtils {
 
         public Writer writeInt(int i) {
             byte[] bytes = new byte[Integer.BYTES];
-            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)(i & (0xFF << k));
+            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)((i & (0xFF << (k * 8))) >> k * 8);
             return writeBytes(bytes);
         }
 
@@ -67,13 +67,13 @@ public class ByteUtils {
 
         public Writer writeShort(short i) {
             byte[] bytes = new byte[Short.BYTES];
-            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)(i & (0xFF << k));
+            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)((i & (0xFF << (k * 8))) >> k * 8);
             return writeBytes(bytes);
         }
 
         public Writer writeLong(long i) {
             byte[] bytes = new byte[Long.BYTES];
-            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)(i & (0xFF << k));
+            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)((i & (0xFF << (k * 8))) >> k * 8);
             return writeBytes(bytes);
         }
 
@@ -85,10 +85,10 @@ public class ByteUtils {
             while (true) {
                 int afterShift = i >>> 7;
                 if (afterShift == 0) {
-                    writeByte((byte)((i & 0b1111111) | 0b10000000));
+                    writeByte((byte)((i & 0b01111111) | 0b10000000));
                     break;
                 } else {
-                    writeByte((byte)(i & 0b1111111));
+                    writeByte((byte)(i & 0b01111111));
                 }
                 i = afterShift;
             }
@@ -184,7 +184,9 @@ public class ByteUtils {
 
         public int readInt() {
             int value = 0;
-            for (int i = 0; i < Integer.BYTES; i++) value |= (data[pointer + i] << i);
+            for (int i = 0; i < Integer.BYTES; i++) {
+                value |= (Byte.toUnsignedInt(data[pointer + i]) << (i * 8));
+            }
             pointer += Integer.BYTES;
             return value;
         }
@@ -199,14 +201,18 @@ public class ByteUtils {
 
         public short readShort() {
             short value = 0;
-            for (int i = 0; i < Short.BYTES; i++) value |= (data[pointer + i] << i);
+            for (int i = 0; i < Short.BYTES; i++) {
+                value |= (Byte.toUnsignedInt(data[pointer + i]) << (i * 8));
+            }
             pointer += Short.BYTES;
             return value;
         }
 
         public long readLong() {
             long value = 0;
-            for (int i = 0; i < Long.BYTES; i++) value |= (data[pointer + i] << i);
+            for (int i = 0; i < Long.BYTES; i++) {
+                value |= (Byte.toUnsignedInt(data[pointer + i]) << (i * 8));
+            }
             pointer += Long.BYTES;
             return value;
         }
@@ -221,7 +227,7 @@ public class ByteUtils {
             byte chunk;
             do {
                 chunk = readByte();
-                value |= chunk << (7 * (i++));
+                value |= (chunk & 0b01111111) << (7 * (i++));
             } while ((chunk & 0b10000000) == 0);
             return value;
         }

@@ -4,6 +4,7 @@ import io.github.phantamanta44.libnine.tile.L9TileEntity;
 import io.github.phantamanta44.libnine.util.WorldBlockPos;
 import io.github.phantamanta44.libnine.util.helper.ByteUtils;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -49,9 +50,14 @@ public class PacketServerSyncTileEntity implements IMessage {
 
         @Override
         public IMessage onMessage(PacketServerSyncTileEntity message, MessageContext ctx) {
-            TileEntity tile = message.pos.getWorld().getTileEntity(message.pos);
-            if (tile instanceof L9TileEntity) {
-                ((L9TileEntity)tile).deserializeBytes(ByteUtils.reader(message.data));
+            if (message.pos.getWorld().provider.getDimension()
+                    == Minecraft.getMinecraft().world.provider.getDimension()) {
+                Minecraft.getMinecraft().addScheduledTask(() -> {
+                    TileEntity tile = Minecraft.getMinecraft().world.getTileEntity(message.pos);
+                    if (tile instanceof L9TileEntity) {
+                        ((L9TileEntity)tile).deserializeBytes(ByteUtils.reader(message.data));
+                    }
+                });
             }
             return null;
         }

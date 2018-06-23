@@ -4,7 +4,10 @@ import io.github.phantamanta44.libnine.LibNine;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
 import io.github.phantamanta44.libnine.util.helper.ByteUtils;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+
+import javax.annotation.Nullable;
 
 public class L9TileEntity extends TileEntity implements ISerializable {
 
@@ -29,6 +32,11 @@ public class L9TileEntity extends TileEntity implements ISerializable {
     protected void setDirty() {
         markDirty();
         if (!getWorld().isRemote) dispatchTileUpdate();
+    }
+
+    @Override
+    public NBTTagCompound getUpdateTag() {
+        return super.getUpdateTag();
     }
 
     /**

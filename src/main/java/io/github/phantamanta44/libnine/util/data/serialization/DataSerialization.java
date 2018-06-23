@@ -1,8 +1,10 @@
 package io.github.phantamanta44.libnine.util.data.serialization;
 
+import io.github.phantamanta44.libnine.LibNine;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
 import io.github.phantamanta44.libnine.util.helper.ByteUtils;
 import io.github.phantamanta44.libnine.util.helper.FormatUtils;
+import io.github.phantamanta44.libnine.util.helper.MirrorUtils;
 import io.github.phantamanta44.libnine.util.tuple.IPair;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -71,10 +73,13 @@ public class DataSerialization {
     private static final Map<Class<?>, List<Field>> classMappings = new HashMap<>();
 
     private static void calculateClassMappings(Class<?> src) {
-        classMappings.put(src, Arrays.stream(src.getDeclaredFields())
-                .sorted(Comparator.comparing(Field::getName))
+        LibNine.LOGGER.info("Calculating serialization mappings for class: {}", src.getName());
+        classMappings.put(src, MirrorUtils.getHierarchy(src).stream()
+                .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
                 .filter(f -> f.isAnnotationPresent(AutoSerialize.class))
+                .sorted(Comparator.comparing(Field::getName))
                 .peek(f -> f.setAccessible(true))
+                .peek(f -> LibNine.LOGGER.info("- Found serializable field: {}", f.getName()))
                 .collect(Collectors.toList()));
     }
 

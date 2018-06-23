@@ -21,7 +21,7 @@ public class L9ClientProxy extends L9CommonProxy {
 
     @Override
     public void dispatchTileUpdate(L9TileEntity tile) {
-        // NO-OP
+        if (!tile.getWorld().isRemote) super.dispatchTileUpdate(tile);
     }
 
 }

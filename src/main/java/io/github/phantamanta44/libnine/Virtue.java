@@ -85,7 +85,7 @@ public class Virtue {
     void markUsesTileEntities() {
         if (!usesTileEntities) {
             getNetworkHandler().registerMessage(
-                    new PacketServerSyncTileEntity.Handler(), PacketServerSyncTileEntity.class, 255, Side.SERVER);
+                    PacketServerSyncTileEntity.Handler.class, PacketServerSyncTileEntity.class, 255, Side.CLIENT);
             usesTileEntities = true;
         }
     }
