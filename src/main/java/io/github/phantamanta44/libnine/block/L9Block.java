@@ -107,7 +107,7 @@ public class L9Block extends Block implements ITileEntityProvider {
     @Nullable
     @SuppressWarnings("unchecked")
     public <T extends TileEntity> T getTileEntity(IBlockAccess world, BlockPos pos) {
-        return (T)WorldUtils.getTileSafely(world, pos);
+        return (T)world.getTileEntity(pos);
     }
 
 }

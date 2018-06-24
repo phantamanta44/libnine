@@ -1,6 +1,5 @@
 package io.github.phantamanta44.libnine.util;
 
-import io.github.phantamanta44.libnine.util.helper.WorldUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -9,12 +8,13 @@ import net.minecraftforge.common.DimensionManager;
 
 import javax.annotation.Nullable;
 
-public class WorldBlockPos extends BlockPos {
+public class WorldBlockPos {
 
-    private World world;
+    private final BlockPos pos;
+    private final World world;
 
     public WorldBlockPos(World world, int x, int y, int z) {
-        super(x, y, z);
+        this.pos = new BlockPos(x, y, z).toImmutable();
         this.world = world;
     }
 
@@ -34,27 +34,39 @@ public class WorldBlockPos extends BlockPos {
         return world;
     }
 
-    public void setWorld(World world) {
-        this.world = world;
+    public int getDimId() {
+        return world.provider.getDimension();
+    }
+
+    public int getX() {
+        return pos.getX();
+    }
+
+    public int getY() {
+        return pos.getY();
+    }
+
+    public int getZ() {
+        return pos.getZ();
     }
 
     @Nullable
     public TileEntity getTileEntity() {
-        return WorldUtils.getTileSafely(world, this);
+        return world.getTileEntity(pos);
     }
 
     public IBlockState getBlockState() {
-        return getWorld().getBlockState(this);
+        return getWorld().getBlockState(pos);
     }
 
-    public BlockPos demote() {
-        return new BlockPos(this);
+    public BlockPos getPos() {
+        return pos;
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof WorldBlockPos && super.equals(o)
-                && world.provider.getDimension() == ((WorldBlockPos)o).getWorld().provider.getDimension();
+        return o instanceof WorldBlockPos && pos.equals(((WorldBlockPos)o).pos)
+                && getDimId() == ((WorldBlockPos)o).getDimId();
     }
 
 }
