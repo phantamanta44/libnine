@@ -2,13 +2,15 @@ package io.github.phantamanta44.libnine.block;
 
 import io.github.phantamanta44.libnine.LibNine;
 import io.github.phantamanta44.libnine.item.L9ItemBlock;
+import io.github.phantamanta44.libnine.util.WorldBlockPos;
+import io.github.phantamanta44.libnine.util.helper.WorldUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -104,12 +106,8 @@ public class L9Block extends Block implements ITileEntityProvider {
 
     @Nullable
     @SuppressWarnings("unchecked")
-    public <T extends TileEntity> T getTileEntity(World world, BlockPos pos) {
-        return (T)world.getTileEntity(pos);
-    }
-
-    protected boolean isInCreativeTab(CreativeTabs tab) {
-        return tab.equals(getCreativeTabToDisplayOn());
+    public <T extends TileEntity> T getTileEntity(IBlockAccess world, BlockPos pos) {
+        return (T)WorldUtils.getTileSafely(world, pos);
     }
 
 }

@@ -1,21 +1,27 @@
 package io.github.phantamanta44.libnine.client;
 
+import io.github.phantamanta44.libnine.Registrar;
+import io.github.phantamanta44.libnine.Virtue;
 import io.github.phantamanta44.libnine.block.L9Block;
 import io.github.phantamanta44.libnine.block.L9BlockStated;
 import io.github.phantamanta44.libnine.block.state.IBlockModelMapper;
 import io.github.phantamanta44.libnine.item.L9Item;
 import io.github.phantamanta44.libnine.util.tuple.IPair;
 import io.github.phantamanta44.libnine.util.tuple.ITriple;
-import io.github.phantamanta44.libnine.Registrar;
-import io.github.phantamanta44.libnine.Virtue;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.IStateMapper;
 import net.minecraft.client.renderer.block.statemap.StateMapperBase;
+import net.minecraft.client.renderer.color.IBlockColor;
+import net.minecraft.client.renderer.color.IItemColor;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.LinkedList;
@@ -27,18 +33,8 @@ public class ClientRegistrar extends Registrar {
     private List<IPair<Block, IStateMapper>> rqBlockStateMappers = new LinkedList<>();
 
     @Override
-    public void queueItemModelReg(L9Item item, int meta, String model, String variant) {
-        rqItemModels.add(ITriple.of(item, meta, getBound().newModelResourceLocation(model, variant)));
-    }
-
-    @Override
     public void queueItemModelReg(L9Item item, int meta, String model) {
-        queueItemModelReg(item, meta, model, "inventory");
-    }
-
-    @Override
-    public void queueItemModelReg(L9Item item, String model, String variant) {
-        queueItemModelReg(item, 0, model, variant);
+        rqItemModels.add(ITriple.of(item, meta, getBound().newModelResourceLocation(model, "inventory")));
     }
 
     @Override
@@ -47,18 +43,8 @@ public class ClientRegistrar extends Registrar {
     }
 
     @Override
-    public void queueItemBlockModelReg(L9Block block, int meta, String model, String variant) {
-        rqItemModels.add(ITriple.of(block.getItemBlock(), meta, getBound().newModelResourceLocation(model, variant)));
-    }
-
-    @Override
     public void queueItemBlockModelReg(L9Block block, int meta, String model) {
-        rqItemModels.add(ITriple.of(block.getItemBlock(), meta, getBound().newModelResourceLocation(model)));
-    }
-
-    @Override
-    public void queueItemBlockModelReg(L9Block block, String model, String variant) {
-        queueItemBlockModelReg(block, 0, model, variant);
+        rqItemModels.add(ITriple.of(block.getItemBlock(), meta, getBound().newModelResourceLocation(model, "inventory")));
     }
 
     @Override
@@ -67,7 +53,7 @@ public class ClientRegistrar extends Registrar {
     }
 
     @Override
-    public void queueBlockStateMapperReq(L9BlockStated block, IBlockModelMapper mapper) {
+    public void queueBlockStateMapperReg(L9BlockStated block, IBlockModelMapper mapper) {
         rqBlockStateMappers.add(IPair.of(block, new StateMapperAdapter(mapper, getBound())));
     }
 
@@ -77,6 +63,34 @@ public class ClientRegistrar extends Registrar {
         rqItemModels = null;
         rqBlockStateMappers.forEach(m -> m.sprexec(ModelLoader::setCustomStateMapper));
         rqBlockStateMappers = null;
+    }
+
+    private List<IPair<IItemColor, Item[]>> rqItemColourHandlers = new LinkedList<>();
+    private List<IPair<IBlockColor, L9Block[]>> rqBlockColourHandlers = new LinkedList<>();
+
+    @Override
+    public void queueItemColourHandlerReg(IItemColor handler, Item... items) {
+        rqItemColourHandlers.add(IPair.of(handler, items));
+    }
+
+    @Override
+    public void queueBlockColourHandlerReg(IBlockColor handler, L9Block... blocks) {
+        rqBlockColourHandlers.add(IPair.of(handler, blocks));
+    }
+
+    @Override
+    public void onRegisterColourHandlers() {
+        rqItemColourHandlers.forEach(h -> h.sprexec(
+                Minecraft.getMinecraft().getItemColors()::registerItemColorHandler));
+        rqItemColourHandlers = null;
+        rqBlockColourHandlers.forEach(h -> h.sprexec(
+                Minecraft.getMinecraft().getBlockColors()::registerBlockColorHandler));
+        rqBlockColourHandlers = null;
+    }
+
+    @Override
+    public <T extends TileEntity> void queueTESRReg(Class<T> clazz, TileEntitySpecialRenderer<T> renderer) {
+        ClientRegistry.bindTileEntitySpecialRenderer(clazz, renderer);
     }
 
     private static class StateMapperAdapter extends StateMapperBase {

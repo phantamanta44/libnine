@@ -8,6 +8,9 @@ import io.github.phantamanta44.libnine.tile.L9TileEntity;
 import io.github.phantamanta44.libnine.util.LazyConstant;
 import io.github.phantamanta44.libnine.util.helper.FormatUtils;
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.color.IBlockColor;
+import net.minecraft.client.renderer.color.IItemColor;
+import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.event.RegistryEvent;
@@ -126,7 +129,23 @@ public class Registrar {
         // NO-OP
     }
     
-    public void queueBlockStateMapperReq(L9BlockStated block, IBlockModelMapper mapper) {
+    public void queueBlockStateMapperReg(L9BlockStated block, IBlockModelMapper mapper) {
+        // NO-OP
+    }
+
+    public void queueItemColourHandlerReg(IItemColor handler, Item... items) {
+        // NO-OP
+    }
+
+    public void queueBlockColourHandlerReg(IBlockColor handler, L9Block... blocks) {
+        // NO-OP
+    }
+
+    public void onRegisterColourHandlers() {
+        // NO-OP
+    }
+
+    public <T extends TileEntity> void queueTESRReg(Class<T> clazz, TileEntitySpecialRenderer<T> renderer) {
         // NO-OP
     }
 

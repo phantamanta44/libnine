@@ -3,7 +3,7 @@ package io.github.phantamanta44.libnine.component;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
 import io.github.phantamanta44.libnine.util.function.IIntBiConsumer;
 import io.github.phantamanta44.libnine.util.helper.ByteUtils;
-import io.github.phantamanta44.libnine.util.helper.MathUtils;
+import io.github.phantamanta44.libnine.util.math.MathUtils;
 import net.minecraft.nbt.NBTTagCompound;
 
 import java.util.Collection;

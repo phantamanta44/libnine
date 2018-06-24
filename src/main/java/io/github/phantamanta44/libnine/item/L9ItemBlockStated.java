@@ -22,10 +22,6 @@ public class L9ItemBlockStated extends L9ItemBlock {
         return getBlock().getInternalName();
     }
 
-    public String getModelVariant(VirtualState state) {
-        return "inventory";
-    }
-
     /*
      * Properties
      */

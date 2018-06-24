@@ -18,8 +18,9 @@ public class CapabilityBrokerDirectional implements ICapabilityProvider {
         this.capabilities = Tables.newCustomTable(new HashMap<>(), HashMap::new);
     }
 
-    public <T> void put(@Nullable EnumFacing dir, Capability<T> capability, T aspect) {
+    public <T> CapabilityBrokerDirectional with(@Nullable EnumFacing dir, Capability<T> capability, T aspect) {
         capabilities.put(dir, capability, aspect);
+        return this;
     }
 
     @Override

@@ -40,7 +40,7 @@ public class L9CommonProxy {
         getRegistrar().lookUpTileVirtue(tile.getClass()).getNetworkHandler().sendToAllAround(
                 new PacketServerSyncTileEntity(tile),
                 new NetworkRegistry.TargetPoint(
-                        tile.getWorld().provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 32D));
+                        tile.getWorld().provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64D));
     }
 
     /*

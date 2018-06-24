@@ -4,6 +4,7 @@ import io.github.phantamanta44.libnine.LibNine;
 import io.github.phantamanta44.libnine.block.state.VirtualState;
 import io.github.phantamanta44.libnine.item.L9ItemBlock;
 import io.github.phantamanta44.libnine.item.L9ItemBlockStated;
+import io.github.phantamanta44.libnine.util.Accrue;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
@@ -16,7 +17,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class L9BlockStated extends L9Block {
+public class L9BlockStated extends L9Block {
 
     private List<IProperty<?>> props;
     private List<VirtualState> states;
@@ -29,14 +30,22 @@ public abstract class L9BlockStated extends L9Block {
      * Initializers
      */
 
-    protected abstract void collectProperties(List<IProperty<?>> props);
+    protected void accrueProperties(Accrue<IProperty<?>> props) {
+        // NO-OP
+    }
+
+    protected void accrueVolatileProperties(Accrue<IProperty<?>> props) {
+        // NO-OP
+    }
 
     @Override
     protected BlockStateContainer createBlockState() {
-        List<IProperty<?>> accum = new LinkedList<>();
-        collectProperties(accum);
-        props = Collections.unmodifiableList(accum);
-        states = Collections.unmodifiableList(VirtualState.cartesian(props));
+        List<IProperty<?>> propList = new LinkedList<>();
+        Accrue<IProperty<?>> accum = new Accrue<>(propList);
+        accrueProperties(accum);
+        states = Collections.unmodifiableList(VirtualState.cartesian(propList));
+        accrueVolatileProperties(accum);
+        props = Collections.unmodifiableList(propList);
         return new BlockStateContainer(this, props.toArray(new IProperty[0]));
     }
 
@@ -48,9 +57,8 @@ public abstract class L9BlockStated extends L9Block {
     @Override
     protected void initModel() {
         for (int i = 0; i < states.size(); i++) {
-            VirtualState state = states.get(i);
-            LibNine.PROXY.getRegistrar().queueItemBlockModelReg(
-                    this, i, getItemBlock().getModelName(state), getItemBlock().getModelVariant(state));
+            LibNine.PROXY.getRegistrar()
+                    .queueItemBlockModelReg(this, i, getItemBlock().getModelName(states.get(i)));
         }
     }
 
@@ -77,10 +85,8 @@ public abstract class L9BlockStated extends L9Block {
 
     @Override
     public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> items) {
-        if (isInCreativeTab(tab)) {
-            for (int i = 0; i < states.size(); i++) {
-                items.add(new ItemStack(this, 1, i));
-            }
+        for (int i = 0; i < states.size(); i++) {
+            items.add(new ItemStack(this, 1, i));
         }
     }
 
@@ -95,6 +101,11 @@ public abstract class L9BlockStated extends L9Block {
             if (states.get(i).matches(state)) return i;
         }
         throw new IllegalArgumentException("Invalid block state!");
+    }
+
+    @Override
+    public IBlockState getStateFromMeta(int meta) {
+        return states.get(meta).synthesize(getBlockState());
     }
 
 }

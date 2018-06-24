@@ -1,11 +1,13 @@
 package io.github.phantamanta44.libnine.util.helper;
 
+import io.github.phantamanta44.libnine.util.WorldBlockPos;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -47,11 +49,15 @@ public class WorldUtils {
 
     @Nullable
     public static TileEntity getAdjacentTile(TileEntity base, EnumFacing dir) {
-        return base.getWorld().getTileEntity(base.getPos().add(dir.getDirectionVec()));
+        return getTileSafely(base.getWorld(), base.getPos().add(dir.getDirectionVec()));
     }
 
     public static Vec3d getBlockCenter(BlockPos pos) {
         return new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
+    }
+
+    public static TileEntity getTileSafely(IBlockAccess world, BlockPos pos) {
+        return world.getTileEntity(pos instanceof WorldBlockPos ? ((WorldBlockPos)pos).demote() : pos);
     }
 
 }

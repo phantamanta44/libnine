@@ -2,6 +2,7 @@ package io.github.phantamanta44.libnine.block.state;
 
 import com.google.common.collect.Lists;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 
 import java.util.HashMap;
@@ -31,11 +32,19 @@ public class VirtualState {
     }
 
     public boolean matches(IBlockState state) {
-        if (state.getProperties().size() != props.size()) return false;
-        for (Map.Entry<IProperty<?>, Comparable<?>> entry : state.getProperties().entrySet()) {
-            if (!get(entry.getKey()).equals(entry.getValue())) return false;
+        for (Map.Entry<IProperty<?>, Comparable<?>> prop : props.entrySet()) {
+            if (!state.getProperties().get(prop.getKey()).equals(prop.getValue())) return false;
         }
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    public IBlockState synthesize(BlockStateContainer container) {
+        IBlockState state = container.getBaseState();
+        for (Map.Entry<IProperty<?>, Comparable<?>> prop : props.entrySet()) {
+            state = state.withProperty((IProperty)prop.getKey(), (Comparable)prop.getValue());
+        }
+        return state;
     }
 
     private Stream<VirtualState> cartesian(IProperty<?> prop) {

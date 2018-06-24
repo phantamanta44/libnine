@@ -1,4 +1,4 @@
-package io.github.phantamanta44.libnine.util;
+package io.github.phantamanta44.libnine.util.nbt;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
@@ -31,6 +31,16 @@ public class ChainingTagCompound extends NBTTagCompound {
 
     public ChainingTagCompound withByte(String key, int value) {
         super.setByte(key, (byte)value);
+        return this;
+    }
+
+    public ChainingTagCompound withFloat(String key, float value) {
+        super.setFloat(key, value);
+        return this;
+    }
+
+    public ChainingTagCompound withDouble(String key, double value) {
+        super.setDouble(key, value);
         return this;
     }
 

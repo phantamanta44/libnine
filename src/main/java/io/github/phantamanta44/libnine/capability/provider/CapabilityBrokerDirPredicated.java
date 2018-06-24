@@ -19,8 +19,9 @@ public class CapabilityBrokerDirPredicated implements ICapabilityProvider {
         this.capabilities = new HashMap<>();
     }
 
-    public <T> void put(Capability<T> capability, T aspect, BiPredicate<T, EnumFacing> condition) {
+    public <T> CapabilityBrokerDirPredicated with(Capability<T> capability, T aspect, BiPredicate<T, EnumFacing> condition) {
         capabilities.put(capability, IPair.of(condition, aspect));
+        return this;
     }
 
     @Override

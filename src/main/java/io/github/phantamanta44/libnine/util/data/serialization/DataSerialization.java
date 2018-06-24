@@ -5,10 +5,13 @@ import io.github.phantamanta44.libnine.util.data.ISerializable;
 import io.github.phantamanta44.libnine.util.helper.ByteUtils;
 import io.github.phantamanta44.libnine.util.helper.FormatUtils;
 import io.github.phantamanta44.libnine.util.helper.MirrorUtils;
+import io.github.phantamanta44.libnine.util.nbt.NBTUtils;
 import io.github.phantamanta44.libnine.util.tuple.IPair;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -67,7 +70,27 @@ public class DataSerialization {
                             s.writeToNBT(f);
                             t.setTag(k, f);
                     }, (t, k) -> FluidStack.loadFluidStackFromNBT(t.getCompoundTag(k)),
-                    ByteUtils.Writer::writeFluidStack, ByteUtils.Reader::readFluidStack)
+                    ByteUtils.Writer::writeFluidStack, ByteUtils.Reader::readFluidStack),
+            new LambdaSerializer<>(BlockPos.class,
+                    (t, k, p) -> t.setTag(k, NBTUtils.serializeBlockPos(p)),
+                    (t, k) -> NBTUtils.deserializeBlockPos(t.getCompoundTag(k)),
+                    (d, p) -> d.writeInt(p.getX()).writeInt(p.getY()).writeInt(p.getZ()),
+                    d -> {
+                            int x = d.readInt();
+                            int y = d.readInt();
+                            int z = d.readInt();
+                            return new BlockPos(x, y, z);
+                    }),
+            new LambdaSerializer<>(Vec3d.class,
+                    (t, k, v) -> t.setTag(k, NBTUtils.serializeVector(v)),
+                    (t, k) -> NBTUtils.deserializeVector(t.getCompoundTag(k)),
+                    (d, v) -> d.writeDouble(v.x).writeDouble(v.y).writeDouble(v.z),
+                    d -> {
+                            double x = d.readDouble();
+                            double y = d.readDouble();
+                            double z = d.readDouble();
+                            return new Vec3d(x, y, z);
+                    })
     );
 
     private static final Map<Class<?>, List<Field>> classMappings = new HashMap<>();
@@ -79,7 +102,6 @@ public class DataSerialization {
                 .filter(f -> f.isAnnotationPresent(AutoSerialize.class))
                 .sorted(Comparator.comparing(Field::getName))
                 .peek(f -> f.setAccessible(true))
-                .peek(f -> LibNine.LOGGER.info("- Found serializable field: {}", f.getName()))
                 .collect(Collectors.toList()));
     }
 

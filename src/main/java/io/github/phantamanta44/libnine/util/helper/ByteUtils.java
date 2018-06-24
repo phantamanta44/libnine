@@ -53,7 +53,7 @@ public class ByteUtils {
 
         public Writer writeInt(int i) {
             byte[] bytes = new byte[Integer.BYTES];
-            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)((i & (0xFF << (k * 8))) >> k * 8);
+            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)((i & (0xFF << (k * 8))) >> (k * 8));
             return writeBytes(bytes);
         }
 
@@ -67,13 +67,13 @@ public class ByteUtils {
 
         public Writer writeShort(short i) {
             byte[] bytes = new byte[Short.BYTES];
-            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)((i & (0xFF << (k * 8))) >> k * 8);
+            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)((i & (0xFF << (k * 8))) >> (k * 8));
             return writeBytes(bytes);
         }
 
         public Writer writeLong(long i) {
             byte[] bytes = new byte[Long.BYTES];
-            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)((i & (0xFF << (k * 8))) >> k * 8);
+            for (int k = 0; k < bytes.length; k++) bytes[k] = (byte)((i & (0xFFL << (k * 8))) >> (k * 8));
             return writeBytes(bytes);
         }
 
@@ -211,7 +211,7 @@ public class ByteUtils {
         public long readLong() {
             long value = 0;
             for (int i = 0; i < Long.BYTES; i++) {
-                value |= (Byte.toUnsignedInt(data[pointer + i]) << (i * 8));
+                value |= (Byte.toUnsignedLong(data[pointer + i]) << (i * 8));
             }
             pointer += Long.BYTES;
             return value;

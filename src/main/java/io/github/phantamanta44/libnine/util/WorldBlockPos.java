@@ -1,10 +1,13 @@
 package io.github.phantamanta44.libnine.util;
 
+import io.github.phantamanta44.libnine.util.helper.WorldUtils;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
+
+import javax.annotation.Nullable;
 
 public class WorldBlockPos extends BlockPos {
 
@@ -35,12 +38,23 @@ public class WorldBlockPos extends BlockPos {
         this.world = world;
     }
 
+    @Nullable
     public TileEntity getTileEntity() {
-        return getWorld().getTileEntity(this);
+        return WorldUtils.getTileSafely(world, this);
     }
 
     public IBlockState getBlockState() {
         return getWorld().getBlockState(this);
+    }
+
+    public BlockPos demote() {
+        return new BlockPos(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof WorldBlockPos && super.equals(o)
+                && world.provider.getDimension() == ((WorldBlockPos)o).getWorld().provider.getDimension();
     }
 
 }

@@ -1,25 +1,39 @@
 package io.github.phantamanta44.libnine.tile;
 
 import io.github.phantamanta44.libnine.LibNine;
+import io.github.phantamanta44.libnine.capability.provider.NoopCapabilities;
+import io.github.phantamanta44.libnine.util.LazyConstant;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
+import io.github.phantamanta44.libnine.util.data.serialization.DataSerialization;
 import io.github.phantamanta44.libnine.util.helper.ByteUtils;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 import javax.annotation.Nullable;
 
 public class L9TileEntity extends TileEntity implements ISerializable {
 
+    private final DataSerialization serializer;
+    private final LazyConstant<ICapabilityProvider> capabilityBroker;
+
     private boolean requiresSync;
 
     public L9TileEntity() {
-        requiresSync = false;
+        this.serializer = new DataSerialization(this);
+        this.capabilityBroker = new LazyConstant<>(this::initCapabilities);
+        this.requiresSync = false;
     }
 
     /*
      * Initializers
      */
+
+    protected ICapabilityProvider initCapabilities() {
+        return new NoopCapabilities();
+    }
 
     protected void markRequiresSync() {
         requiresSync = true;
@@ -32,11 +46,6 @@ public class L9TileEntity extends TileEntity implements ISerializable {
     protected void setDirty() {
         markDirty();
         if (!getWorld().isRemote) dispatchTileUpdate();
-    }
-
-    @Override
-    public NBTTagCompound getUpdateTag() {
-        return super.getUpdateTag();
     }
 
     /**
@@ -53,6 +62,31 @@ public class L9TileEntity extends TileEntity implements ISerializable {
     }
 
     @Override
+    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
+        return capabilityBroker.get().hasCapability(capability, facing) || super.hasCapability(capability, facing);
+    }
+
+    @Nullable
+    @Override
+    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
+        T aspect = capabilityBroker.get().getCapability(capability, facing);
+        return aspect != null ? aspect : super.getCapability(capability, facing);
+    }
+
+    @Override
+    public void readFromNBT(NBTTagCompound compound) {
+        super.readFromNBT(compound);
+        serializer.deserializeNBT(compound);
+    }
+
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
+        super.writeToNBT(compound);
+        serializer.serializeNBT(compound);
+        return compound;
+    }
+
+    @Override
     public void deserializeNBT(NBTTagCompound nbt) {
         readFromNBT(nbt);
     }
@@ -64,12 +98,12 @@ public class L9TileEntity extends TileEntity implements ISerializable {
 
     @Override
     public void serializeBytes(ByteUtils.Writer data) {
-        // NO-OP
+        serializer.serializeBytes(data);
     }
 
     @Override
     public void deserializeBytes(ByteUtils.Reader data) {
-        // NO-OP
+        serializer.deserializeBytes(data);
     }
 
 }
