@@ -7,6 +7,8 @@ import io.github.phantamanta44.libnine.util.data.ISerializable;
 import io.github.phantamanta44.libnine.util.data.serialization.DataSerialization;
 import io.github.phantamanta44.libnine.util.helper.ByteUtils;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -104,6 +106,22 @@ public class L9TileEntity extends TileEntity implements ISerializable {
     @Override
     public void deserializeBytes(ByteUtils.Reader data) {
         serializer.deserializeBytes(data);
+    }
+
+    @Nullable
+    @Override
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        return requiresSync ? new SPacketUpdateTileEntity(pos, -0, getUpdateTag()) : null;
+    }
+
+    @Override
+    public NBTTagCompound getUpdateTag() {
+        return serializeNBT();
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        readFromNBT(pkt.getNbtCompound());
     }
 
 }
