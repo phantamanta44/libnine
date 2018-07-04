@@ -1,9 +1,12 @@
 package io.github.phantamanta44.libnine;
 
 import io.github.phantamanta44.libnine.block.L9Block;
+import io.github.phantamanta44.libnine.gui.L9GuiHandler;
 import io.github.phantamanta44.libnine.item.L9Item;
+import io.github.phantamanta44.libnine.network.PacketClientContainerInteraction;
 import io.github.phantamanta44.libnine.network.PacketServerSyncTileEntity;
 import io.github.phantamanta44.libnine.util.LazyConstant;
+import io.github.phantamanta44.libnine.util.render.TextureResource;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.ResourceLocation;
@@ -26,19 +29,41 @@ public class Virtue {
     private final String modId, modPref;
     private final CreativeTabs defaultCreativeTab;
     private final LazyConstant<SimpleNetworkWrapper> networkHandler;
-    private boolean usesTileEntities;
+    private final LazyConstant<L9GuiHandler> guiHandler;
+    private boolean usesTileEntities, usesContainers;
 
     public Virtue(String modId, @Nullable CreativeTabs defaultCreativeTab) {
         this.modId = modId;
         this.modPref = modId + ":";
         this.defaultCreativeTab = defaultCreativeTab;
         this.networkHandler = new LazyConstant<>(() -> NetworkRegistry.INSTANCE.newSimpleChannel(modId));
-        this.usesTileEntities = false;
+        this.guiHandler = new LazyConstant<>(() -> {
+            L9GuiHandler handler = new L9GuiHandler(this);
+            NetworkRegistry.INSTANCE.registerGuiHandler(this, handler);
+            return handler;
+        });
+        this.usesTileEntities = this.usesContainers = false;
         loadedVirtues.put(modId, this);
     }
 
     public Virtue(String modId) {
         this(modId, null);
+    }
+
+    void markUsesTileEntities() {
+        if (!usesTileEntities) {
+            getNetworkHandler().registerMessage(
+                    PacketServerSyncTileEntity.Handler.class, PacketServerSyncTileEntity.class, 255, Side.CLIENT);
+            usesTileEntities = true;
+        }
+    }
+
+    void markUsesContainers() {
+        if (!usesContainers) {
+            getNetworkHandler().registerMessage(
+                    PacketClientContainerInteraction.Handler.class, PacketClientContainerInteraction.class, 254, Side.SERVER);
+            usesContainers = true;
+        }
     }
 
     public String getModId() {
@@ -52,6 +77,10 @@ public class Virtue {
 
     public SimpleNetworkWrapper getNetworkHandler() {
         return networkHandler.get();
+    }
+
+    public L9GuiHandler getGuiHandler() {
+        return guiHandler.get();
     }
 
     public String prefix(String suffix) {
@@ -70,6 +99,10 @@ public class Virtue {
         return new ModelResourceLocation(prefix(model));
     }
 
+    public TextureResource newTextureResource(String resource, int width, int height) {
+        return new TextureResource(newResourceLocation(resource), width, height);
+    }
+
     public void setCreativeTabFor(L9Item item) {
         if (defaultCreativeTab != null) {
             item.setCreativeTab(defaultCreativeTab);
@@ -79,14 +112,6 @@ public class Virtue {
     public void setCreativeTabFor(L9Block block) {
         if (defaultCreativeTab != null) {
             block.setCreativeTab(defaultCreativeTab);
-        }
-    }
-
-    void markUsesTileEntities() {
-        if (!usesTileEntities) {
-            getNetworkHandler().registerMessage(
-                    PacketServerSyncTileEntity.Handler.class, PacketServerSyncTileEntity.class, 255, Side.CLIENT);
-            usesTileEntities = true;
         }
     }
 

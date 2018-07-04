@@ -1,5 +1,7 @@
 package io.github.phantamanta44.libnine.util.nbt;
 
+import io.github.phantamanta44.libnine.util.math.Vec2i;
+import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -15,13 +17,31 @@ public class NBTUtils {
         return new BlockPos(tag.getInteger("x"), tag.getInteger("y"), tag.getInteger("z"));
     }
 
-    public static ChainingTagCompound serializeVector(Vec3d vec) {
+    public static ChainingTagCompound serializeWorldBlockPos(WorldBlockPos pos) {
+        return new ChainingTagCompound()
+                .withInt("dim", pos.getDimId()).withTag("pos", serializeBlockPos(pos.getPos()));
+    }
+
+    public static WorldBlockPos deserializeWorldBlockPos(NBTTagCompound tag) {
+        return new WorldBlockPos(tag.getInteger("dim"), deserializeBlockPos(tag.getCompoundTag("pos")));
+    }
+
+    public static ChainingTagCompound serializeVec3d(Vec3d vec) {
         return new ChainingTagCompound()
                 .withDouble("x", vec.x).withDouble("y", vec.y).withDouble("z", vec.z);
     }
 
-    public static Vec3d deserializeVector(NBTTagCompound tag) {
+    public static Vec3d deserializeVec3d(NBTTagCompound tag) {
         return new Vec3d(tag.getDouble("x"), tag.getDouble("y"), tag.getDouble("z"));
+    }
+
+    public static ChainingTagCompound serializeVec2i(Vec2i vec) {
+        return new ChainingTagCompound()
+                .withInt("x", vec.getX()).withInt("y", vec.getY());
+    }
+
+    public static Vec2i deserializeVec2i(NBTTagCompound tag) {
+        return new Vec2i(tag.getInteger("x"), tag.getInteger("y"));
     }
 
 }

@@ -1,6 +1,6 @@
 package io.github.phantamanta44.libnine.component;
 
-import io.github.phantamanta44.libnine.util.helper.ByteUtils;
+import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;

@@ -1,13 +1,17 @@
-package io.github.phantamanta44.libnine.util.helper;
+package io.github.phantamanta44.libnine.util.data;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import io.github.phantamanta44.libnine.util.math.Vec2i;
+import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTSizeTracker;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -18,6 +22,7 @@ import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.UUID;
 
 public class ByteUtils {
 
@@ -133,6 +138,26 @@ public class ByteUtils {
         public Writer writeFluidStack(FluidStack stack) {
             writeFluid(stack.getFluid()).writeInt(stack.amount);
             return stack.tag != null ? writeBool(true).writeTagCompound(stack.tag) : writeBool(false);
+        }
+        
+        public Writer writeBlockPos(BlockPos pos) {
+            return writeInt(pos.getX()).writeInt(pos.getY()).writeInt(pos.getZ());
+        }
+
+        public Writer writeWorldBlockPos(WorldBlockPos pos) {
+            return writeInt(pos.getDimId()).writeBlockPos(pos.getPos());
+        }
+        
+        public Writer writeVec3d(Vec3d vec) {
+            return writeDouble(vec.x).writeDouble(vec.y).writeDouble(vec.z);
+        }
+        
+        public Writer writeVec2i(Vec2i vec) {
+            return writeInt(vec.getX()).writeInt(vec.getY());
+        }
+        
+        public Writer writeUuid(UUID id) {
+            return writeString(id.toString());
         }
 
         public byte[] toArray() {
@@ -274,6 +299,26 @@ public class ByteUtils {
             FluidStack stack = new FluidStack(fluid, amount);
             if (readBool()) stack.tag = readTagCompound();
             return stack;
+        }
+
+        public BlockPos readBlockPos() {
+            return new BlockPos(readInt(), readInt(), readInt());
+        }
+
+        public WorldBlockPos readWorldBlockPos() {
+            return new WorldBlockPos(readInt(), readBlockPos());
+        }
+
+        public Vec3d readVec3d() {
+            return new Vec3d(readDouble(), readDouble(), readDouble());
+        }
+
+        public Vec2i readVec2i() {
+            return new Vec2i(readInt(), readInt());
+        }
+
+        public UUID readUuid() {
+            return UUID.fromString(readString());
         }
 
     }

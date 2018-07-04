@@ -2,7 +2,7 @@ package io.github.phantamanta44.libnine.capability;
 
 import io.github.phantamanta44.libnine.component.IntReservoir;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
-import io.github.phantamanta44.libnine.util.helper.ByteUtils;
+import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.energy.IEnergyStorage;
 

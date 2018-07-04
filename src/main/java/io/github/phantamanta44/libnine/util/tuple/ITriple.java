@@ -62,6 +62,18 @@ public interface ITriple<A, B, C> {
             return c;
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof ITriple)) return false;
+            ITriple tri = (ITriple)o;
+            return tri.getA().equals(a) && tri.getB().equals(b) && tri.getC().equals(c);
+        }
+
+        @Override
+        public int hashCode() {
+            return a.hashCode() ^ b.hashCode() ^ c.hashCode();
+        }
+
     }
 
 }

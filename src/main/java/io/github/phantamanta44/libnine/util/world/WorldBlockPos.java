@@ -1,4 +1,4 @@
-package io.github.phantamanta44.libnine.util;
+package io.github.phantamanta44.libnine.util.world;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
@@ -67,6 +67,11 @@ public class WorldBlockPos {
     public boolean equals(Object o) {
         return o instanceof WorldBlockPos && pos.equals(((WorldBlockPos)o).pos)
                 && getDimId() == ((WorldBlockPos)o).getDimId();
+    }
+
+    @Override
+    public int hashCode() {
+        return world.hashCode() ^ pos.hashCode();
     }
 
 }

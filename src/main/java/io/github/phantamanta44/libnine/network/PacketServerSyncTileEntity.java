@@ -2,8 +2,8 @@ package io.github.phantamanta44.libnine.network;
 
 import io.github.phantamanta44.libnine.LibNine;
 import io.github.phantamanta44.libnine.tile.L9TileEntity;
-import io.github.phantamanta44.libnine.util.WorldBlockPos;
-import io.github.phantamanta44.libnine.util.helper.ByteUtils;
+import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
+import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.tileentity.TileEntity;
@@ -58,7 +58,7 @@ public class PacketServerSyncTileEntity implements IMessage {
                     if (tile instanceof L9TileEntity) {
                         ((L9TileEntity)tile).deserializeBytes(ByteUtils.reader(message.data));
                     } else {
-                        LibNine.LOGGER.warn("No tile exists for sync packet at pos: " + message.pos);
+                        LibNine.LOGGER.warn("No tile exists for sync packet at pos {}", message.pos);
                     }
                 });
             }

@@ -3,6 +3,9 @@ package io.github.phantamanta44.libnine;
 import io.github.phantamanta44.libnine.block.L9Block;
 import io.github.phantamanta44.libnine.block.L9BlockStated;
 import io.github.phantamanta44.libnine.block.state.IBlockModelMapper;
+import io.github.phantamanta44.libnine.gui.GuiIdentity;
+import io.github.phantamanta44.libnine.gui.L9Container;
+import io.github.phantamanta44.libnine.gui.L9GuiHandler;
 import io.github.phantamanta44.libnine.item.L9Item;
 import io.github.phantamanta44.libnine.tile.L9TileEntity;
 import io.github.phantamanta44.libnine.util.LazyConstant;
@@ -11,6 +14,7 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.event.RegistryEvent;
@@ -25,13 +29,19 @@ import java.util.Map;
 public class Registrar {
 
     private final Map<Class<? extends L9TileEntity>, Virtue> tileVirtueTable;
+    private final Map<Class<? extends L9Container>, Virtue> containerVirtueTable;
 
     public Registrar() {
-        tileVirtueTable = new HashMap<>();
+        this.tileVirtueTable = new HashMap<>();
+        this.containerVirtueTable = new HashMap<>();
     }
 
     public Virtue lookUpTileVirtue(Class<? extends L9TileEntity> clazz) {
         return tileVirtueTable.get(clazz);
+    }
+
+    public Virtue lookUpContainerVirtue(Class<? extends L9Container> clazz) {
+        return containerVirtueTable.get(clazz);
     }
 
     private Virtue bound;
@@ -97,15 +107,7 @@ public class Registrar {
         rqTileEntities = null;
     }
     
-    public void queueItemModelReg(L9Item item, int meta, String model, String variant) {
-        // NO-OP
-    }
-    
     public void queueItemModelReg(L9Item item, int meta, String model) {
-        // NO-OP
-    }
-
-    public void queueItemModelReg(L9Item item, String model, String variant) {
         // NO-OP
     }
 
@@ -113,15 +115,7 @@ public class Registrar {
         // NO-OP
     }
 
-    public void queueItemBlockModelReg(L9Block block, int meta, String model, String variant) {
-        // NO-OP
-    }
-
     public void queueItemBlockModelReg(L9Block block, int meta, String model) {
-        // NO-OP
-    }
-
-    public void queueItemBlockModelReg(L9Block block, String model, String variant) {
         // NO-OP
     }
 
@@ -146,6 +140,16 @@ public class Registrar {
     }
 
     public <T extends TileEntity> void queueTESRReg(Class<T> clazz, TileEntitySpecialRenderer<T> renderer) {
+        // NO-OP
+    }
+
+    public <T extends Container> void queueGuiServerReg(GuiIdentity<T, ?> identity, L9GuiHandler.ContainerFactory<T> factory) {
+        getBound().markUsesContainers();
+        getBound().getGuiHandler().registerServerGui(identity, factory);
+        containerVirtueTable.put(identity.getContainerClass(), getBound());
+    }
+
+    public <S extends Container, C> void queueGuiClientReg(GuiIdentity<S, C> identity, L9GuiHandler.GuiFactory<S, C> factory) {
         // NO-OP
     }
 

@@ -5,6 +5,8 @@ import io.github.phantamanta44.libnine.Virtue;
 import io.github.phantamanta44.libnine.block.L9Block;
 import io.github.phantamanta44.libnine.block.L9BlockStated;
 import io.github.phantamanta44.libnine.block.state.IBlockModelMapper;
+import io.github.phantamanta44.libnine.gui.GuiIdentity;
+import io.github.phantamanta44.libnine.gui.L9GuiHandler;
 import io.github.phantamanta44.libnine.item.L9Item;
 import io.github.phantamanta44.libnine.util.tuple.IPair;
 import io.github.phantamanta44.libnine.util.tuple.ITriple;
@@ -17,6 +19,7 @@ import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
+import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -26,6 +29,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class ClientRegistrar extends Registrar {
 
@@ -93,6 +97,11 @@ public class ClientRegistrar extends Registrar {
         ClientRegistry.bindTileEntitySpecialRenderer(clazz, renderer);
     }
 
+    @Override
+    public <S extends Container, C> void queueGuiClientReg(GuiIdentity<S, C> identity, L9GuiHandler.GuiFactory<S, C> factory) {
+        getBound().getGuiHandler().registerClientGui(identity, factory);
+    }
+
     private static class StateMapperAdapter extends StateMapperBase {
 
         private final IBlockModelMapper mapper;
@@ -104,11 +113,22 @@ public class ClientRegistrar extends Registrar {
         }
 
         @Override
+        public Map<IBlockState, ModelResourceLocation> putStateModelLocations(Block block) {
+            for (IBlockState state : block.getBlockState().getValidStates()) {
+                ModelResourceLocation model = getModelResourceLocation(state);
+                if (model != null) mapStateModelLocations.put(state, model);
+            }
+            return mapStateModelLocations;
+        }
+
+        @Override
         protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+            String model = mapper.getModel(state);
+            if (model == null) return null;
             String variant = mapper.getVariant(state);
             return variant == null
-                    ? virtue.newModelResourceLocation(mapper.getModel(state))
-                    : virtue.newModelResourceLocation(mapper.getModel(state), variant);
+                    ? virtue.newModelResourceLocation(model)
+                    : virtue.newModelResourceLocation(model, variant);
         }
 
     }

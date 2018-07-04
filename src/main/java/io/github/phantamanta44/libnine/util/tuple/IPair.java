@@ -53,6 +53,18 @@ public interface IPair<A, B> {
             return b;
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof IPair)) return false;
+            IPair pair = (IPair)o;
+            return pair.getA().equals(a) && pair.getB().equals(b);
+        }
+
+        @Override
+        public int hashCode() {
+            return a.hashCode() ^ b.hashCode();
+        }
+
     }
 
 }

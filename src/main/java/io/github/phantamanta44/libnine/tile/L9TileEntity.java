@@ -3,14 +3,17 @@ package io.github.phantamanta44.libnine.tile;
 import io.github.phantamanta44.libnine.LibNine;
 import io.github.phantamanta44.libnine.capability.provider.NoopCapabilities;
 import io.github.phantamanta44.libnine.util.LazyConstant;
+import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
 import io.github.phantamanta44.libnine.util.data.serialization.DataSerialization;
-import io.github.phantamanta44.libnine.util.helper.ByteUtils;
+import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
@@ -21,11 +24,13 @@ public class L9TileEntity extends TileEntity implements ISerializable {
     private final DataSerialization serializer;
     private final LazyConstant<ICapabilityProvider> capabilityBroker;
 
+    private WorldBlockPos worldPos;
     private boolean requiresSync;
 
     public L9TileEntity() {
         this.serializer = new DataSerialization(this);
         this.capabilityBroker = new LazyConstant<>(this::initCapabilities);
+        this.worldPos = null;
         this.requiresSync = false;
     }
 
@@ -39,6 +44,14 @@ public class L9TileEntity extends TileEntity implements ISerializable {
 
     protected void markRequiresSync() {
         requiresSync = true;
+    }
+
+    /*
+     * Properties
+     */
+
+    public WorldBlockPos getWorldPos() {
+        return worldPos == null ? (worldPos = new WorldBlockPos(world, pos)) : worldPos;
     }
 
     /*
@@ -57,6 +70,18 @@ public class L9TileEntity extends TileEntity implements ISerializable {
     @Deprecated
     public void markDirty() {
         super.markDirty();
+    }
+
+    @Override
+    public void setPos(BlockPos pos) {
+        super.setPos(pos);
+        if (world != null) worldPos = new WorldBlockPos(world, pos);
+    }
+
+    @Override
+    public void setWorld(World world) {
+        super.setWorld(world);
+        if (pos != null) worldPos = new WorldBlockPos(world, pos);
     }
 
     protected void dispatchTileUpdate() {
@@ -78,6 +103,7 @@ public class L9TileEntity extends TileEntity implements ISerializable {
     @Override
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
+        worldPos = new WorldBlockPos(world, pos);
         serializer.deserializeNBT(compound);
     }
 

@@ -1,12 +1,14 @@
 package io.github.phantamanta44.libnine.util.data.serialization;
 
 import io.github.phantamanta44.libnine.LibNine;
+import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
-import io.github.phantamanta44.libnine.util.helper.ByteUtils;
 import io.github.phantamanta44.libnine.util.helper.FormatUtils;
 import io.github.phantamanta44.libnine.util.helper.MirrorUtils;
+import io.github.phantamanta44.libnine.util.math.Vec2i;
 import io.github.phantamanta44.libnine.util.nbt.NBTUtils;
 import io.github.phantamanta44.libnine.util.tuple.IPair;
+import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -74,23 +76,23 @@ public class DataSerialization {
             new LambdaSerializer<>(BlockPos.class,
                     (t, k, p) -> t.setTag(k, NBTUtils.serializeBlockPos(p)),
                     (t, k) -> NBTUtils.deserializeBlockPos(t.getCompoundTag(k)),
-                    (d, p) -> d.writeInt(p.getX()).writeInt(p.getY()).writeInt(p.getZ()),
-                    d -> {
-                            int x = d.readInt();
-                            int y = d.readInt();
-                            int z = d.readInt();
-                            return new BlockPos(x, y, z);
-                    }),
+                    ByteUtils.Writer::writeBlockPos, ByteUtils.Reader::readBlockPos),
+            new LambdaSerializer<>(WorldBlockPos.class,
+                    (t, k, p) -> t.setTag(k, NBTUtils.serializeWorldBlockPos(p)),
+                    (t, k) -> NBTUtils.deserializeWorldBlockPos(t.getCompoundTag(k)),
+                    ByteUtils.Writer::writeWorldBlockPos, ByteUtils.Reader::readWorldBlockPos),
             new LambdaSerializer<>(Vec3d.class,
-                    (t, k, v) -> t.setTag(k, NBTUtils.serializeVector(v)),
-                    (t, k) -> NBTUtils.deserializeVector(t.getCompoundTag(k)),
-                    (d, v) -> d.writeDouble(v.x).writeDouble(v.y).writeDouble(v.z),
-                    d -> {
-                            double x = d.readDouble();
-                            double y = d.readDouble();
-                            double z = d.readDouble();
-                            return new Vec3d(x, y, z);
-                    })
+                    (t, k, v) -> t.setTag(k, NBTUtils.serializeVec3d(v)),
+                    (t, k) -> NBTUtils.deserializeVec3d(t.getCompoundTag(k)),
+                    ByteUtils.Writer::writeVec3d, ByteUtils.Reader::readVec3d),
+            new LambdaSerializer<>(Vec2i.class,
+                    (t, k, v) -> t.setTag(k, NBTUtils.serializeVec2i(v)),
+                    (t, k) -> NBTUtils.deserializeVec2i(t.getCompoundTag(k)),
+                    ByteUtils.Writer::writeVec2i, ByteUtils.Reader::readVec2i),
+            new LambdaSerializer<>(UUID.class,
+                    (t, k, i) -> t.setString(k, i.toString()),
+                    (t, k) -> UUID.fromString(t.getString(k)),
+                    ByteUtils.Writer::writeUuid, ByteUtils.Reader::readUuid)
     );
 
     private static final Map<Class<?>, List<Field>> classMappings = new HashMap<>();

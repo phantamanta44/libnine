@@ -22,16 +22,12 @@ public class L9ItemSubs extends L9Item {
     @Override
     protected void initModel() {
         for (int i = 0; i < variantCount; i++) {
-            LibNine.PROXY.getRegistrar().queueItemModelReg(this, i, getModelName(i), getModelVariant(i));
+            LibNine.PROXY.getRegistrar().queueItemModelReg(this, i, getModelName(i));
         }
     }
 
     protected String getModelName(int variant) {
         return getInternalName();
-    }
-
-    protected String getModelVariant(int variant) {
-        return "inventory";
     }
 
     /*

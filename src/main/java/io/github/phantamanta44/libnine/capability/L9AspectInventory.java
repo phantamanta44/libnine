@@ -1,7 +1,7 @@
 package io.github.phantamanta44.libnine.capability;
 
 import io.github.phantamanta44.libnine.util.data.ISerializable;
-import io.github.phantamanta44.libnine.util.helper.ByteUtils;
+import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import io.github.phantamanta44.libnine.util.helper.ItemUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;

@@ -1,6 +1,6 @@
 package io.github.phantamanta44.libnine.util.data.serialization;
 
-import io.github.phantamanta44.libnine.util.helper.ByteUtils;
+import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import net.minecraft.nbt.NBTTagCompound;
 
 public interface ISerializationProvider<T> {

@@ -1,5 +1,6 @@
-package io.github.phantamanta44.libnine.util.helper;
+package io.github.phantamanta44.libnine.util.world;
 
+import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -36,6 +37,10 @@ public class WorldUtils {
             ent.setDefaultPickupDelay();
             world.spawnEntity(ent);
         }
+    }
+
+    public static void dropItem(WorldBlockPos pos, ItemStack stack) {
+        dropItem(pos.getWorld(), pos.getPos(), stack);
     }
 
     public static void iterateAdjacentTiles(TileEntity tile, BiConsumer<TileEntity, EnumFacing> func) {

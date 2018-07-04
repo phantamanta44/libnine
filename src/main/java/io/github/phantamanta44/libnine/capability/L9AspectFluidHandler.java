@@ -2,7 +2,7 @@ package io.github.phantamanta44.libnine.capability;
 
 import io.github.phantamanta44.libnine.component.FluidReservoir;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
-import io.github.phantamanta44.libnine.util.helper.ByteUtils;
+import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.common.util.Constants;

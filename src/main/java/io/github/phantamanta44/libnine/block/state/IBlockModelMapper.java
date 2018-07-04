@@ -51,6 +51,7 @@ public interface IBlockModelMapper {
             this.mapper = mapper;
         }
 
+        @Nullable
         @Override
         public String getModel(IBlockState state) {
             return model;
