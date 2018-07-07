@@ -2,6 +2,7 @@ package io.github.phantamanta44.libnine.util.data;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import io.github.phantamanta44.libnine.util.ImpossibilityRealizedException;
 import io.github.phantamanta44.libnine.util.math.Vec2i;
 import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.item.Item;
@@ -9,16 +10,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTSizeTracker;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -105,17 +103,15 @@ public class ByteUtils {
             return writeVarPrecision(bytes.length).writeBytes(bytes);
         }
 
-        public Writer writeDir(EnumFacing dir) {
-            return writeByte((byte)dir.ordinal());
-        }
-
         public Writer writeTagCompound(NBTTagCompound tag) {
             try {
                 ByteArrayDataOutput buf = ByteStreams.newDataOutput();
+
                 CompressedStreamTools.write(tag, buf);
-                return writeBytes(buf.toByteArray());
+                byte[] bytes = buf.toByteArray();
+                return writeVarPrecision(bytes.length).writeBytes(bytes);
             } catch (IOException e) {
-                throw new IllegalStateException("This shouldn't happen!", e);
+                throw new ImpossibilityRealizedException(e);
             }
         }
 
@@ -173,17 +169,6 @@ public class ByteUtils {
     }
 
     public static class Reader {
-
-        private static final Field fRead;
-
-        static {
-            try {
-                fRead = ReflectionHelper.findField(NBTSizeTracker.class, "c", "read");
-                fRead.setAccessible(true);
-            } catch (Exception e) {
-                throw new IllegalStateException("Failed to access NBTSizeTracker#read!", e);
-            }
-        }
 
         private final byte[] data;
         private int pointer;
@@ -263,18 +248,15 @@ public class ByteUtils {
             return new String(data, pointer - length, length, Charset.forName("UTF-8"));
         }
 
-        public EnumFacing readDir() {
-            return EnumFacing.values()[readByte()];
-        }
-
         public NBTTagCompound readTagCompound() {
             try {
-                NBTSizeTracker nst = new NBTSizeTracker(2097152L);
-                NBTTagCompound tag = CompressedStreamTools.read(ByteStreams.newDataInput(data, pointer), nst);
-                pointer += (int)fRead.getLong(nst);
+                int length = readVarPrecision();
+                NBTTagCompound tag = CompressedStreamTools.read(
+                        ByteStreams.newDataInput(readBytes(length)),
+                        new NBTSizeTracker(length));
                 return tag;
             } catch (Exception e) {
-                throw new IllegalStateException("This shouldn't happen!", e);
+                throw new ImpossibilityRealizedException(e);
             }
         }
 

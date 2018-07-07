@@ -11,7 +11,6 @@ import io.github.phantamanta44.libnine.util.tuple.IPair;
 import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fluids.Fluid;
@@ -50,9 +49,6 @@ public class DataSerialization {
             new LambdaSerializer<>(String.class,
                     NBTTagCompound::setString, NBTTagCompound::getString,
                     ByteUtils.Writer::writeString, ByteUtils.Reader::readString),
-            new LambdaSerializer<>(EnumFacing.class,
-                    (t, k, d) -> t.setByte(k, (byte)d.ordinal()), (t, k) -> EnumFacing.values()[t.getByte(k)],
-                    ByteUtils.Writer::writeDir, ByteUtils.Reader::readDir),
             new LambdaSerializer<>(NBTTagCompound.class,
                     NBTTagCompound::setTag, NBTTagCompound::getCompoundTag,
                     ByteUtils.Writer::writeTagCompound, ByteUtils.Reader::readTagCompound),
@@ -147,11 +143,19 @@ public class DataSerialization {
                 tag.setTag(key, serTag);
             } else if (o.getB() instanceof IDatum) {
                 IDatum d = (IDatum)o.getB();
-                getSerializationProvider(d.get().getClass()).serializeNBT(d.get(), key, tag);
+                if (d.get().getClass().isEnum()) {
+                    tag.setShort(key, (short)((Enum<?>)d.get()).ordinal());
+                } else {
+                    getSerializationProvider(d.get().getClass()).serializeNBT(d.get(), key, tag);
+                }
             } else {
                 Field f = (Field)o.getB();
                 try {
-                    getSerializationProvider(f.getType()).serializeNBT(f.get(target), key, tag);
+                    if (f.getType().isEnum()) {
+                        tag.setShort(key, (short)((Enum<?>)f.get(target)).ordinal());
+                    } else {
+                        getSerializationProvider(f.getType()).serializeNBT(f.get(target), key, tag);
+                    }
                 } catch (Exception e) {
                     throw new IllegalStateException("Could not read field: " + f.toString(), e);
                 }
@@ -167,11 +171,19 @@ public class DataSerialization {
                 ((ISerializable)o.getB()).deserializeNBT(tag.getCompoundTag(key));
             } else if (o.getB() instanceof IDatum) {
                 IDatum d = (IDatum)o.getB();
-                d.set(getSerializationProvider(d.get().getClass()).deserializeNBT(key, tag));
+                if (d.get().getClass().isEnum()) {
+                    d.set(d.get().getClass().getEnumConstants()[tag.getShort(key)]);
+                } else {
+                    d.set(getSerializationProvider(d.get().getClass()).deserializeNBT(key, tag));
+                }
             } else {
                 Field f = (Field)o.getB();
                 try {
-                    f.set(target, getSerializationProvider(f.getType()).deserializeNBT(key, tag));
+                    if (f.getType().isEnum()) {
+                        f.set(target, f.getType().getEnumConstants()[tag.getShort(key)]);
+                    } else {
+                        f.set(target, getSerializationProvider(f.getType()).deserializeNBT(key, tag));
+                    }
                 } catch (Exception e) {
                     throw new IllegalStateException("Could not write field: " + f.toString(), e);
                 }
@@ -186,11 +198,19 @@ public class DataSerialization {
                 ((ISerializable)o.getB()).serializeBytes(data);
             } else if (o.getB() instanceof IDatum) {
                 IDatum d = (IDatum)o.getB();
-                getSerializationProvider(d.get().getClass()).serializeBytes(d.get(), data);
+                if (d.get().getClass().isEnum()) {
+                    data.writeShort((short)((Enum<?>)d.get()).ordinal());
+                } else {
+                    getSerializationProvider(d.get().getClass()).serializeBytes(d.get(), data);
+                }
             } else {
                 Field f = (Field)o.getB();
                 try {
-                    getSerializationProvider(f.getType()).serializeBytes(f.get(target), data);
+                    if (f.getType().isEnum()) {
+                        data.writeShort((short)((Enum<?>)f.get(target)).ordinal());
+                    } else {
+                        getSerializationProvider(f.getType()).serializeBytes(f.get(target), data);
+                    }
                 } catch (Exception e) {
                     throw new IllegalStateException("Could not read field: " + f.toString(), e);
                 }
@@ -205,11 +225,19 @@ public class DataSerialization {
                 ((ISerializable)o.getB()).deserializeBytes(data);
             } else if (o.getB() instanceof IDatum) {
                 IDatum d = (IDatum)o.getB();
-                d.set(getSerializationProvider(d.get().getClass()).deserializeBytes(data));
+                if (d.get().getClass().isEnum()) {
+                    d.set(d.get().getClass().getEnumConstants()[data.readShort()]);
+                } else {
+                    d.set(getSerializationProvider(d.get().getClass()).deserializeBytes(data));
+                }
             } else {
                 Field f = (Field)o.getB();
                 try {
-                    f.set(target, getSerializationProvider(f.getType()).deserializeBytes(data));
+                    if (f.getType().isEnum()) {
+                        f.set(target, f.getType().getEnumConstants()[data.readShort()]);
+                    } else {
+                        f.set(target, getSerializationProvider(f.getType()).deserializeBytes(data));
+                    }
                 } catch (Exception e) {
                     throw new IllegalStateException("Could not write field: " + f.toString(), e);
                 }
@@ -220,7 +248,7 @@ public class DataSerialization {
     private ISerializationProvider getSerializationProvider(Class<?> clazz) {
         ISerializationProvider serializer = serializers.get(clazz);
         if (serializer == null) {
-            throw new NoSuchElementException("No serializer for type: " + clazz.getName());
+            throw new UnsupportedOperationException("No serializer for type: " + clazz.getName());
         }
         return serializer;
     }

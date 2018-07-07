@@ -36,7 +36,7 @@ public class TextureResource {
         return new TextureRegion(this, x, y, width, height);
     }
 
-    public TextureRegion asTexture() {
+    public TextureRegion asRegion() {
         return fullRegion;
     }
 

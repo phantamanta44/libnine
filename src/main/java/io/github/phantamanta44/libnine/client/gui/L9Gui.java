@@ -71,6 +71,7 @@ public class L9Gui extends GuiScreen implements IScreenDrawable {
 
     @Override
     public void drawBackground(float partialTicks, int mX, int mY) {
+        drawDefaultBackground();
         if (bg != null) {
             mc.renderEngine.bindTexture(bg);
             drawTexturedModalRect(posX, posY, 0, 0, sizeX, sizeY);

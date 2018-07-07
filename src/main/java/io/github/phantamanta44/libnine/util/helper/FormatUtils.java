@@ -22,10 +22,18 @@ public class FormatUtils {
     }
 
     public static String formatSI(double num, String unit) {
-        long val = Double.valueOf(Math.round(num * 1e9D)).longValue();
-        if (val == 0) return "0 " + unit;
+        if (num == 0) return "0 " + unit;
+        double val = num * 1e9D;
         int magnitude = (int)Math.floor(Math.log10(Math.abs(val)) / 3);
-        return String.format("%.2f %s%s", num / Math.pow(10, magnitude * 3), SI_PREFIXES_FP[magnitude], unit);
+        return String.format("%.2f %s%s", val / Math.pow(10, magnitude * 3), SI_PREFIXES_FP[magnitude], unit);
+    }
+
+    public static String formatPercentage(float percent) {
+        return String.format("%.1f%%", percent * 100);
+    }
+
+    public static String formatPercentage(double percent) {
+        return String.format("%.1f%%", percent * 100);
     }
 
     public static String formatClassName(Class<?> clazz) {

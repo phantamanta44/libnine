@@ -1,4 +1,4 @@
-package io.github.phantamanta44.libnine.capability;
+package io.github.phantamanta44.libnine.capability.impl;
 
 import io.github.phantamanta44.libnine.component.IntReservoir;
 import io.github.phantamanta44.libnine.util.data.ISerializable;

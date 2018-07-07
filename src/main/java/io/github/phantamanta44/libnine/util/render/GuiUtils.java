@@ -11,7 +11,7 @@ public class GuiUtils {
     public static final ResourceLocation BUTTON_SOUND = new ResourceLocation("gui.button.press");
 
     public static boolean isMouseOver(int x, int y, int width, int height, int mX, int mY) {
-        return mX >= x - 1 && mX < x + width + 1 && mY >= y - 1 && mY < y + height + 1;
+        return mX >= x && mX < x + width && mY >= y && mY < y + height;
     }
 
     public static boolean isMouseWithin(int x, int y, Vec2i... convexVertices) {

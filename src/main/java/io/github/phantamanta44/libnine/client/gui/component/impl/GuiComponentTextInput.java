@@ -1,7 +1,7 @@
-package io.github.phantamanta44.libnine.client.gui.component;
+package io.github.phantamanta44.libnine.client.gui.component.impl;
 
+import io.github.phantamanta44.libnine.client.gui.component.GuiComponent;
 import io.github.phantamanta44.libnine.util.helper.InputUtils;
-import io.github.phantamanta44.libnine.util.helper.ModKey;
 import io.github.phantamanta44.libnine.util.render.GuiUtils;
 import io.github.phantamanta44.libnine.util.render.TextureRegion;
 import org.lwjgl.input.Keyboard;
@@ -97,7 +97,7 @@ public class GuiComponentTextInput extends GuiComponent {
                 value += typed;
                 updateValidity();
             } else if (keyCode == Keyboard.KEY_BACK && !value.isEmpty()) {
-                if (InputUtils.checkModsNonExclusive(ModKey.CTRL)) {
+                if (InputUtils.checkModsNonExclusive(InputUtils.ModKey.CTRL)) {
                     int endIndex = 0;
                     if (Character.isLetterOrDigit(value.charAt(currentLength - 1))) {
                         for (int i = currentLength - 2; i >= 0; i--) {

@@ -67,8 +67,8 @@ public class L9Container extends Container {
                 }
                 if (shouldDoPlayerInvTransfer) {
                     if (index < 27) {
-                        if (!mergeItemStack(stack, 0, 27, false)) return ItemStack.EMPTY;
-                    } else if (!mergeItemStack(stack, 27, 36, false)) {
+                        if (!mergeItemStack(stack, 27, 36, false)) return ItemStack.EMPTY;
+                    } else if (!mergeItemStack(stack, 0, 27, false)) {
                         return ItemStack.EMPTY;
                     }
                 }

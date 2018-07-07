@@ -1,6 +1,5 @@
-package io.github.phantamanta44.libnine;
+package io.github.phantamanta44.libnine.capability.impl;
 
-import io.github.phantamanta44.libnine.capability.L9AspectFluidHandler;
 import io.github.phantamanta44.libnine.component.FluidReservoir;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
 import net.minecraft.item.ItemStack;

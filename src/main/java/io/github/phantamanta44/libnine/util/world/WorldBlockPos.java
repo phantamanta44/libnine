@@ -1,5 +1,6 @@
 package io.github.phantamanta44.libnine.util.world;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -57,6 +58,10 @@ public class WorldBlockPos {
 
     public IBlockState getBlockState() {
         return getWorld().getBlockState(pos);
+    }
+
+    public Block getBlock() {
+        return getBlockState().getBlock();
     }
 
     public BlockPos getPos() {

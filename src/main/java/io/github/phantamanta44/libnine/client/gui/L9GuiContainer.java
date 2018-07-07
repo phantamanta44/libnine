@@ -51,6 +51,12 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
     }
 
     @Override
+    public void drawScreen(int mX, int mY, float partialTicks) {
+        super.drawScreen(mX, mY, partialTicks);
+        renderHoveredToolTip(mX, mY);
+    }
+
+    @Override
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mX, int mY) {
         this.partialTicks = partialTicks;
         drawBackground(partialTicks, mX, mY);
@@ -64,6 +70,7 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
 
     @Override
     public void drawBackground(float partialTicks, int mX, int mY) {
+        drawDefaultBackground();
         if (bg != null) {
             mc.renderEngine.bindTexture(bg);
             drawTexturedModalRect(posX, posY, 0, 0, sizeX, sizeY);

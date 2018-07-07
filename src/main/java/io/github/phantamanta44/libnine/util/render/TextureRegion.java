@@ -9,6 +9,7 @@ public class TextureRegion {
     private final TextureResource texture;
     private final int x, y, width, height;
     private final float u1, v1, u2, v2;
+    private final float du, dv;
 
     public TextureRegion(TextureResource texture, int x, int y, int width, int height) {
         this.texture = texture;
@@ -20,6 +21,8 @@ public class TextureRegion {
         this.v1 = (float)y / texture.getHeight();
         this.u2 = this.u1 + (float)width / texture.getWidth();
         this.v2 = this.v1 + (float)height / texture.getHeight();
+        this.du = this.u2 - this.u1;
+        this.dv = this.v2 - this.v1;
     }
 
     public TextureRegion(TextureResource texture) {
@@ -62,6 +65,14 @@ public class TextureRegion {
         return v2;
     }
 
+    public float getUDifferential() {
+        return du;
+    }
+
+    public float getVDifferential() {
+        return dv;
+    }
+
     public void draw(int x, int y, int width, int height) {
         texture.bind();
         Tessellator tess = Tessellator.getInstance();
@@ -71,6 +82,22 @@ public class TextureRegion {
         buf.pos(x + width, y + height, 0D).tex(u2, v2).endVertex();
         buf.pos(x + width, y, 0D).tex(u2, v1).endVertex();
         buf.pos(x, y, 0D).tex(u1, v1).endVertex();
+        tess.draw();
+    }
+
+    public void drawPartial(int x, int y, int width, int height, float x1, float y1, float x2, float y2) {
+        float xStart = x + width * x1, xEnd = x + width * x2;
+        float yStart = y + height * y1, yEnd = y + height * y2;
+        float uStart = u1 + du * x1, uEnd = u1 + du * x2;
+        float vStart = v1 + dv * y1, vEnd = v1 + dv * y2;
+        texture.bind();
+        Tessellator tess = Tessellator.getInstance();
+        BufferBuilder buf = tess.getBuffer();
+        buf.begin(7, DefaultVertexFormats.POSITION_TEX);
+        buf.pos(xStart, yEnd, 0D).tex(uStart, vEnd).endVertex();
+        buf.pos(xEnd, yEnd, 0D).tex(uEnd, vEnd).endVertex();
+        buf.pos(xEnd, yStart, 0D).tex(uEnd, vStart).endVertex();
+        buf.pos(xStart, yStart, 0D).tex(uStart, vStart).endVertex();
         tess.draw();
     }
 

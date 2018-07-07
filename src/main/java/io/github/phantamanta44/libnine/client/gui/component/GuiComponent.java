@@ -8,6 +8,8 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 
+import java.util.List;
+
 public abstract class GuiComponent {
 
     protected final int x, y, width, height;
@@ -38,6 +40,11 @@ public abstract class GuiComponent {
 
     protected void drawTooltip(String string, int x, int y) {
         gui.drawHoveringText(string, x, y);
+        RenderHelper.enableGUIStandardItemLighting();
+    }
+
+    protected void drawTooltip(List<String> lines, int x, int y) {
+        gui.drawHoveringText(lines, x, y);
         RenderHelper.enableGUIStandardItemLighting();
     }
 
