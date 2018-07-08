@@ -17,7 +17,6 @@ public class SingleSound implements ISound {
     private final float pitch;
     private final float x, y, z;
     private final SoundCategory category;
-    private SoundEventAccessor soundEvent;
     private Sound sound;
 
     public SingleSound(ResourceLocation resource, float volume, float pitch, float x, float y, float z, SoundCategory category) {
@@ -54,7 +53,7 @@ public class SingleSound implements ISound {
     @Nullable
     @Override
     public SoundEventAccessor createAccessor(SoundHandler handler) {
-        soundEvent = handler.getAccessor(resource);
+        SoundEventAccessor soundEvent = handler.getAccessor(resource);
         sound = soundEvent != null ? soundEvent.cloneEntry() : SoundHandler.MISSING_SOUND;
         return soundEvent;
     }

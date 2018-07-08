@@ -86,6 +86,7 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
         fontRenderer.drawString(name, 8, 6, DEF_TEXT_COL);
     }
 
+    @SuppressWarnings("deprecation")
     protected void drawPlayerInventoryName() {
         fontRenderer.drawString(I18n.translateToLocal("container.inventory"), 8, this.ySize - 96 + 2, DEF_TEXT_COL);
     }

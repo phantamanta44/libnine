@@ -55,7 +55,7 @@ public class ParameterizedItemModelLoader implements ICustomModelLoader {
                 }
             }
         }
-        return new ParameterizedItemModel(resource, resourceInjector, archetype, mutationTable);
+        return new ParameterizedItemModel(resourceInjector, archetype, mutationTable);
     }
 
     @Override

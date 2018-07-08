@@ -65,10 +65,7 @@ public class GuiComponentRedstoneControl extends GuiComponent {
 
     @Override
     public boolean onClick(int mX, int mY, int button, boolean mouseOver) {
-        if (mouseOver) {
-            return true;
-        }
-        return false;
+        return mouseOver;
     }
 
 }

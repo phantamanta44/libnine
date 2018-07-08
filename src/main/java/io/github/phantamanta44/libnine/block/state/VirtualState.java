@@ -38,7 +38,7 @@ public class VirtualState {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "RedundantCast"})
     public IBlockState synthesize(BlockStateContainer container) {
         IBlockState state = container.getBaseState();
         for (Map.Entry<IProperty<?>, Comparable<?>> prop : props.entrySet()) {

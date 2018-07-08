@@ -32,6 +32,7 @@ public class ItemUtils {
         return item.getRarity(stack).rarityColor + item.getItemStackDisplayName(stack);
     }
 
+    @SuppressWarnings("deprecation")
     public static String getLocalizedSubName(L9ItemSubs item, int meta) {
         return I18n.translateToLocal(String.format("item.%s%d.name", item.getRegistryName(), meta));
     }

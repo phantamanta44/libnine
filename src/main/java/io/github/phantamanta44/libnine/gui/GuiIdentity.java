@@ -30,7 +30,7 @@ public class GuiIdentity<S extends Container, C> {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof GuiIdentity && ((GuiIdentity)o).name == name;
+        return o instanceof GuiIdentity && ((GuiIdentity)o).name.equals(name);
     }
 
 }

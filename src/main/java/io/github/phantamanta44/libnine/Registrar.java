@@ -45,8 +45,8 @@ public class Registrar {
     }
 
     private Virtue bound;
-    private List<L9Block> virtueBlocks = new LinkedList<>();
-    private List<L9Item> virtueItems = new LinkedList<>();
+    private final List<L9Block> virtueBlocks = new LinkedList<>();
+    private final List<L9Item> virtueItems = new LinkedList<>();
     
     public void begin(Virtue virtue) {
         if (bound != null) {

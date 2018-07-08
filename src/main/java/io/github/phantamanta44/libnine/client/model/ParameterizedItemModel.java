@@ -1,7 +1,6 @@
 package io.github.phantamanta44.libnine.client.model;
 
 import com.google.common.collect.Table;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
@@ -32,23 +31,25 @@ import java.util.stream.Stream;
 
 public class ParameterizedItemModel implements IModel {
 
-    private final ResourceLocation resource;
     private final TObjectIntMap<String> indexMap;
     private final Map<Mutation, IModel> children;
 
-    ParameterizedItemModel(ResourceLocation resource, ParameterizedItemModelLoader.ResourceInjector resourceInjector,
+    ParameterizedItemModel(ParameterizedItemModelLoader.ResourceInjector resourceInjector,
                            JsonObject archetype, @Nullable Table<String, String, JsonObject> mutations) {
-        this.resource = resource;
         this.indexMap = new TObjectIntHashMap<>();
-        String[] keys = new String[mutations.rowKeySet().size()];
-        int index = 0;
-        for (String key : mutations.rowKeySet()) {
-            this.indexMap.put(key, index);
-            keys[index] = key;
-            index++;
+        if (mutations != null) {
+            String[] keys = new String[mutations.rowKeySet().size()];
+            int index = 0;
+            for (String key : mutations.rowKeySet()) {
+                this.indexMap.put(key, index);
+                keys[index] = key;
+                index++;
+            }
+            this.children = calculateCartesianProduct(keys, mutations, 0)
+                    .collect(Collectors.toMap(m -> m, m -> compileChildModel(resourceInjector, mutateModel(archetype, mutations, m))));
+        } else {
+            this.children = Collections.singletonMap(new Mutation(this), compileChildModel(resourceInjector, archetype));
         }
-        this.children = calculateCartesianProduct(keys, mutations, 0)
-                .collect(Collectors.toMap(m -> m, m -> compileChildModel(resourceInjector, mutateModel(archetype, mutations, m))));
     }
 
     private Stream<Mutation> calculateCartesianProduct(String[] keys, Table<String, String, JsonObject> mutations, int index) {
@@ -60,9 +61,7 @@ public class ParameterizedItemModel implements IModel {
     private JsonObject mutateModel(JsonObject model, Table<String, String, JsonObject> mutations, Mutation mutation) {
         JsonObject result = JsonUtils9.copy(model);
         for (String key : indexMap.keySet()) {
-            for (Map.Entry<String, JsonElement> entry : mutations.get(key, mutation.values[indexMap.get(key)]).entrySet()) {
-                result.add(entry.getKey(), entry.getValue());
-            }
+            JsonUtils9.merge(result, mutations.get(key, mutation.values[indexMap.get(key)]));
         }
         return result;
     }

@@ -17,7 +17,8 @@ public class Accrue<T> implements Consumer<T> {
         backing.add(t);
     }
 
-    public void acceptAll(T... values) {
+    @SafeVarargs
+    public final void acceptAll(T... values) {
         backing.addAll(Arrays.asList(values));
     }
 

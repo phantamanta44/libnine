@@ -103,6 +103,7 @@ public class L9BlockStated extends L9Block {
         throw new IllegalArgumentException("Invalid block state!");
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public IBlockState getStateFromMeta(int meta) {
         return states.get(meta).synthesize(getBlockState());

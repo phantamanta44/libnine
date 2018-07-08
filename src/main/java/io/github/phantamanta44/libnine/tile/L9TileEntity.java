@@ -63,15 +63,6 @@ public class L9TileEntity extends TileEntity implements ISerializable {
         if (!getWorld().isRemote) dispatchTileUpdate();
     }
 
-    /**
-     * Please don't touch this :(
-     */
-    @Override
-    @Deprecated
-    public void markDirty() {
-        super.markDirty();
-    }
-
     @Override
     public void setPos(BlockPos pos) {
         super.setPos(pos);

@@ -251,10 +251,9 @@ public class ByteUtils {
         public NBTTagCompound readTagCompound() {
             try {
                 int length = readVarPrecision();
-                NBTTagCompound tag = CompressedStreamTools.read(
+                return CompressedStreamTools.read(
                         ByteStreams.newDataInput(readBytes(length)),
                         new NBTSizeTracker(length));
-                return tag;
             } catch (Exception e) {
                 throw new ImpossibilityRealizedException(e);
             }
