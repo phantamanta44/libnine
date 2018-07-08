@@ -1,4 +1,4 @@
-package io.github.phantamanta44.libnine.component;
+package io.github.phantamanta44.libnine.component.reservoir;
 
 import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import net.minecraft.nbt.NBTTagCompound;
@@ -12,29 +12,29 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.function.BiConsumer;
 
-public class FluidReservoir extends IntReservoir implements IFluidTankProperties {
+public class FluidReservoir extends DelegatedIntReservoir implements IFluidTankProperties {
 
     private final boolean locked;
     private final Collection<BiConsumer<Fluid, Fluid>> callbacks;
 
     private Fluid fluid;
 
-    public FluidReservoir(Fluid fluid, int qty, int capacity, boolean locked) {
-        super(qty, capacity);
+    public FluidReservoir(Fluid fluid, IIntReservoir backing, boolean locked) {
+        super(backing);
         this.fluid = fluid;
         this.locked = locked;
         this.callbacks = new LinkedList<>();
     }
 
-    public FluidReservoir(Fluid fluid, int capacity) {
-        super(0, capacity);
+    public FluidReservoir(Fluid fluid, IIntReservoir backing) {
+        super(backing);
         this.fluid = fluid;
         this.locked = true;
         this.callbacks = new LinkedList<>();
     }
 
-    public FluidReservoir(int capacity) {
-        super(0, capacity);
+    public FluidReservoir(IIntReservoir backing) {
+        super(backing);
         this.fluid = null;
         this.locked = false;
         this.callbacks = new LinkedList<>();

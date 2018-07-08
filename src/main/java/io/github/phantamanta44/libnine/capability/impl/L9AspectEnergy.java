@@ -1,16 +1,16 @@
 package io.github.phantamanta44.libnine.capability.impl;
 
-import io.github.phantamanta44.libnine.component.IntReservoir;
-import io.github.phantamanta44.libnine.util.data.ISerializable;
+import io.github.phantamanta44.libnine.component.reservoir.IIntReservoir;
 import io.github.phantamanta44.libnine.util.data.ByteUtils;
+import io.github.phantamanta44.libnine.util.data.ISerializable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.energy.IEnergyStorage;
 
 public class L9AspectEnergy implements IEnergyStorage, ISerializable {
 
-    private final IntReservoir reservoir;
+    private final IIntReservoir reservoir;
 
-    public L9AspectEnergy(IntReservoir reservoir) {
+    public L9AspectEnergy(IIntReservoir reservoir) {
         this.reservoir = reservoir;
     }
 

@@ -1,6 +1,6 @@
 package io.github.phantamanta44.libnine.capability.impl;
 
-import io.github.phantamanta44.libnine.component.FluidReservoir;
+import io.github.phantamanta44.libnine.component.reservoir.FluidReservoir;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
 import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import net.minecraft.nbt.NBTTagCompound;
