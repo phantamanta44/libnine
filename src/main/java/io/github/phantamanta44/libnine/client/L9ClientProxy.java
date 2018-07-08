@@ -3,6 +3,7 @@ package io.github.phantamanta44.libnine.client;
 import io.github.phantamanta44.libnine.L9CommonProxy;
 import io.github.phantamanta44.libnine.Registrar;
 import io.github.phantamanta44.libnine.client.event.ClientTickHandler;
+import io.github.phantamanta44.libnine.client.model.L9Models;
 import io.github.phantamanta44.libnine.tile.L9TileEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -34,6 +35,7 @@ public class L9ClientProxy extends L9CommonProxy {
 
     @Override
     protected void onPreInit(FMLPreInitializationEvent event) {
+        L9Models.registerModels();
         super.onPreInit(event);
         MinecraftForge.EVENT_BUS.register(new ClientTickHandler());
     }
