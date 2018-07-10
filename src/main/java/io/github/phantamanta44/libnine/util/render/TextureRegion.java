@@ -3,6 +3,7 @@ package io.github.phantamanta44.libnine.util.render;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import org.lwjgl.opengl.GL11;
 
 public class TextureRegion {
 
@@ -77,7 +78,7 @@ public class TextureRegion {
         texture.bind();
         Tessellator tess = Tessellator.getInstance();
         BufferBuilder buf = tess.getBuffer();
-        buf.begin(7, DefaultVertexFormats.POSITION_TEX);
+        buf.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
         buf.pos(x, y + height, 0D).tex(u1, v2).endVertex();
         buf.pos(x + width, y + height, 0D).tex(u2, v2).endVertex();
         buf.pos(x + width, y, 0D).tex(u2, v1).endVertex();
@@ -93,7 +94,7 @@ public class TextureRegion {
         texture.bind();
         Tessellator tess = Tessellator.getInstance();
         BufferBuilder buf = tess.getBuffer();
-        buf.begin(7, DefaultVertexFormats.POSITION_TEX);
+        buf.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
         buf.pos(xStart, yEnd, 0D).tex(uStart, vEnd).endVertex();
         buf.pos(xEnd, yEnd, 0D).tex(uEnd, vEnd).endVertex();
         buf.pos(xEnd, yStart, 0D).tex(uEnd, vStart).endVertex();
