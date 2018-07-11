@@ -2,6 +2,8 @@ package io.github.phantamanta44.libnine.util.math;
 
 import net.minecraft.util.math.Vec3d;
 
+import javax.annotation.Nullable;
+
 public class LinAlUtils {
 
     public static final Vec3d X_POS = new Vec3d(1, 0, 0);
@@ -18,6 +20,14 @@ public class LinAlUtils {
 
     public static Vec3d reflect2D(Vec3d target, Vec3d symmetry) {
         return project(target, symmetry).scale(2D).subtract(target);
+    }
+
+    @Nullable
+    public static Vec3d castOntoPlane(Vec3d origin, Vec3d dir, Vec3d planarPoint, Vec3d planeNormal) {
+        double a = planeNormal.dotProduct(dir);
+        if (a == 0) return null;
+        double scale = planeNormal.dotProduct(planarPoint.subtract(origin)) / a;
+        return scale > 0 ? origin.add(dir.scale(scale)) : null;
     }
 
 }
