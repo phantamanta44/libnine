@@ -1,6 +1,5 @@
 package io.github.phantamanta44.libnine.util.world;
 
-import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -58,5 +57,13 @@ public class WorldUtils {
     public static Vec3d getBlockCenter(BlockPos pos) {
         return new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
     }
+    
+    public static boolean pointLiesInBlock(Vec3d point, BlockPos block) {
+        return point.x >= block.getX() && point.x <= block.getX() + 1
+                && point.y >= block.getY() && point.y <= block.getY() + 1
+                && point.z >= block.getZ() && point.z <= block.getZ() + 1;
+    }
+
+
 
 }
