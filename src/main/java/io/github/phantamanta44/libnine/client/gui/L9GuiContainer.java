@@ -3,11 +3,14 @@ package io.github.phantamanta44.libnine.client.gui;
 import io.github.phantamanta44.libnine.client.gui.component.GuiComponent;
 import io.github.phantamanta44.libnine.client.gui.component.GuiComponentManager;
 import io.github.phantamanta44.libnine.gui.L9Container;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
 
 import java.io.IOException;
+import java.util.List;
 
 public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
 
@@ -42,7 +45,6 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
         super.initGui();
         posX = (this.width - this.sizeX) / 2;
         posY = (this.height - this.sizeY) / 2;
-        components.setMouseOffset(posX, posY);
     }
 
     @Override
@@ -53,19 +55,19 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
     @Override
     public void drawScreen(int mX, int mY, float partialTicks) {
         super.drawScreen(mX, mY, partialTicks);
-        renderHoveredToolTip(mX, mY);
+        renderHoveredToolTip(mX - posX, mY - posY);
     }
 
     @Override
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mX, int mY) {
         this.partialTicks = partialTicks;
-        drawBackground(partialTicks, mX, mY);
+        drawBackground(partialTicks, mX - posX, mY - posY);
     }
 
     @Override
     protected void drawGuiContainerForegroundLayer(int mX, int mY) {
-        drawForeground(partialTicks, mX, mY);
-        components.draw(partialTicks, mX, mY);
+        drawForeground(partialTicks, mX - posX, mY - posY);
+        components.draw(partialTicks, mX - posX, mY - posY);
     }
 
     @Override
@@ -89,6 +91,24 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
     @SuppressWarnings("deprecation")
     protected void drawPlayerInventoryName() {
         fontRenderer.drawString(I18n.translateToLocal("container.inventory"), 8, this.ySize - 96 + 2, DEF_TEXT_COL);
+    }
+
+    protected void drawString(String string, int x, int y, int colour, boolean shadow) {
+        Minecraft.getMinecraft().fontRenderer.drawString(string, x, y, colour, shadow);
+    }
+
+    protected void drawString(String string, int x, int y, int colour) {
+        drawString(string, x, y, colour, false);
+    }
+
+    protected void drawTooltip(String string, int x, int y) {
+        drawHoveringText(string, x, y);
+        RenderHelper.enableGUIStandardItemLighting();
+    }
+
+    protected void drawTooltip(List<String> lines, int x, int y) {
+        drawHoveringText(lines, x, y);
+        RenderHelper.enableGUIStandardItemLighting();
     }
 
     @Override

@@ -9,13 +9,9 @@ public class GuiComponentManager {
     private final GuiScreen gui;
     private final LinkedList<ComponentState> comps;
 
-    private int mouseOffsetX;
-    private int mouseOffsetY;
-
     public GuiComponentManager(GuiScreen gui) {
         this.gui = gui;
         this.comps = new LinkedList<>();
-        this.mouseOffsetX = this.mouseOffsetY = 0;
     }
 
     public void register(GuiComponent comp) {
@@ -23,24 +19,16 @@ public class GuiComponentManager {
         comps.add(new ComponentState(comp));
     }
 
-    public void setMouseOffset(int mouseOffsetX, int mouseOffsetY) {
-        this.mouseOffsetX = mouseOffsetX;
-        this.mouseOffsetY = mouseOffsetY;
-    }
-
-    public void draw(float partialTicks, int mXRaw, int mYRaw) {
-        int mX = mXRaw - mouseOffsetX, mY = mYRaw - mouseOffsetY;
+    public void draw(float partialTicks, int mX, int mY) {
         comps.forEach(c -> c.drawAndUpdate(partialTicks, mX, mY));
         comps.forEach(c -> c.drawTooltip(partialTicks, mX, mY));
     }
 
-    public boolean handleMouseClick(int mXRaw, int mYRaw, int button) {
-        int mX = mXRaw - mouseOffsetX, mY = mYRaw - mouseOffsetY;
+    public boolean handleMouseClick(int mX, int mY, int button) {
         return comps.stream().noneMatch(c -> c.handleMouseClick(mX, mY, button));
     }
 
-    public boolean handleMouseDrag(int mXRaw, int mYRaw, int button, long dragTime) {
-        int mX = mXRaw - mouseOffsetX, mY = mYRaw - mouseOffsetY;
+    public boolean handleMouseDrag(int mX, int mY, int button, long dragTime) {
         return comps.stream().noneMatch(c -> c.handleMouseDrag(mX, mY, button, dragTime));
     }
 

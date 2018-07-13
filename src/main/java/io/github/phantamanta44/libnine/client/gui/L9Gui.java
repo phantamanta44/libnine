@@ -2,12 +2,14 @@ package io.github.phantamanta44.libnine.client.gui;
 
 import io.github.phantamanta44.libnine.client.gui.component.GuiComponent;
 import io.github.phantamanta44.libnine.client.gui.component.GuiComponentManager;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ResourceLocation;
 
 import java.io.IOException;
+import java.util.List;
 
 public class L9Gui extends GuiScreen implements IScreenDrawable {
 
@@ -40,7 +42,6 @@ public class L9Gui extends GuiScreen implements IScreenDrawable {
         super.initGui();
         posX = (this.width - this.sizeX) / 2;
         posY = (this.height - this.sizeY) / 2;
-        components.setMouseOffset(posX, posY);
     }
 
     @Override
@@ -50,7 +51,7 @@ public class L9Gui extends GuiScreen implements IScreenDrawable {
 
     @Override
     public void drawScreen(int mX, int mY, float partialTicks) {
-        drawBackground(partialTicks, mX, mY);
+        drawBackground(partialTicks, mX - posX, mY - posY);
         GlStateManager.disableRescaleNormal();
         RenderHelper.disableStandardItemLighting();
         GlStateManager.disableLighting();
@@ -61,8 +62,8 @@ public class L9Gui extends GuiScreen implements IScreenDrawable {
         GlStateManager.translate(posX, posY, 0.0F);
         GlStateManager.enableRescaleNormal();
         RenderHelper.disableStandardItemLighting();
-        drawForeground(partialTicks, mX, mY);
-        components.draw(partialTicks, mX, mY);
+        drawForeground(partialTicks, mX - posX, mY - posY);
+        components.draw(partialTicks, mX - posX, mY - posY);
         GlStateManager.popMatrix();
         GlStateManager.enableLighting();
         GlStateManager.enableDepth();
@@ -81,6 +82,24 @@ public class L9Gui extends GuiScreen implements IScreenDrawable {
     @Override
     public void drawForeground(float partialTicks, int mX, int mY) {
         // NO-OP
+    }
+
+    protected void drawString(String string, int x, int y, int colour, boolean shadow) {
+        Minecraft.getMinecraft().fontRenderer.drawString(string, x, y, colour, shadow);
+    }
+
+    protected void drawString(String string, int x, int y, int colour) {
+        drawString(string, x, y, colour, false);
+    }
+
+    protected void drawTooltip(String string, int x, int y) {
+        drawHoveringText(string, x, y);
+        RenderHelper.enableGUIStandardItemLighting();
+    }
+
+    protected void drawTooltip(List<String> lines, int x, int y) {
+        drawHoveringText(lines, x, y);
+        RenderHelper.enableGUIStandardItemLighting();
     }
 
     @Override
