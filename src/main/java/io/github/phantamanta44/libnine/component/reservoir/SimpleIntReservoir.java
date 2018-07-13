@@ -62,22 +62,22 @@ public class SimpleIntReservoir implements IIntReservoir {
     }
 
     @Override
-    public void serializeNBT(NBTTagCompound tag) {
+    public void serNBT(NBTTagCompound tag) {
         tag.setInteger("Quantity", getQuantity());
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
+    public void deserNBT(NBTTagCompound tag) {
         setQuantity(tag.getInteger("Quantity"));
     }
 
     @Override
-    public void serializeBytes(ByteUtils.Writer data) {
+    public void serBytes(ByteUtils.Writer data) {
         data.writeInt(getQuantity());
     }
 
     @Override
-    public void deserializeBytes(ByteUtils.Reader data) {
+    public void deserBytes(ByteUtils.Reader data) {
         setQuantity(data.readInt());
     }
 

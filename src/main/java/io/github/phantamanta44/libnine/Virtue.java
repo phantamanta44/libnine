@@ -7,6 +7,7 @@ import io.github.phantamanta44.libnine.network.PacketClientContainerInteraction;
 import io.github.phantamanta44.libnine.network.PacketServerSyncTileEntity;
 import io.github.phantamanta44.libnine.util.LazyConstant;
 import io.github.phantamanta44.libnine.util.render.TextureResource;
+import io.github.phantamanta44.libnine.wsd.WSDManager;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.ResourceLocation;
@@ -30,6 +31,7 @@ public class Virtue {
     private final CreativeTabs defaultCreativeTab;
     private final LazyConstant<SimpleNetworkWrapper> networkHandler;
     private final LazyConstant<L9GuiHandler> guiHandler;
+    private final LazyConstant<WSDManager> wsdManager;
     private boolean usesTileEntities, usesContainers;
 
     public Virtue(String modId, @Nullable CreativeTabs defaultCreativeTab) {
@@ -42,6 +44,7 @@ public class Virtue {
             NetworkRegistry.INSTANCE.registerGuiHandler(this, handler);
             return handler;
         });
+        this.wsdManager = new LazyConstant<>(() -> new WSDManager(this));
         this.usesTileEntities = this.usesContainers = false;
         loadedVirtues.put(modId, this);
     }
@@ -81,6 +84,10 @@ public class Virtue {
 
     public L9GuiHandler getGuiHandler() {
         return guiHandler.get();
+    }
+
+    public WSDManager getWsdManager() {
+        return wsdManager.get();
     }
 
     public String prefix(String suffix) {

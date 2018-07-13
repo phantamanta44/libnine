@@ -88,26 +88,26 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTankP
     }
 
     @Override
-    public void serializeNBT(NBTTagCompound tag) {
-        super.serializeNBT(tag);
+    public void serNBT(NBTTagCompound tag) {
+        super.serNBT(tag);
         if (!locked) tag.setString("Fluid", fluid.getName());
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
-        super.deserializeNBT(tag);
+    public void deserNBT(NBTTagCompound tag) {
+        super.deserNBT(tag);
         if (!locked) fluid = FluidRegistry.getFluid(tag.getString("Fluid"));
     }
 
     @Override
-    public void serializeBytes(ByteUtils.Writer data) {
-        super.serializeBytes(data);
+    public void serBytes(ByteUtils.Writer data) {
+        super.serBytes(data);
         if (!locked) data.writeFluid(getFluid());
     }
 
     @Override
-    public void deserializeBytes(ByteUtils.Reader data) {
-        super.deserializeBytes(data);
+    public void deserBytes(ByteUtils.Reader data) {
+        super.deserBytes(data);
         if (!locked) setFluid(data.readFluid());
     }
 

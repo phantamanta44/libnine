@@ -59,30 +59,30 @@ public class L9AspectFluidHandler implements IFluidHandler, ISerializable {
     }
 
     @Override
-    public void serializeNBT(NBTTagCompound tag) {
+    public void serNBT(NBTTagCompound tag) {
         NBTTagList list = new NBTTagList();
         for (FluidReservoir tank : tanks) {
             NBTTagCompound tankTag = new NBTTagCompound();
-            tank.serializeNBT(tankTag);
+            tank.serNBT(tankTag);
             list.appendTag(tankTag);
         }
         tag.setTag("Tanks", list);
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
+    public void deserNBT(NBTTagCompound tag) {
         NBTTagList list = tag.getTagList("Tanks", Constants.NBT.TAG_COMPOUND);
-        for (int i = 0; i < tanks.length; i++) tanks[i].deserializeNBT(list.getCompoundTagAt(i));
+        for (int i = 0; i < tanks.length; i++) tanks[i].deserNBT(list.getCompoundTagAt(i));
     }
 
     @Override
-    public void serializeBytes(ByteUtils.Writer data) {
-        for (FluidReservoir tank : tanks) tank.serializeBytes(data);
+    public void serBytes(ByteUtils.Writer data) {
+        for (FluidReservoir tank : tanks) tank.serBytes(data);
     }
 
     @Override
-    public void deserializeBytes(ByteUtils.Reader data) {
-        for (FluidReservoir tank : tanks) tank.deserializeBytes(data);
+    public void deserBytes(ByteUtils.Reader data) {
+        for (FluidReservoir tank : tanks) tank.deserBytes(data);
     }
 
 }

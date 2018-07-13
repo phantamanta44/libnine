@@ -53,23 +53,23 @@ public abstract class DelegatedIntReservoir implements IIntReservoir {
     }
 
     @Override
-    public void serializeNBT(NBTTagCompound tag) {
-        backing.serializeNBT(tag);
+    public void serNBT(NBTTagCompound tag) {
+        backing.serNBT(tag);
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
-        backing.deserializeNBT(tag);
+    public void deserNBT(NBTTagCompound tag) {
+        backing.deserNBT(tag);
     }
 
     @Override
-    public void serializeBytes(ByteUtils.Writer data) {
-        backing.serializeBytes(data);
+    public void serBytes(ByteUtils.Writer data) {
+        backing.serBytes(data);
     }
 
     @Override
-    public void deserializeBytes(ByteUtils.Reader data) {
-        backing.deserializeBytes(data);
+    public void deserBytes(ByteUtils.Reader data) {
+        backing.deserBytes(data);
     }
 
 }

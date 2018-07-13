@@ -139,7 +139,7 @@ public class DataSerialization {
             String key = FormatUtils.toTitleCase(o.getA());
             if (o.getB() instanceof ISerializable) {
                 NBTTagCompound serTag = new NBTTagCompound();
-                ((ISerializable)o.getB()).serializeNBT(serTag);
+                ((ISerializable)o.getB()).serNBT(serTag);
                 tag.setTag(key, serTag);
             } else if (o.getB() instanceof IDatum) {
                 IDatum d = (IDatum)o.getB();
@@ -168,7 +168,7 @@ public class DataSerialization {
         applyClassMappings(target).forEach(o -> {
             String key = FormatUtils.toTitleCase(o.getA());
             if (o.getB() instanceof ISerializable) {
-                ((ISerializable)o.getB()).deserializeNBT(tag.getCompoundTag(key));
+                ((ISerializable)o.getB()).deserNBT(tag.getCompoundTag(key));
             } else if (o.getB() instanceof IDatum) {
                 IDatum d = (IDatum)o.getB();
                 if (d.get().getClass().isEnum()) {
@@ -195,7 +195,7 @@ public class DataSerialization {
     public void serializeBytes(ByteUtils.Writer data) {
         applyClassMappings(target).forEach(o -> {
             if (o.getB() instanceof ISerializable) {
-                ((ISerializable)o.getB()).serializeBytes(data);
+                ((ISerializable)o.getB()).serBytes(data);
             } else if (o.getB() instanceof IDatum) {
                 IDatum d = (IDatum)o.getB();
                 if (d.get().getClass().isEnum()) {
@@ -222,7 +222,7 @@ public class DataSerialization {
     public void deserializeBytes(ByteUtils.Reader data) {
         applyClassMappings(target).forEach(o -> {
             if (o.getB() instanceof ISerializable) {
-                ((ISerializable)o.getB()).deserializeBytes(data);
+                ((ISerializable)o.getB()).deserBytes(data);
             } else if (o.getB() instanceof IDatum) {
                 IDatum d = (IDatum)o.getB();
                 if (d.get().getClass().isEnum()) {

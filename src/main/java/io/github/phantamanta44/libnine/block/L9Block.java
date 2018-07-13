@@ -7,6 +7,7 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -47,8 +48,9 @@ public class L9Block extends Block implements ITileEntityProvider {
     }
 
     protected void initRegistration() {
-        setRegistryName(getInternalName());
-        getItemBlock().setRegistryName(getInternalName());
+        ResourceLocation registryName = LibNine.PROXY.getRegistrar().getBound().newResourceLocation(getInternalName());
+        setRegistryName(registryName);
+        getItemBlock().setRegistryName(registryName);
         LibNine.PROXY.getRegistrar().queueBlockReg(this);
         LibNine.PROXY.getRegistrar().queueItemReg(getItemBlock());
     }

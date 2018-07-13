@@ -6,14 +6,17 @@ import io.github.phantamanta44.libnine.client.event.ClientTickHandler;
 import io.github.phantamanta44.libnine.client.model.L9Models;
 import io.github.phantamanta44.libnine.tile.L9TileEntity;
 import io.github.phantamanta44.libnine.util.render.RenderUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.World;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -40,6 +43,12 @@ public class L9ClientProxy extends L9CommonProxy {
     @Override
     public void dispatchTileUpdate(L9TileEntity tile) {
         if (!tile.getWorld().isRemote) super.dispatchTileUpdate(tile);
+    }
+
+    @Override
+    public World getAnySidedWorld() {
+        return FMLCommonHandler.instance().getEffectiveSide().isClient()
+                ? Minecraft.getMinecraft().world : super.getAnySidedWorld();
     }
 
     /*

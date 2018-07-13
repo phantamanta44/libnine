@@ -31,9 +31,10 @@ public class VirtualState {
         return (T)props.get(prop);
     }
 
+    @SuppressWarnings("EqualsBetweenInconvertibleTypes")
     public boolean matches(IBlockState state) {
         for (Map.Entry<IProperty<?>, Comparable<?>> prop : props.entrySet()) {
-            if (!state.getProperties().get(prop.getKey()).equals(prop.getValue())) return false;
+            if (!state.getValue(prop.getKey()).equals(prop.getValue())) return false;
         }
         return true;
     }

@@ -24,6 +24,7 @@ public class L9BlockStated extends L9Block {
 
     public L9BlockStated(String name, Material material) {
         super(name, material);
+        setDefaultState(initDefaultState(getBlockState().getBaseState()));
     }
 
     /*
@@ -47,6 +48,10 @@ public class L9BlockStated extends L9Block {
         accrueVolatileProperties(accum);
         props = Collections.unmodifiableList(propList);
         return new BlockStateContainer(this, props.toArray(new IProperty[0]));
+    }
+
+    protected IBlockState initDefaultState(IBlockState state) {
+        return state;
     }
 
     @Override

@@ -27,7 +27,7 @@ public class L9Item extends Item {
     }
 
     protected void initRegistration() {
-        setRegistryName(getInternalName());
+        setRegistryName(LibNine.PROXY.getRegistrar().getBound().newResourceLocation(getInternalName()));
         LibNine.PROXY.getRegistrar().queueItemReg(this);
     }
 

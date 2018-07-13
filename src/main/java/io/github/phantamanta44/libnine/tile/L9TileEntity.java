@@ -106,22 +106,22 @@ public class L9TileEntity extends TileEntity implements ISerializable {
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
+    public void deserNBT(NBTTagCompound nbt) {
         readFromNBT(nbt);
     }
 
     @Override
-    public void serializeNBT(NBTTagCompound tag) {
+    public void serNBT(NBTTagCompound tag) {
         writeToNBT(tag);
     }
 
     @Override
-    public void serializeBytes(ByteUtils.Writer data) {
+    public void serBytes(ByteUtils.Writer data) {
         serializer.serializeBytes(data);
     }
 
     @Override
-    public void deserializeBytes(ByteUtils.Reader data) {
+    public void deserBytes(ByteUtils.Reader data) {
         serializer.deserializeBytes(data);
     }
 

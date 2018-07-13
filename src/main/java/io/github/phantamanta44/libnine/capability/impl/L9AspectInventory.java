@@ -97,7 +97,7 @@ public class L9AspectInventory implements IItemHandlerModifiable, ISerializable 
     }
 
     @Override
-    public void serializeNBT(NBTTagCompound tag) {
+    public void serNBT(NBTTagCompound tag) {
         NBTTagList list = new NBTTagList();
         for (ItemStack stack : inv) {
             NBTTagCompound itemTag = new NBTTagCompound();
@@ -112,7 +112,7 @@ public class L9AspectInventory implements IItemHandlerModifiable, ISerializable 
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
+    public void deserNBT(NBTTagCompound tag) {
         NBTTagList list = tag.getTagList("Items", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < inv.length; i++) {
             NBTTagCompound itemTag = list.getCompoundTagAt(i);
@@ -121,7 +121,7 @@ public class L9AspectInventory implements IItemHandlerModifiable, ISerializable 
     }
 
     @Override
-    public void serializeBytes(ByteUtils.Writer data) {
+    public void serBytes(ByteUtils.Writer data) {
         for (ItemStack stack : inv) {
             if (stack.isEmpty()) {
                 data.writeShort((short)-1);
@@ -132,7 +132,7 @@ public class L9AspectInventory implements IItemHandlerModifiable, ISerializable 
     }
 
     @Override
-    public void deserializeBytes(ByteUtils.Reader data) {
+    public void deserBytes(ByteUtils.Reader data) {
         for (int i = 0; i < inv.length; i++) {
             if (data.readShort() == -1) {
                 setStackInSlot(i, ItemStack.EMPTY);

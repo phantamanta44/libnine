@@ -45,23 +45,23 @@ public class L9AspectEnergy implements IEnergyStorage, ISerializable {
     }
 
     @Override
-    public void serializeNBT(NBTTagCompound tag) {
-        reservoir.serializeNBT(tag);
+    public void serNBT(NBTTagCompound tag) {
+        reservoir.serNBT(tag);
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
-        reservoir.deserializeNBT(tag);
+    public void deserNBT(NBTTagCompound tag) {
+        reservoir.deserNBT(tag);
     }
 
     @Override
-    public void serializeBytes(ByteUtils.Writer data) {
-        reservoir.serializeBytes(data);
+    public void serBytes(ByteUtils.Writer data) {
+        reservoir.serBytes(data);
     }
 
     @Override
-    public void deserializeBytes(ByteUtils.Reader data) {
-        reservoir.deserializeBytes(data);
+    public void deserBytes(ByteUtils.Reader data) {
+        reservoir.deserBytes(data);
     }
 
 }

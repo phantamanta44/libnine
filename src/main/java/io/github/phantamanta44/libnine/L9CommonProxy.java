@@ -4,7 +4,9 @@ import io.github.phantamanta44.libnine.network.PacketServerSyncTileEntity;
 import io.github.phantamanta44.libnine.tile.L9TileEntity;
 import io.github.phantamanta44.libnine.tile.RegisterTile;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -41,6 +43,10 @@ public class L9CommonProxy {
                 new PacketServerSyncTileEntity(tile),
                 new NetworkRegistry.TargetPoint(
                         tile.getWorld().provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), 64D));
+    }
+
+    public World getAnySidedWorld() {
+        return FMLCommonHandler.instance().getMinecraftServerInstance().getEntityWorld();
     }
 
     /*
