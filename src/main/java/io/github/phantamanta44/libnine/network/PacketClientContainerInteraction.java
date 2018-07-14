@@ -23,14 +23,12 @@ public class PacketClientContainerInteraction implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-
         data = new byte[buf.readableBytes()];
         buf.readBytes(data);
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-
         buf.writeBytes(data);
     }
 

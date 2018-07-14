@@ -71,6 +71,7 @@ public class L9ClientProxy extends L9CommonProxy {
 
     @Override
     protected void onPostInit(FMLPostInitializationEvent event) {
+        super.onPostInit(event);
         ClientCommandHandler.instance.registerCommand(new Command9S());
     }
 

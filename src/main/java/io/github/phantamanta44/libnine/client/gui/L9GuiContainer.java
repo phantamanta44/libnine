@@ -113,12 +113,12 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
 
     @Override
     protected void mouseClicked(int mX, int mY, int button) throws IOException {
-        if (components.handleMouseClick(mX, mY, button)) super.mouseClicked(mX, mY, button);
+        if (components.handleMouseClick(mX - posX, mY - posY, button)) super.mouseClicked(mX, mY, button);
     }
 
     @Override
     protected void mouseClickMove(int mX, int mY, int button, long dragTime) {
-        if (components.handleMouseDrag(mX, mY, button, dragTime)) {
+        if (components.handleMouseDrag(mX - posX, mY - posY, button, dragTime)) {
             super.mouseClickMove(mX, mY, button, dragTime);
         }
     }

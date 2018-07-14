@@ -9,6 +9,13 @@ import net.minecraft.util.text.translation.I18n;
 
 public class ItemUtils {
 
+    public static final short WILDCARD_META = (short)32767;
+
+    public static boolean matchesWithWildcard(ItemStack a, ItemStack b) {
+        return a.getItem().equals(b.getItem())
+                && (a.getMetadata() == WILDCARD_META || b.getMetadata() == WILDCARD_META || a.getMetadata() == b.getMetadata());
+    }
+
     public static String getColouredName(ItemStack stack) {
         return stack.getRarity().rarityColor + stack.getDisplayName();
     }

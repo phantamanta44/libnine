@@ -1,8 +1,16 @@
 package io.github.phantamanta44.libnine;
 
 import io.github.phantamanta44.libnine.network.PacketServerSyncTileEntity;
+import io.github.phantamanta44.libnine.recipe.IRecipeList;
+import io.github.phantamanta44.libnine.recipe.IRecipeManager;
+import io.github.phantamanta44.libnine.recipe.RecipeManager;
+import io.github.phantamanta44.libnine.recipe.input.ItemStackInput;
+import io.github.phantamanta44.libnine.recipe.output.ItemStackOutput;
+import io.github.phantamanta44.libnine.recipe.type.SmeltingRecipe;
 import io.github.phantamanta44.libnine.tile.L9TileEntity;
 import io.github.phantamanta44.libnine.tile.RegisterTile;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -16,9 +24,11 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 public class L9CommonProxy {
 
     private final Registrar registrar;
+    private final RecipeManager recipeManager;
 
     public L9CommonProxy() {
         registrar = initRegistrar();
+        recipeManager = initRecipeManager();
     }
 
     /*
@@ -29,12 +39,20 @@ public class L9CommonProxy {
         return new Registrar();
     }
 
+    protected RecipeManager initRecipeManager() {
+        return new RecipeManager();
+    }
+
     /*
      * API
      */
 
     public Registrar getRegistrar() {
         return registrar;
+    }
+
+    public IRecipeManager getRecipeManager() {
+        return recipeManager;
     }
 
     public void dispatchTileUpdate(L9TileEntity tile) {
@@ -65,7 +83,9 @@ public class L9CommonProxy {
     }
 
     protected void onPostInit(FMLPostInitializationEvent event) {
-        // NO-OP
+        IRecipeList<ItemStack, ItemStackInput, ItemStackOutput, SmeltingRecipe> smeltingRecipes
+                = recipeManager.getRecipeList(SmeltingRecipe.class);
+        FurnaceRecipes.instance().getSmeltingList().forEach((i, o) -> smeltingRecipes.add(new SmeltingRecipe(i, o)));
     }
 
 }

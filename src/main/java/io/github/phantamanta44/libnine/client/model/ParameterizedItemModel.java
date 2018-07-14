@@ -21,10 +21,7 @@ import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.model.IModelState;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -136,6 +133,9 @@ public class ParameterizedItemModel implements IModel {
             public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
                 Mutation mutation = new Mutation(container.model);
                 ((IParamaterized)stack.getItem()).getModelMutations(stack, mutation);
+                if (!container.children.containsKey(mutation)) {
+                    throw new NoSuchElementException("Invalid PI mutation: " + mutation);
+                }
                 return container.children.get(mutation);
             }
 
@@ -191,7 +191,9 @@ public class ParameterizedItemModel implements IModel {
 
         @Override
         public String toString() {
-            return Arrays.toString(values);
+            return "Mutation { " + indexMap.keySet().stream()
+                    .map(k -> String.format("%s: %s", k, values[indexMap.get(k)]))
+                    .collect(Collectors.joining(", ")) + " }";
         }
 
     }

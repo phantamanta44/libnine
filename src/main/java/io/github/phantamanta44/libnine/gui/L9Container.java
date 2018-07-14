@@ -9,6 +9,8 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
+import java.util.Arrays;
+
 public class L9Container extends Container {
 
     private final boolean hasInvPlayer;

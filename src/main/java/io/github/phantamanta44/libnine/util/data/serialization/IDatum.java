@@ -125,6 +125,14 @@ public interface IDatum<T> {
         public float getFloat() {
             return value;
         }
+
+        public float preincrement(float offset) {
+            return (value += offset) - offset;
+        }
+
+        public float postincrement(float offset) {
+            return value += offset;
+        }
         
     }
     
@@ -152,6 +160,14 @@ public interface IDatum<T> {
 
         public double getDouble() {
             return value;
+        }
+
+        public double preincrement(double offset) {
+            return (value += offset) - offset;
+        }
+
+        public double postincrement(double offset) {
+            return value += offset;
         }
         
     }
