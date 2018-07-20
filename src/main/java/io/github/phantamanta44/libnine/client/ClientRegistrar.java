@@ -64,9 +64,7 @@ public class ClientRegistrar extends Registrar {
     @SubscribeEvent
     public void onRegisterModels(ModelRegistryEvent event) {
         rqItemModels.forEach(m -> m.sprexec(ModelLoader::setCustomModelResourceLocation));
-        rqItemModels = null;
         rqBlockStateMappers.forEach(m -> m.sprexec(ModelLoader::setCustomStateMapper));
-        rqBlockStateMappers = null;
     }
 
     private List<IPair<IItemColor, Item[]>> rqItemColourHandlers = new LinkedList<>();
@@ -86,10 +84,8 @@ public class ClientRegistrar extends Registrar {
     public void onRegisterColourHandlers() {
         rqItemColourHandlers.forEach(h -> h.sprexec(
                 Minecraft.getMinecraft().getItemColors()::registerItemColorHandler));
-        rqItemColourHandlers = null;
         rqBlockColourHandlers.forEach(h -> h.sprexec(
                 Minecraft.getMinecraft().getBlockColors()::registerBlockColorHandler));
-        rqBlockColourHandlers = null;
     }
 
     @Override
@@ -115,8 +111,7 @@ public class ClientRegistrar extends Registrar {
         @Override
         public Map<IBlockState, ModelResourceLocation> putStateModelLocations(Block block) {
             for (IBlockState state : block.getBlockState().getValidStates()) {
-                ModelResourceLocation model = getModelResourceLocation(state);
-                if (model != null) mapStateModelLocations.put(state, model);
+                mapStateModelLocations.put(state, getModelResourceLocation(state));
             }
             return mapStateModelLocations;
         }
@@ -124,7 +119,6 @@ public class ClientRegistrar extends Registrar {
         @Override
         protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
             String model = mapper.getModel(state);
-            if (model == null) return null;
             String variant = mapper.getVariant(state);
             return variant == null
                     ? virtue.newModelResourceLocation(model)

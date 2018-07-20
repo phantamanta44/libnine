@@ -21,6 +21,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,6 +45,7 @@ public class Registrar {
         return containerVirtueTable.get(clazz);
     }
 
+    @Nullable
     private Virtue bound;
     private final List<L9Block> virtueBlocks = new LinkedList<>();
     private final List<L9Item> virtueItems = new LinkedList<>();
@@ -80,7 +82,6 @@ public class Registrar {
     @SubscribeEvent
     public void onRegisterItems(RegistryEvent.Register<Item> event) {
         rqItems.forEach(event.getRegistry()::register);
-        rqItems = null;
     }
 
     private List<L9Block> rqBlocks = new LinkedList<>();
@@ -99,12 +100,10 @@ public class Registrar {
     @SuppressWarnings("unchecked")
     public void onRegisterBlocks(RegistryEvent.Register<Block> event) {
         rqBlocks.forEach(event.getRegistry()::register);
-        rqBlocks = null;
         rqTileEntities.forEach(t -> {
             t.register();
             tileVirtueTable.put(t.clazz.get(), t.virtue.get());
         });
-        rqTileEntities = null;
     }
     
     public void queueItemModelReg(L9Item item, int meta, String model) {

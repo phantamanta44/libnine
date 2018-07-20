@@ -24,7 +24,7 @@ public interface IBlockModelMapper {
 
         private final Function<IBlockState, String> mapper;
 
-        public ToModel(Function<IBlockState, String> mapper) {
+        ToModel(Function<IBlockState, String> mapper) {
             this.mapper = mapper;
         }
 
@@ -46,12 +46,11 @@ public interface IBlockModelMapper {
         private final String model;
         private final Function<IBlockState, String> mapper;
 
-        public ToVariant(String model, Function<IBlockState, String> mapper) {
+        ToVariant(String model, Function<IBlockState, String> mapper) {
             this.model = model;
             this.mapper = mapper;
         }
 
-        @Nullable
         @Override
         public String getModel(IBlockState state) {
             return model;

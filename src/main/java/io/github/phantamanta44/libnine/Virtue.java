@@ -28,6 +28,7 @@ public class Virtue {
     }
 
     private final String modId, modPref;
+    @Nullable
     private final CreativeTabs defaultCreativeTab;
     private final LazyConstant<SimpleNetworkWrapper> networkHandler;
     private final LazyConstant<L9GuiHandler> guiHandler;

@@ -33,6 +33,7 @@ public class CapabilityBrokerLazy extends CapabilityBroker {
     }
 
     @SuppressWarnings("unchecked")
+    @Nullable
     private <T> T tryLateResolve(Capability<T> capability) {
         closedSet.add(capability);
         T aspect = (T)factory.apply(capability);

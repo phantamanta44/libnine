@@ -13,10 +13,6 @@ public class WSDSerializableWrapper<T extends INbtSerializable> extends L9WSD {
         this.value = initialValue;
     }
 
-    public WSDSerializableWrapper(Virtue virtue, IWSDIdentity identity) {
-        this(virtue, identity, null);
-    }
-
     public T get() {
         return value;
     }

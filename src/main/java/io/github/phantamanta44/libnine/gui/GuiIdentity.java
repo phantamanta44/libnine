@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 public class GuiIdentity<S extends Container, C> {
 
     private final String name;
+    @Nullable
     private final Class<? extends L9Container> containerClass;
 
     public GuiIdentity(String name, @Nullable Class<? extends L9Container> containerClass) {

@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.phantamanta44.libnine.util.helper.ResourceUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourcePack;
 import net.minecraft.client.resources.data.IMetadataSection;
@@ -103,8 +104,8 @@ public class ParameterizedItemModelLoader implements ICustomModelLoader {
         }
 
         @Override
-        public BufferedImage getPackImage() {
-            return null;
+        public BufferedImage getPackImage() throws IOException {
+            return TextureUtil.readBufferedImage(getInputStream(new ResourceLocation("textures/misc/unknown_pack.png")));
         }
 
         @Override

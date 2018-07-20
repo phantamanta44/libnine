@@ -2,14 +2,16 @@ package io.github.phantamanta44.libnine.network;
 
 import io.github.phantamanta44.libnine.LibNine;
 import io.github.phantamanta44.libnine.tile.L9TileEntity;
-import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import io.github.phantamanta44.libnine.util.data.ByteUtils;
+import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+
+import javax.annotation.Nullable;
 
 public class PacketServerSyncTileEntity implements IMessage {
 
@@ -49,6 +51,7 @@ public class PacketServerSyncTileEntity implements IMessage {
 
     public static class Handler implements IMessageHandler<PacketServerSyncTileEntity, IMessage> {
 
+        @Nullable
         @Override
         public IMessage onMessage(PacketServerSyncTileEntity message, MessageContext ctx) {
             if (message.pos.getWorld().provider.getDimension()

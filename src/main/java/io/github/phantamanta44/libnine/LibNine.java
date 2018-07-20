@@ -1,6 +1,5 @@
 package io.github.phantamanta44.libnine;
 
-import io.github.phantamanta44.libnine.util.nullity.LateInitialization;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -13,17 +12,17 @@ import org.apache.logging.log4j.Logger;
 public class LibNine {
 
     @Mod.Instance(L9Const.MOD_ID)
-    @LateInitialization
+    @SuppressWarnings("NullableProblems")
     public static LibNine INSTANCE;
 
     @SidedProxy(
             serverSide = "io.github.phantamanta44.libnine.client.L9ServerProxy",
             clientSide = "io.github.phantamanta44.libnine.client.L9ClientProxy"
     )
-    @LateInitialization
+    @SuppressWarnings("NullableProblems")
     public static L9CommonProxy PROXY;
 
-    @LateInitialization
+    @SuppressWarnings("NullableProblems")
     public static Logger LOGGER;
 
     @Mod.EventHandler

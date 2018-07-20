@@ -9,6 +9,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+import javax.annotation.Nullable;
+
 public class PacketClientContainerInteraction implements IMessage {
 
     private byte[] data;
@@ -34,6 +36,7 @@ public class PacketClientContainerInteraction implements IMessage {
 
     public static class Handler implements IMessageHandler<PacketClientContainerInteraction, IMessage> {
 
+        @Nullable
         @Override
         public IMessage onMessage(PacketClientContainerInteraction message, MessageContext ctx) {
             ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> {

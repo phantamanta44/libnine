@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.Loader;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -104,7 +105,7 @@ public class RenderUtils {
             } catch (IOException e) {
                 LibNine.LOGGER.error("Could not retrieve shader {}!", resource);
                 LibNine.LOGGER.error(e);
-                return null;
+                return "";
             }
         });
     }
@@ -172,6 +173,7 @@ public class RenderUtils {
         }
 
         private final List<IShader> shaderSources;
+        @Nullable
         private int[] shaderIds;
         private int programId;
 
@@ -183,7 +185,7 @@ public class RenderUtils {
 
         @Override
         public IShaderProgram withShader(IShader shader) {
-            if (programId != -1) throw new UnsupportedOperationException("Shader program already compiled!");
+            if (shaderIds != null) throw new UnsupportedOperationException("Shader program already compiled!");
             shaderSources.add(shader);
             return this;
         }
@@ -191,16 +193,19 @@ public class RenderUtils {
         @Override
         public IShaderProgram compile() {
             programId = GL20.glCreateProgram();
-            this.shaderIds = new int[shaderSources.size()];
+            shaderIds = new int[shaderSources.size()];
             for (int i = 0; i < shaderSources.size(); i++) {
-                shaderIds[i] = GL20.glCreateShader(shaderSources.get(i).getType().getGlConstant());
-                GL20.glShaderSource(shaderIds[i], shaderSources.get(i).getSource());
-                GL20.glCompileShader(shaderIds[i]);
-                if (GL20.glGetShaderi(shaderIds[i], GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
-                    LibNine.LOGGER.error("Compilation failed for one or more shaders! Ignoring...\n{}",
-                            GL20.glGetShaderInfoLog(shaderIds[i], GL20.glGetShaderi(shaderIds[i], GL20.GL_INFO_LOG_LENGTH)));
-                } else {
-                    GL20.glAttachShader(programId, shaderIds[i]);
+                String source = shaderSources.get(i).getSource();
+                if (!source.isEmpty()) {
+                    shaderIds[i] = GL20.glCreateShader(shaderSources.get(i).getType().getGlConstant());
+                    GL20.glShaderSource(shaderIds[i], source);
+                    GL20.glCompileShader(shaderIds[i]);
+                    if (GL20.glGetShaderi(shaderIds[i], GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE) {
+                        LibNine.LOGGER.error("Compilation failed for one or more shaders! Ignoring...\n{}",
+                                GL20.glGetShaderInfoLog(shaderIds[i], GL20.glGetShaderi(shaderIds[i], GL20.GL_INFO_LOG_LENGTH)));
+                    } else {
+                        GL20.glAttachShader(programId, shaderIds[i]);
+                    }
                 }
             }
             GL20.glLinkProgram(programId);
@@ -210,14 +215,16 @@ public class RenderUtils {
 
         @Override
         public void use() {
-            if (programId == 0) throw new IllegalStateException("Shader program not compiled!");
+            if (shaderIds == null) throw new IllegalStateException("Shader program not compiled!");
             GL20.glUseProgram(programId);
         }
 
         private void clean() {
-            for (int shaderId : shaderIds) GL20.glDeleteShader(shaderId);
-            GL20.glDeleteProgram(programId);
-            programId = 0;
+            if (shaderIds != null) {
+                for (int shaderId : shaderIds) GL20.glDeleteShader(shaderId);
+                GL20.glDeleteProgram(programId);
+                programId = 0;
+            }
         }
 
     }

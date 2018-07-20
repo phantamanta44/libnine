@@ -24,6 +24,7 @@ public class L9TileEntity extends TileEntity implements ISerializable {
     private final DataSerialization serializer;
     private final LazyConstant<ICapabilityProvider> capabilityBroker;
 
+    @Nullable
     private WorldBlockPos worldPos;
     private boolean requiresSync;
 

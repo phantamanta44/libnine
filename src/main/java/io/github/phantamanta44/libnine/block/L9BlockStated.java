@@ -5,7 +5,6 @@ import io.github.phantamanta44.libnine.block.state.VirtualState;
 import io.github.phantamanta44.libnine.item.L9ItemBlock;
 import io.github.phantamanta44.libnine.item.L9ItemBlockStated;
 import io.github.phantamanta44.libnine.util.collection.Accrue;
-import io.github.phantamanta44.libnine.util.nullity.LateInitialization;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
@@ -20,9 +19,9 @@ import java.util.List;
 
 public class L9BlockStated extends L9Block {
 
-    @LateInitialization
+    @SuppressWarnings("NullableProblems")
     private List<IProperty<?>> props;
-    @LateInitialization
+    @SuppressWarnings("NullableProblems")
     private List<VirtualState> states;
 
     public L9BlockStated(String name, Material material) {

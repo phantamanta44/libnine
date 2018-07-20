@@ -20,6 +20,7 @@ public class L9Block extends Block implements ITileEntityProvider {
     private final String internalName;
     private final L9ItemBlock itemBlock;
 
+    @Nullable
     private BiFunction<World, Integer, ? extends TileEntity> tileFactory;
 
     public L9Block(String name, Material material) {
@@ -95,13 +96,13 @@ public class L9Block extends Block implements ITileEntityProvider {
     @Nullable
     @Override
     public TileEntity createTileEntity(World world, IBlockState state) {
-        return tileFactory != null ? createNewTileEntity(world, getMetaFromState(state)) : null;
+        return createNewTileEntity(world, getMetaFromState(state));
     }
 
     @Nullable
     @Override
     public TileEntity createNewTileEntity(World world, int meta) {
-        return tileFactory.apply(world, meta);
+        return tileFactory != null ? tileFactory.apply(world, meta) : null;
     }
 
     @Nullable

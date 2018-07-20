@@ -42,7 +42,8 @@ public class L9AspectFluidHandler implements IFluidHandler, ISerializable {
     @Override
     public FluidStack drain(FluidStack resource, boolean doDrain) {
         for (FluidReservoir tank : tanks) {
-            if (tank.canDrainFluidType(resource)) {
+            if (tank.canDrainFluidType(resource) && tank.hasFluid()) {
+                //noinspection ConstantConditions
                 return new FluidStack(tank.getFluid(), tank.draw(resource.amount, doDrain));
             }
         }
@@ -53,7 +54,10 @@ public class L9AspectFluidHandler implements IFluidHandler, ISerializable {
     @Override
     public FluidStack drain(int maxDrain, boolean doDrain) {
         for (FluidReservoir tank : tanks) {
-            if (tank.canDrain()) return new FluidStack(tank.getFluid(), tank.draw(maxDrain, doDrain));
+            if (tank.canDrain() && tank.hasFluid()) {
+                //noinspection ConstantConditions
+                return new FluidStack(tank.getFluid(), tank.draw(maxDrain, doDrain));
+            }
         }
         return null;
     }

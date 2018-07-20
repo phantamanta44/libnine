@@ -17,6 +17,7 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTankP
     private final boolean locked;
     private final Collection<BiConsumer<Fluid, Fluid>> callbacks;
 
+    @Nullable
     private Fluid fluid;
 
     public FluidReservoir(Fluid fluid, IIntReservoir backing, boolean locked) {
@@ -40,11 +41,16 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTankP
         this.callbacks = new LinkedList<>();
     }
 
+    public boolean hasFluid() {
+        return fluid != null && getQuantity() > 0;
+    }
+
+    @Nullable
     public Fluid getFluid() {
         return fluid;
     }
 
-    public void setFluid(Fluid fluid) {
+    public void setFluid(@Nullable Fluid fluid) {
         if (locked) throw new UnsupportedOperationException("Fluid type is locked!");
         Fluid oldFluid = this.fluid;
         this.fluid = fluid;
@@ -60,7 +66,7 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTankP
     @Nullable
     @Override
     public FluidStack getContents() {
-        return fluid != null ? new FluidStack(getFluid(), getQuantity()) : null;
+        return fluid != null ? new FluidStack(fluid, getQuantity()) : null;
     }
 
     @Override
@@ -90,25 +96,46 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTankP
     @Override
     public void serNBT(NBTTagCompound tag) {
         super.serNBT(tag);
-        if (!locked) tag.setString("Fluid", fluid.getName());
+        if (!locked) {
+            if (fluid == null) {
+                tag.setBoolean("NoFluid", true);
+            } else {
+                tag.setString("Fluid", fluid.getName());
+            }
+        }
     }
 
     @Override
     public void deserNBT(NBTTagCompound tag) {
         super.deserNBT(tag);
-        if (!locked) fluid = FluidRegistry.getFluid(tag.getString("Fluid"));
+        if (!locked) {
+            fluid = tag.hasKey("NoFluid") ? null : FluidRegistry.getFluid(tag.getString("Fluid"));
+        }
     }
 
     @Override
     public void serBytes(ByteUtils.Writer data) {
         super.serBytes(data);
-        if (!locked) data.writeFluid(getFluid());
+        if (!locked) {
+            if (fluid == null) {
+                data.writeByte((byte)0);
+            } else {
+                data.writeFluid(fluid);
+            }
+        }
     }
 
     @Override
     public void deserBytes(ByteUtils.Reader data) {
         super.deserBytes(data);
-        if (!locked) setFluid(data.readFluid());
+        if (!locked) {
+            if (data.readByte() != 0) {
+                data.backUp(1);
+                setFluid(data.readFluid());
+            } else {
+                setFluid(null);
+            }
+        }
     }
 
 }

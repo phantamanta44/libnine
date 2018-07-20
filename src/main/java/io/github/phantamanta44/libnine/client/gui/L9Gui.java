@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
@@ -16,20 +17,21 @@ public class L9Gui extends GuiScreen implements IScreenDrawable {
     protected final int sizeX;
     protected final int sizeY;
 
+    @Nullable
     private final ResourceLocation bg;
     private final GuiComponentManager components;
 
     private int posX;
     private int posY;
 
-    public L9Gui(ResourceLocation bg, int sizeX, int sizeY) {
+    public L9Gui(@Nullable ResourceLocation bg, int sizeX, int sizeY) {
         this.bg = bg;
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         this.components = new GuiComponentManager(this);
     }
 
-    public L9Gui(ResourceLocation bg) {
+    public L9Gui(@Nullable ResourceLocation bg) {
         this(bg, 176, 166);
     }
 

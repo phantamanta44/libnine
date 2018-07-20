@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
     protected final int sizeX;
     protected final int sizeY;
 
+    @Nullable
     private final ResourceLocation bg;
     private final GuiComponentManager components;
 
@@ -24,7 +26,7 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
     private int posY;
     private float partialTicks;
 
-    public L9GuiContainer(L9Container container, ResourceLocation bg, int sizeX, int sizeY) {
+    public L9GuiContainer(L9Container container, @Nullable ResourceLocation bg, int sizeX, int sizeY) {
         super(container);
         this.bg = bg;
         this.sizeX = sizeX;
@@ -32,7 +34,7 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
         this.components = new GuiComponentManager(this);
     }
 
-    public L9GuiContainer(L9Container container, ResourceLocation bg) {
+    public L9GuiContainer(L9Container container, @Nullable ResourceLocation bg) {
         this(container, bg, 176, 166);
     }
 
