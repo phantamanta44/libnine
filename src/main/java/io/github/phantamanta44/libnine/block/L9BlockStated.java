@@ -4,7 +4,8 @@ import io.github.phantamanta44.libnine.LibNine;
 import io.github.phantamanta44.libnine.block.state.VirtualState;
 import io.github.phantamanta44.libnine.item.L9ItemBlock;
 import io.github.phantamanta44.libnine.item.L9ItemBlockStated;
-import io.github.phantamanta44.libnine.util.Accrue;
+import io.github.phantamanta44.libnine.util.collection.Accrue;
+import io.github.phantamanta44.libnine.util.nullity.LateInitialization;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
@@ -19,7 +20,9 @@ import java.util.List;
 
 public class L9BlockStated extends L9Block {
 
+    @LateInitialization
     private List<IProperty<?>> props;
+    @LateInitialization
     private List<VirtualState> states;
 
     public L9BlockStated(String name, Material material) {
@@ -31,10 +34,13 @@ public class L9BlockStated extends L9Block {
      * Initializers
      */
 
+
+    @SuppressWarnings("WeakerAccess")
     protected void accrueProperties(Accrue<IProperty<?>> props) {
         // NO-OP
     }
 
+    @SuppressWarnings("WeakerAccess")
     protected void accrueVolatileProperties(Accrue<IProperty<?>> props) {
         // NO-OP
     }
@@ -50,6 +56,7 @@ public class L9BlockStated extends L9Block {
         return new BlockStateContainer(this, props.toArray(new IProperty[0]));
     }
 
+    @SuppressWarnings("WeakerAccess")
     protected IBlockState initDefaultState(IBlockState state) {
         return state;
     }

@@ -17,6 +17,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -39,6 +40,7 @@ public class L9CommonProxy {
         return new Registrar();
     }
 
+    @SuppressWarnings("WeakerAccess")
     protected RecipeManager initRecipeManager() {
         return new RecipeManager();
     }
@@ -76,6 +78,20 @@ public class L9CommonProxy {
         for (ASMDataTable.ASMData target : event.getAsmData().getAll(RegisterTile.class.getName())) {
             getRegistrar().queueTileEntityReg((String)target.getAnnotationInfo().get("value"), target.getClassName());
         }
+        for (ASMDataTable.ASMData target : event.getAsmData().getAll(InitMe.class.getName())) {
+            String modId = (String)target.getAnnotationInfo().get("value");
+            getRegistrar().begin(Virtue.forMod(modId));
+            try {
+                String methodName = target.getObjectName();
+                methodName = methodName.substring(0, methodName.lastIndexOf('('));
+                Class.forName(target.getClassName()).getDeclaredMethod(methodName).invoke(null);
+            } catch (Exception e) {
+                LibNine.LOGGER.error("Failed to run initializer {}::{} for virtue {}",
+                        target.getClassName(), target.getObjectName(), modId);
+                LibNine.LOGGER.error("", e);
+            }
+            getRegistrar().end();
+        }
     }
 
     protected void onInit(FMLInitializationEvent event) {
@@ -83,6 +99,11 @@ public class L9CommonProxy {
     }
 
     protected void onPostInit(FMLPostInitializationEvent event) {
+        // NO-OP
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    protected void onLoadComplete(FMLLoadCompleteEvent event) {
         IRecipeList<ItemStack, ItemStackInput, ItemStackOutput, SmeltingRecipe> smeltingRecipes
                 = recipeManager.getRecipeList(SmeltingRecipe.class);
         FurnaceRecipes.instance().getSmeltingList().forEach((i, o) -> smeltingRecipes.add(new SmeltingRecipe(i, o)));

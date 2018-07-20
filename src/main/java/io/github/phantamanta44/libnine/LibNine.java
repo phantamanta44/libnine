@@ -1,8 +1,10 @@
 package io.github.phantamanta44.libnine;
 
+import io.github.phantamanta44.libnine.util.nullity.LateInitialization;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
@@ -11,14 +13,17 @@ import org.apache.logging.log4j.Logger;
 public class LibNine {
 
     @Mod.Instance(L9Const.MOD_ID)
+    @LateInitialization
     public static LibNine INSTANCE;
 
     @SidedProxy(
             serverSide = "io.github.phantamanta44.libnine.client.L9ServerProxy",
             clientSide = "io.github.phantamanta44.libnine.client.L9ClientProxy"
     )
+    @LateInitialization
     public static L9CommonProxy PROXY;
 
+    @LateInitialization
     public static Logger LOGGER;
 
     @Mod.EventHandler
@@ -35,6 +40,11 @@ public class LibNine {
     @Mod.EventHandler
     public void onPostInit(FMLPostInitializationEvent event) {
         PROXY.onPostInit(event);
+    }
+
+    @Mod.EventHandler
+    public void onLoadComplete(FMLLoadCompleteEvent event) {
+        PROXY.onLoadComplete(event);
     }
 
 }

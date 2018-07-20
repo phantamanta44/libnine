@@ -1,4 +1,4 @@
-package io.github.phantamanta44.libnine.util;
+package io.github.phantamanta44.libnine.util.collection;
 
 import java.util.Arrays;
 import java.util.Collection;
