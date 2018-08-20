@@ -16,11 +16,15 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
+import net.minecraftforge.fml.common.discovery.asm.ModAnnotation;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.relauncher.Side;
+
+import java.util.List;
 
 public class L9CommonProxy {
 
@@ -78,19 +82,33 @@ public class L9CommonProxy {
         for (ASMDataTable.ASMData target : event.getAsmData().getAll(RegisterTile.class.getName())) {
             getRegistrar().queueTileEntityReg((String)target.getAnnotationInfo().get("value"), target.getClassName());
         }
+        Side actualSide = FMLCommonHandler.instance().getSide();
         for (ASMDataTable.ASMData target : event.getAsmData().getAll(InitMe.class.getName())) {
-            String modId = (String)target.getAnnotationInfo().get("value");
-            getRegistrar().begin(Virtue.forMod(modId));
-            try {
-                String methodName = target.getObjectName();
-                methodName = methodName.substring(0, methodName.lastIndexOf('('));
-                Class.forName(target.getClassName()).getDeclaredMethod(methodName).invoke(null);
-            } catch (Exception e) {
-                LibNine.LOGGER.error("Failed to run initializer {}::{} for virtue {}",
-                        target.getClassName(), target.getObjectName(), modId);
-                LibNine.LOGGER.error("", e);
+            List sides = (List)target.getAnnotationInfo().get("sides");
+            boolean shouldContinue = true;
+            if (sides != null) {
+                shouldContinue = false;
+                for (Object side : sides) {
+                    if (actualSide == Side.valueOf(((ModAnnotation.EnumHolder)side).getValue())) {
+                        shouldContinue = true;
+                    }
+                }
             }
-            getRegistrar().end();
+            if (shouldContinue) {
+                String modId = (String)target.getAnnotationInfo().get("value");
+                boolean bind = modId != null && !modId.isEmpty();
+                if (bind) getRegistrar().begin(Virtue.forMod(modId));
+                try {
+                    String methodName = target.getObjectName();
+                    methodName = methodName.substring(0, methodName.lastIndexOf('('));
+                    Class.forName(target.getClassName()).getDeclaredMethod(methodName).invoke(null);
+                } catch (Exception e) {
+                    LibNine.LOGGER.error("Failed to run initializer {}::{} for virtue {}",
+                            target.getClassName(), target.getObjectName(), modId);
+                    LibNine.LOGGER.error("", e);
+                }
+                if (bind) getRegistrar().end();
+            }
         }
     }
 

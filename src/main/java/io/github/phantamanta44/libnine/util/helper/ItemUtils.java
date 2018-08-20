@@ -7,13 +7,21 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.translation.I18n;
 
+import java.util.function.Predicate;
+
 public class ItemUtils {
 
     public static final short WILDCARD_META = (short)32767;
 
     public static boolean matchesWithWildcard(ItemStack a, ItemStack b) {
+        //noinspection ConstantConditions
         return a.getItem().equals(b.getItem())
-                && (a.getMetadata() == WILDCARD_META || b.getMetadata() == WILDCARD_META || a.getMetadata() == b.getMetadata());
+                && (a.getMetadata() == WILDCARD_META || b.getMetadata() == WILDCARD_META || a.getMetadata() == b.getMetadata())
+                && (a.hasTagCompound() ? (b.hasTagCompound() && b.getTagCompound().equals(a.getTagCompound())) : !b.hasTagCompound());
+    }
+
+    public static Predicate<ItemStack> matchesWithWildcard(ItemStack stack) {
+        return s -> matchesWithWildcard(stack, s);
     }
 
     public static String getColouredName(ItemStack stack) {

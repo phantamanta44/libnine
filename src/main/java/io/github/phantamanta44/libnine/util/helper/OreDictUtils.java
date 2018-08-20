@@ -5,6 +5,7 @@ import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class OreDictUtils {
 
@@ -19,6 +20,18 @@ public class OreDictUtils {
 
     public static boolean exists(String entry) {
         return !OreDictionary.getOres(entry).isEmpty();
+    }
+
+    public static boolean matchesOredict(ItemStack stack, String ore) {
+        int targetId = OreDictionary.getOreID(ore);
+        for (int id : OreDictionary.getOreIDs(stack)) {
+            if (id == targetId) return true;
+        }
+        return false;
+    }
+
+    public static Predicate<ItemStack> matchesOredict(String ore) {
+        return s -> matchesOredict(s, ore);
     }
 
 }
