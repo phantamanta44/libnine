@@ -13,6 +13,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("NullableProblems")
 public class PacketServerSyncTileEntity implements IMessage {
 
     private WorldBlockPos pos;

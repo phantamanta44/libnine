@@ -72,7 +72,7 @@ public class Registrar {
         return bound;
     }
 
-    private List<Item> rqItems = new LinkedList<>();
+    private final List<Item> rqItems = new LinkedList<>();
 
     public void queueItemReg(Item item) {
         rqItems.add(item);
@@ -84,8 +84,8 @@ public class Registrar {
         rqItems.forEach(event.getRegistry()::register);
     }
 
-    private List<L9Block> rqBlocks = new LinkedList<>();
-    private List<TileRegistration> rqTileEntities = new LinkedList<>();
+    private final List<L9Block> rqBlocks = new LinkedList<>();
+    private final List<TileRegistration> rqTileEntities = new LinkedList<>();
 
     public void queueBlockReg(L9Block block) {
         rqBlocks.add(block);

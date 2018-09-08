@@ -17,6 +17,7 @@ public class SingleSound implements ISound {
     private final float pitch;
     private final float x, y, z;
     private final SoundCategory category;
+    @SuppressWarnings("NullableProblems")
     private Sound sound;
 
     public SingleSound(ResourceLocation resource, float volume, float pitch, float x, float y, float z, SoundCategory category) {

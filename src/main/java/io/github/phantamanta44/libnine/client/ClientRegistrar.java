@@ -33,8 +33,8 @@ import java.util.Map;
 
 public class ClientRegistrar extends Registrar {
 
-    private List<ITriple<Item, Integer, ModelResourceLocation>> rqItemModels = new LinkedList<>();
-    private List<IPair<Block, IStateMapper>> rqBlockStateMappers = new LinkedList<>();
+    private final List<ITriple<Item, Integer, ModelResourceLocation>> rqItemModels = new LinkedList<>();
+    private final List<IPair<Block, IStateMapper>> rqBlockStateMappers = new LinkedList<>();
 
     @Override
     public void queueItemModelReg(L9Item item, int meta, String model) {
@@ -67,8 +67,8 @@ public class ClientRegistrar extends Registrar {
         rqBlockStateMappers.forEach(m -> m.sprexec(ModelLoader::setCustomStateMapper));
     }
 
-    private List<IPair<IItemColor, Item[]>> rqItemColourHandlers = new LinkedList<>();
-    private List<IPair<IBlockColor, L9Block[]>> rqBlockColourHandlers = new LinkedList<>();
+    private final List<IPair<IItemColor, Item[]>> rqItemColourHandlers = new LinkedList<>();
+    private final List<IPair<IBlockColor, L9Block[]>> rqBlockColourHandlers = new LinkedList<>();
 
     @Override
     public void queueItemColourHandlerReg(IItemColor handler, Item... items) {
