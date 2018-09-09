@@ -17,8 +17,8 @@ public class L9GuiHandler implements IGuiHandler {
 
     private final Virtue virtue;
     private final TObjectIntMap<GuiIdentity> guiIdentityMappings;
-    private final TIntObjectMap<ContainerFactory> serverGuiMappings;
-    private final TIntObjectMap<GuiFactory> clientGuiMappings;
+    private final TIntObjectMap<IContainerFactory> serverGuiMappings;
+    private final TIntObjectMap<IGuiFactory> clientGuiMappings;
     private int currentIndex;
 
     public L9GuiHandler(Virtue virtue) {
@@ -37,11 +37,11 @@ public class L9GuiHandler implements IGuiHandler {
         return guiIdentityMappings.get(identity);
     }
 
-    public <T extends Container> void registerServerGui(GuiIdentity<T, ?> identity, ContainerFactory<T> factory) {
+    public <T extends Container> void registerServerGui(GuiIdentity<T, ?> identity, IContainerFactory<T> factory) {
         serverGuiMappings.put(indexFor(identity), factory);
     }
 
-    public <S extends Container, C> void registerClientGui(GuiIdentity<S, C> identity, GuiFactory<S, C> factory) {
+    public <S extends Container, C> void registerClientGui(GuiIdentity<S, C> identity, IGuiFactory<S, C> factory) {
         clientGuiMappings.put(indexFor(identity), factory);
     }
     
@@ -69,14 +69,14 @@ public class L9GuiHandler implements IGuiHandler {
     }
 
     @FunctionalInterface
-    public interface ContainerFactory<T extends Container> {
+    public interface IContainerFactory<T extends Container> {
 
         T create(EntityPlayer player, World world, int x, int y, int z);
 
     }
 
     @FunctionalInterface
-    public interface GuiFactory<S extends Container, C> {
+    public interface IGuiFactory<S extends Container, C> {
 
         C create(S container, EntityPlayer player, World world, int x, int y, int z);
 

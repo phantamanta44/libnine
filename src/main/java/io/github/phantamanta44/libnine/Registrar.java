@@ -142,13 +142,13 @@ public class Registrar {
         // NO-OP
     }
 
-    public <T extends Container> void queueGuiServerReg(GuiIdentity<T, ?> identity, L9GuiHandler.ContainerFactory<T> factory) {
+    public <T extends Container> void queueGuiServerReg(GuiIdentity<T, ?> identity, L9GuiHandler.IContainerFactory<T> factory) {
         getBound().markUsesContainers();
         getBound().getGuiHandler().registerServerGui(identity, factory);
         containerVirtueTable.put(identity.getContainerClass(), getBound());
     }
 
-    public <S extends Container, C> void queueGuiClientReg(GuiIdentity<S, C> identity, L9GuiHandler.GuiFactory<S, C> factory) {
+    public <S extends Container, C> void queueGuiClientReg(GuiIdentity<S, C> identity, L9GuiHandler.IGuiFactory<S, C> factory) {
         // NO-OP
     }
 

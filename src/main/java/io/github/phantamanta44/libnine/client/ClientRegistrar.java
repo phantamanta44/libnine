@@ -94,7 +94,7 @@ public class ClientRegistrar extends Registrar {
     }
 
     @Override
-    public <S extends Container, C> void queueGuiClientReg(GuiIdentity<S, C> identity, L9GuiHandler.GuiFactory<S, C> factory) {
+    public <S extends Container, C> void queueGuiClientReg(GuiIdentity<S, C> identity, L9GuiHandler.IGuiFactory<S, C> factory) {
         getBound().getGuiHandler().registerClientGui(identity, factory);
     }
 
