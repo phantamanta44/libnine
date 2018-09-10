@@ -152,7 +152,25 @@ public class L9AspectInventory implements IItemHandlerModifiable, ISerializable 
         public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
             ItemStack original = getStackInSlot(slot).copy();
             super.setStackInSlot(slot, stack);
-            observer.onSlotChanged(slot, original, stack);
+            observer.onSlotChanged(slot, original, getStackInSlot(slot));
+        }
+
+        @Override
+        public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+            if (simulate) return super.insertItem(slot, stack, true);
+            ItemStack original = getStackInSlot(slot).copy();
+            ItemStack result = super.insertItem(slot, stack, false);
+            observer.onSlotChanged(slot, original, getStackInSlot(slot));
+            return result;
+        }
+
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            if (simulate) return super.extractItem(slot, amount, true);
+            ItemStack original = getStackInSlot(slot).copy();
+            ItemStack result = super.extractItem(slot, amount, false);
+            observer.onSlotChanged(slot, original, getStackInSlot(slot));
+            return result;
         }
 
     }

@@ -54,10 +54,13 @@ public class L9AspectSlot implements IItemHandlerModifiable, ISerializable {
         if (stack.getCount() > slotLimit) stack.setCount(slotLimit);
     }
 
-    @Nonnull
     @Override
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
         if (slot != 0) throw new IndexOutOfBoundsException("Not in bounds of single-slot inventory: " + slot);
+        return insertItem(stack, simulate);
+    }
+
+    public ItemStack insertItem(@Nonnull ItemStack stack, boolean simulate) {
         if (stack.isEmpty()) return ItemStack.EMPTY;
         if (pred != null && !pred.test(stack)) return stack;
         if (getStackInSlot().isEmpty()) {
@@ -78,10 +81,13 @@ public class L9AspectSlot implements IItemHandlerModifiable, ISerializable {
         }
     }
 
-    @Nonnull
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
         if (slot != 0) throw new IndexOutOfBoundsException("Not in bounds of single-slot inventory: " + slot);
+        return extractItem(amount, simulate);
+    }
+
+    public ItemStack extractItem(int amount, boolean simulate) {
         if (amount == 0 || getStackInSlot().isEmpty()) return ItemStack.EMPTY;
         int toTransfer = Math.min(amount, getStackInSlot().getCount());
         ItemStack result = ItemHandlerHelper.copyStackWithSize(getStackInSlot(), toTransfer);
@@ -156,7 +162,25 @@ public class L9AspectSlot implements IItemHandlerModifiable, ISerializable {
         public void setStackInSlot(ItemStack stack) {
             ItemStack original = getStackInSlot().copy();
             super.setStackInSlot(stack);
-            observer.onSlotChanged(0, original, stack);
+            observer.onSlotChanged(0, original, getStackInSlot());
+        }
+
+        @Override
+        public ItemStack insertItem(@Nonnull ItemStack stack, boolean simulate) {
+            if (simulate) return super.insertItem(stack, true);
+            ItemStack original = getStackInSlot().copy();
+            ItemStack result = super.insertItem(stack, false);
+            observer.onSlotChanged(0, original, getStackInSlot());
+            return result;
+        }
+
+        @Override
+        public ItemStack extractItem(int amount, boolean simulate) {
+            if (simulate) return super.extractItem(amount, true);
+            ItemStack original = getStackInSlot().copy();
+            ItemStack result = super.extractItem(amount, false);
+            observer.onSlotChanged(0, original, getStackInSlot());
+            return result;
         }
 
     }
