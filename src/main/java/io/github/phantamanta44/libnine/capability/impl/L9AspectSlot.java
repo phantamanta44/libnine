@@ -50,6 +50,8 @@ public class L9AspectSlot implements IItemHandlerModifiable, ISerializable {
 
     public void setStackInSlot(ItemStack stack) {
         this.stack = stack;
+        int slotLimit = getSlotLimit();
+        if (stack.getCount() > slotLimit) stack.setCount(slotLimit);
     }
 
     @Nonnull
@@ -57,14 +59,12 @@ public class L9AspectSlot implements IItemHandlerModifiable, ISerializable {
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
         if (slot != 0) throw new IndexOutOfBoundsException("Not in bounds of single-slot inventory: " + slot);
         if (stack.isEmpty()) return ItemStack.EMPTY;
-        if ((pred != null && !pred.test(stack))) return stack;
+        if (pred != null && !pred.test(stack)) return stack;
         if (getStackInSlot().isEmpty()) {
-            int toTransfer = Math.min(stack.getCount(),
-                    Math.min(getStackInSlot().getMaxStackSize(), getSlotLimit()));
+            int toTransfer = Math.min(stack.getCount(), getSlotLimit());
             if (!simulate) setStackInSlot(ItemHandlerHelper.copyStackWithSize(stack, toTransfer));
-            if (toTransfer == stack.getCount()) return ItemStack.EMPTY;
-            stack.shrink(toTransfer);
-            return stack;
+            return toTransfer == stack.getCount() ? ItemStack.EMPTY
+                    : ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - toTransfer);
         } else {
             int maxStackSize = Math.min(getStackInSlot().getMaxStackSize(), getSlotLimit());
             if (getStackInSlot().getCount() >= maxStackSize
@@ -73,12 +73,8 @@ public class L9AspectSlot implements IItemHandlerModifiable, ISerializable {
             }
             int toTransfer = Math.min(stack.getCount(), maxStackSize - getStackInSlot().getCount());
             if (!simulate) getStackInSlot().grow(toTransfer);
-            if (toTransfer == stack.getCount()) {
-                return ItemStack.EMPTY;
-            } else {
-                stack.shrink(toTransfer);
-                return stack;
-            }
+            return toTransfer == stack.getCount() ? ItemStack.EMPTY
+                    : ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - toTransfer);
         }
     }
 

@@ -45,6 +45,8 @@ public class L9AspectInventory implements IItemHandlerModifiable, ISerializable 
     @Override
     public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
         inv[slot] = stack;
+        int slotLimit = getSlotLimit(slot);
+        if (stack.getCount() > slotLimit) stack.setCount(slotLimit);
     }
 
     @Nonnull
@@ -53,12 +55,10 @@ public class L9AspectInventory implements IItemHandlerModifiable, ISerializable 
         if (stack.isEmpty()) return ItemStack.EMPTY;
         if ((preds[slot] != null && !preds[slot].test(stack))) return stack;
         if (getStackInSlot(slot).isEmpty()) {
-            int toTransfer = Math.min(stack.getCount(),
-                    Math.min(getStackInSlot(slot).getMaxStackSize(), getSlotLimit(slot)));
+            int toTransfer = Math.min(stack.getCount(), getSlotLimit(slot));
             if (!simulate) setStackInSlot(slot, ItemHandlerHelper.copyStackWithSize(stack, toTransfer));
-            if (toTransfer == stack.getCount()) return ItemStack.EMPTY;
-            stack.shrink(toTransfer);
-            return stack;
+            return toTransfer == stack.getCount() ? ItemStack.EMPTY
+                    : ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - toTransfer);
         } else {
             int maxStackSize = Math.min(getStackInSlot(slot).getMaxStackSize(), getSlotLimit(slot));
             if (getStackInSlot(slot).getCount() >= maxStackSize
@@ -67,12 +67,8 @@ public class L9AspectInventory implements IItemHandlerModifiable, ISerializable 
             }
             int toTransfer = Math.min(stack.getCount(), maxStackSize - getStackInSlot(slot).getCount());
             if (!simulate) getStackInSlot(slot).grow(toTransfer);
-            if (toTransfer == stack.getCount()) {
-                return ItemStack.EMPTY;
-            } else {
-                stack.shrink(toTransfer);
-                return stack;
-            }
+            return toTransfer == stack.getCount() ? ItemStack.EMPTY
+                    : ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - toTransfer);
         }
     }
 
