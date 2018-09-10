@@ -17,7 +17,7 @@ public class ItemStackOutput implements IRcpOut<ItemStack> {
 
     @Override
     public boolean isAcceptable(ItemStack stack) {
-        return (stack == ItemStack.EMPTY || (ItemHandlerHelper.canItemStacksStack(stack, this.stack)
+        return (stack.isEmpty() || (ItemHandlerHelper.canItemStacksStack(stack, this.stack)
                 && stack.getCount() + this.stack.getCount() <= stack.getMaxStackSize()));
     }
 

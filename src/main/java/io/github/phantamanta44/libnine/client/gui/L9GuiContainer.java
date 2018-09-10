@@ -5,6 +5,7 @@ import io.github.phantamanta44.libnine.client.gui.component.GuiComponentManager;
 import io.github.phantamanta44.libnine.gui.L9Container;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
@@ -57,7 +58,7 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
     @Override
     public void drawScreen(int mX, int mY, float partialTicks) {
         super.drawScreen(mX, mY, partialTicks);
-        renderHoveredToolTip(mX - posX, mY - posY);
+        renderHoveredToolTip(mX, mY);
     }
 
     @Override
@@ -88,6 +89,7 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
 
     protected void drawContainerName(String name) {
         fontRenderer.drawString(name, 8, 6, DEF_TEXT_COL);
+        GlStateManager.color(1F, 1F, 1F);
     }
 
     @SuppressWarnings("deprecation")

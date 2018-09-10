@@ -23,6 +23,7 @@ public class OreDictUtils {
     }
 
     public static boolean matchesOredict(ItemStack stack, String ore) {
+        if (stack.isEmpty()) return false;
         int targetId = OreDictionary.getOreID(ore);
         for (int id : OreDictionary.getOreIDs(stack)) {
             if (id == targetId) return true;

@@ -90,7 +90,7 @@ public interface ISieve<T> extends Iterable<T> {
 
             @Override
             public boolean hasNext() {
-                return index >= sieve.size();
+                return index < sieve.size();
             }
 
             @Override

@@ -2,7 +2,7 @@ package io.github.phantamanta44.libnine.capability.impl;
 
 import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
-import io.github.phantamanta44.libnine.util.function.ITriConsumer;
+import io.github.phantamanta44.libnine.util.function.IInventoryObserver;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -145,9 +145,9 @@ public class L9AspectInventory implements IItemHandlerModifiable, ISerializable 
 
     public static class Observable extends L9AspectInventory {
 
-        private final ITriConsumer<Integer, ItemStack, ItemStack> observer;
+        private final IInventoryObserver observer;
 
-        public Observable(int size, ITriConsumer<Integer, ItemStack, ItemStack> observer) {
+        public Observable(int size, IInventoryObserver observer) {
             super(size);
             this.observer = observer;
         }
@@ -156,7 +156,7 @@ public class L9AspectInventory implements IItemHandlerModifiable, ISerializable 
         public void setStackInSlot(int slot, @Nonnull ItemStack stack) {
             ItemStack original = getStackInSlot(slot).copy();
             super.setStackInSlot(slot, stack);
-            observer.accept(slot, original, stack);
+            observer.onSlotChanged(slot, original, stack);
         }
 
     }

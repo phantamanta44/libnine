@@ -48,20 +48,25 @@ public class L9Container extends Container {
             if (slot != null && slot.getHasStack()) {
                 ItemStack stack = slot.getStack();
                 ItemStack orig = stack.copy();
-                boolean shouldDoPlayerInvTransfer = true;
+                boolean shouldDoPlayerInvTransfer = true; // is the transfer entirely within the player's inv?
                 if (hasInvOther) {
                     if (index >= 36) {
                         if (!mergeItemStack(stack, 0, 36, false)) return ItemStack.EMPTY;
                         shouldDoPlayerInvTransfer = false;
                     } else {
+                        boolean changed = false;
                         for (int i = 36; i < inventorySlots.size(); i++) {
                             if (inventorySlots.get(i).isItemValid(stack)) {
-                                if (!mergeItemStack(stack, i, i + 1, false)) return ItemStack.EMPTY;
-                                if (stack.getCount() != orig.getCount()) {
-                                    shouldDoPlayerInvTransfer = false;
-                                    break;
+                                if (mergeItemStack(stack, i, i + 1, false)) {
+                                    changed = true;
+                                    if (stack.isEmpty()) break;
                                 }
                             }
+                        }
+                        if (changed) {
+                            shouldDoPlayerInvTransfer = false;
+                        } else {
+                            return ItemStack.EMPTY;
                         }
                     }
                 }

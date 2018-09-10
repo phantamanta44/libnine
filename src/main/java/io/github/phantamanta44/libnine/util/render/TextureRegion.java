@@ -86,6 +86,10 @@ public class TextureRegion {
         tess.draw();
     }
 
+    public void draw(int x, int y) {
+        draw(x, y, width, height);
+    }
+
     public void drawPartial(int x, int y, int width, int height, float x1, float y1, float x2, float y2) {
         float xStart = x + width * x1, xEnd = x + width * x2;
         float yStart = y + height * y1, yEnd = y + height * y2;
@@ -100,6 +104,10 @@ public class TextureRegion {
         buf.pos(xEnd, yStart, 0D).tex(uEnd, vStart).endVertex();
         buf.pos(xStart, yStart, 0D).tex(uStart, vStart).endVertex();
         tess.draw();
+    }
+
+    public void drawPartial(int x, int y, float x1, float y1, float x2, float y2) {
+        drawPartial(x, y, width, height, x1, y1, x2, y2);
     }
 
 }

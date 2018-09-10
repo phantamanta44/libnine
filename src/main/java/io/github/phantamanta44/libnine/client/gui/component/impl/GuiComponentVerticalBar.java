@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 public class GuiComponentVerticalBar extends GuiComponent {
 
     private final TextureRegion bg, fg;
-    private final int innerX, innerY;
+    private final int innerX, innerY, innerWidth, innerHeight;
     private final IFloatSupplier dataSrc;
     private final Supplier<String> ttSrc;
 
@@ -21,6 +21,8 @@ public class GuiComponentVerticalBar extends GuiComponent {
         this.fg = fg;
         this.innerX = x + offsetX;
         this.innerY = y + offsetY;
+        this.innerWidth = width - 2 * offsetX;
+        this.innerHeight = height - 2 * offsetY;
         this.dataSrc = dataSrc;
         this.ttSrc = ttSrc;
     }
@@ -28,7 +30,7 @@ public class GuiComponentVerticalBar extends GuiComponent {
     @Override
     public void render(float partialTicks, int mX, int mY, boolean mouseOver) {
         bg.draw(x, y, width, height);
-        fg.drawPartial(innerX, innerY, fg.getWidth(), fg.getHeight(), 0, 1 - dataSrc.get(), 1, 1);
+        fg.drawPartial(innerX, innerY, innerWidth, innerHeight, 0, 1 - dataSrc.get(), 1, 1);
     }
 
     @Override
