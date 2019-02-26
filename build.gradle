@@ -1,53 +1,86 @@
 buildscript {
     repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
-        maven { url = 'http://files.minecraftforge.net/maven' }
+        mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        // shoutouts to autaut03/kottle
+        classpath(group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true) {
+            exclude group: 'trove', module: 'trove'
+        }
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$ktVersion"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
     }
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'kotlin'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
 version = '1.0.0'
-group = 'io.github.phantamanta44.libnine'
-archivesBaseName = 'libnine-1.12.2'
+group = 'xyz.phanta.libnine'
+archivesBaseName = 'libnine-1.13'
 
-sourceCompatibility = targetCompatibility = '1.8'
-compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
-}
+sourceCompatibility = targetCompatibility = compileKotlin.kotlinOptions.jvmTarget =
+        compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    version = '1.12.2-14.23.4.2705'
-    runDir = 'run'
-    mappings = 'snapshot_20171003'
+    mappings channel: 'snapshot', version: '20180921-1.13'
+
+    // accessTransformer = file('build/resources/main/META-INF/accesstransformer.cfg')
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                libnine {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                libnine {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+repositories {
+    jcenter()
 }
 
 dependencies {
-    // NO-OP
+    minecraft 'net.minecraftforge:forge:1.13.2-25.0.48'
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$ktVersion"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$ktVersion"
+    compile "org.jetbrains.kotlin:kotlin-reflect:$ktVersion"
 }
 
-processResources {
-    // this will ensure that this task is redone when the versions change.
-    inputs.property 'version', project.version
-    inputs.property 'mcversion', project.minecraft.version
-
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-
-        // replace version and mcversion
-        expand 'version':project.version, 'mcversion':project.minecraft.version
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"     : "libnine",
+                "Specification-Vendor"    : "phantamanta44",
+                "Specification-Version"   : "1",
+                "Implementation-Title"    : "libnine",
+                "Implementation-Version"  : "${version}",
+                "Implementation-Vendor"   : "phantamanta44",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
-
-    // copy everything else except the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-    rename 'libnine_at.cfg', 'META-INF/libnine_at.cfg'
 }
 
 task deobfJar(type: Jar) {
@@ -60,13 +93,19 @@ task sourcesJar(type: Jar) {
     classifier = 'sources'
 }
 
-jar {
-    manifest {
-        attributes 'FMLAT': 'libnine_at.cfg'
+shadowJar {
+    classifier = null
+    dependencies {
+        include dependency("org.jetbrains.kotlin.kotlin-stdlib:$ktVersion")
+        include dependency("org.jetbrains.kotlin.kotlin-stdlib-jdk8:$ktVersion")
+        include dependency("org.jetbrains.kotlin.kotlin-reflect:$ktVersion")
     }
 }
 
+build.dependsOn shadowJar
+
 artifacts {
+    archives shadowJar
     archives deobfJar
     archives sourcesJar
 }
