@@ -40,7 +40,7 @@ class NetworkHandler(channelId: ResourceLocation) {
 
     private class Deserializer<T : PacketData>(private val type: PacketType<T>) : java.util.function.Function<PacketBuffer, T> {
 
-        override fun apply(buf: PacketBuffer): T = type.deserialize(ByteReader(buf.array()))
+        override fun apply(buf: PacketBuffer): T = type.deserialize(ByteReader(buf.readByteArray()))
 
     }
 

@@ -18,7 +18,6 @@ class Registrar(internal val mod: Virtue, bus: IEventBus) {
     internal val blocks: MutableList<Block> = newQueue(bus)
     internal val items: MutableList<Item> = newQueue(bus)
     internal val tileEntities: MutableList<TileEntityType<*>> = newQueue(bus)
-    private val toClear: MutableList<MutableList<*>> = mutableListOf()
 
     // TODO potions
     // TODO biomes

@@ -3,6 +3,7 @@ package xyz.phanta.libnine
 import net.minecraft.client.renderer.model.ModelResourceLocation
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.eventbus.api.IEventBus
+import xyz.phanta.libnine.container.ContainerHandler
 import xyz.phanta.libnine.definition.InitializationContext
 import xyz.phanta.libnine.network.NetworkHandler
 import xyz.phanta.libnine.network.PacketServerSyncTileEntity
@@ -28,7 +29,7 @@ abstract class Virtue {
     // handlers
 
     val netHandler: NetworkHandler by lazy { NetworkHandler(resource("main")) }
-    val guiHandler: Unit by lazy { TODO("gui impl") }
+    val containerHandler: ContainerHandler by lazy { ContainerHandler() }
     val wsdHandler: Unit by lazy { TODO("wsd impl") }
 
     // internal state
@@ -57,7 +58,7 @@ abstract class Virtue {
     internal fun markUsesContainers() {
         if (!usesContainers) {
             usesContainers = true
-            TODO("container impl")
+            // TODO do something useful maybe
         }
     }
 

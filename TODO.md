@@ -8,3 +8,4 @@
 * block state abstraction
 * parametric item model (is this still needed in 1.13?)
 * recipe system abstraction
+* config gui
