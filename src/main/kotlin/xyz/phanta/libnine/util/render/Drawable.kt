@@ -1,8 +1,8 @@
 package xyz.phanta.libnine.util.render
 
-import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.util.ResourceLocation
+import xyz.phanta.libnine.util.bindTexture
 
 interface ScreenDrawable {
 
@@ -26,7 +26,7 @@ class TextureResource(private val texture: ResourceLocation, override val width:
 
     private val fullRegion: TextureRegion by lazy { TextureRegion(this) }
 
-    fun bind() = Minecraft.getInstance().textureManager.bindTexture(texture)
+    fun bind() = texture.bindTexture()
 
     override fun getRegion(x: Int, y: Int, width: Int, height: Int): TextureRegion = TextureRegion(this, x, y, width, height)
 

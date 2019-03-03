@@ -1,19 +1,30 @@
 package xyz.phanta.libnine.util.math
 
-class PlanarPoint(val x: Int, val y: Int) {
+interface PlanarVec {
 
-    fun add(xAddend: Int, yAddend: Int): PlanarPoint = PlanarPoint(x + xAddend, y + yAddend)
+    companion object {
 
-    operator fun plus(vec: PlanarPoint): PlanarPoint = add(vec.x, vec.y)
+        fun of(x: Int, y: Int): PlanarVec = ImmutablePlanarVec(x, y)
 
-    operator fun minus(vec: PlanarPoint): PlanarPoint = add(-vec.x, -vec.y)
+    }
 
-    fun distanceTo(vec: PlanarPoint): Double = Math.hypot((vec.x - x).toDouble(), (vec.y - y).toDouble())
+    private data class ImmutablePlanarVec(override val x: Int, override val y: Int) : PlanarVec
 
-    fun inRect(origin: PlanarPoint, width: Int, height: Int): Boolean =
+    val x: Int
+    val y: Int
+
+    fun add(xAddend: Int, yAddend: Int): PlanarVec = ImmutablePlanarVec(x + xAddend, y + yAddend)
+
+    operator fun plus(vec: PlanarVec): PlanarVec = add(vec.x, vec.y)
+
+    operator fun minus(vec: PlanarVec): PlanarVec = add(-vec.x, -vec.y)
+
+    fun distanceTo(vec: PlanarVec): Double = Math.hypot((vec.x - x).toDouble(), (vec.y - y).toDouble())
+
+    fun inRect(origin: PlanarVec, width: Int, height: Int): Boolean =
             x >= origin.x && x < origin.x + width && y >= origin.y && y < origin.y + height
 
-    fun inConvexHull(vararg hullVertices: PlanarPoint): Boolean {
+    fun inConvexHull(vararg hullVertices: PlanarVec): Boolean {
         var xgt = false
         var xlt = false
         var ygt = false
@@ -33,5 +44,17 @@ class PlanarPoint(val x: Int, val y: Int) {
         }
         return false
     }
+
+}
+
+class MutablePlanarVec(override var x: Int, override var y: Int) : PlanarVec {
+
+    fun assignFrom(x: Int, y: Int): PlanarVec {
+        this.x = x
+        this.y = y
+        return this
+    }
+
+    fun assignFrom(from: PlanarVec): PlanarVec = assignFrom(from.x, from.y)
 
 }

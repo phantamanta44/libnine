@@ -20,6 +20,7 @@ import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
 import xyz.phanta.libnine.util.snakeify
 import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.jvm.jvmErasure
 
 typealias DefBody<T> = T.() -> Unit
 
@@ -35,13 +36,19 @@ class DefinitionDefContext(private val reg: Registrar) {
 
     fun <B : Block> blocksBy(template: BlockTemplate<B>, body: DefBody<BlockDefContext<B>>) = body(BlockDefContext(template, reg))
 
-    fun <T : NineTile> tileEntity(name: String, factory: (Virtue, TileEntityType<*>) -> T) {
+    fun <T : NineTile> tileEntity(dest: KMutableProperty0<() -> T>, factory: (Virtue, TileEntityType<*>) -> T) {
         val type = MutableObject<TileEntityType<*>>()
-        type.value = TileEntityType.register(name, TileEntityType.Builder.create { factory(reg.mod, type.value) })
+        val creator = { factory(reg.mod, type.value) }
+        type.value = TileEntityType.register(
+                reg.mod.prefix(dest.name.snakeify()),
+                TileEntityType.Builder.create(creator)
+        )
         reg.tileEntities += type.value
+        dest.set(creator)
         reg.mod.markUsesTileEntities()
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun <C : NineContainer, G : NineGuiContainer, X> container(
             dest: KMutableProperty0<in ContainerType<C, G, X>>,
             containerFactory: (X, InventoryPlayer, EntityPlayer) -> C,
@@ -51,6 +58,7 @@ class DefinitionDefContext(private val reg: Registrar) {
     ) {
         val type = ContainerType(
                 reg.mod.resource(dest.name.snakeify()),
+                dest.returnType.jvmErasure.java as Class<C>,
                 containerFactory,
                 contextSerializer,
                 contextDeserializer,

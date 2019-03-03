@@ -13,11 +13,12 @@ import net.minecraftforge.fml.ExtensionPoint
 import net.minecraftforge.fml.ModLoadingContext
 import net.minecraftforge.fml.network.FMLPlayMessages
 import net.minecraftforge.fml.network.NetworkHooks
+import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.client.gui.NineGuiContainer
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
 
-class ContainerHandler : java.util.function.Function<FMLPlayMessages.OpenContainer, GuiScreen> {
+class ContainerHandler(private val mod: Virtue) : java.util.function.Function<FMLPlayMessages.OpenContainer, GuiScreen> {
 
     private val containerTypeMappings: MutableMap<ResourceLocation, ContainerType<*, *, *>> = mutableMapOf()
 
@@ -25,14 +26,9 @@ class ContainerHandler : java.util.function.Function<FMLPlayMessages.OpenContain
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.GUIFACTORY) { this }
     }
 
-    fun <X> open(player: EntityPlayer, type: ContainerType<*, *, X>, context: X) {
-        NetworkHooks.openGui(player as EntityPlayerMP, type.generateContainerProvider(context)) { buf ->
-            buf.writeByteArray(ByteWriter().also { type.contextSerializer(it, context) }.toArray())
-        }
-    }
-
     fun register(type: ContainerType<*, *, *>) {
         containerTypeMappings[type.key] = type
+        Virtue.containerMap[type.containerClass] = mod
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -50,8 +46,17 @@ class ContainerHandler : java.util.function.Function<FMLPlayMessages.OpenContain
 
 }
 
+fun <X> EntityPlayer.openContainer(type: ContainerType<*, *, X>, context: X) {
+    if (this is EntityPlayerMP) {
+        NetworkHooks.openGui(this, type.generateContainerProvider(context)) { buf ->
+            buf.writeByteArray(ByteWriter().also { type.contextSerializer(it, context) }.toArray())
+        }
+    }
+}
+
 class ContainerType<C : NineContainer, G : NineGuiContainer, X>(
         internal val key: ResourceLocation,
+        internal val containerClass: Class<C>,
         internal val containerFactory: (X, InventoryPlayer, EntityPlayer) -> C,
         internal val contextSerializer: (ByteWriter, X) -> Unit,
         internal val contextDeserializer: (ByteReader) -> X,
