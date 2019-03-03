@@ -5,9 +5,7 @@ import net.minecraft.client.gui.IGuiEventListener
 import xyz.phanta.libnine.util.math.MutablePlanarVec
 import xyz.phanta.libnine.util.math.PlanarVec
 
-abstract class GuiComponent(x: Int, y: Int, val width: Int, val height: Int) {
-
-    val pos: PlanarVec = PlanarVec.of(x, y)
+abstract class GuiComponent(val pos: PlanarVec, val width: Int, val height: Int) {
 
     lateinit var gui: GuiScreen
         internal set

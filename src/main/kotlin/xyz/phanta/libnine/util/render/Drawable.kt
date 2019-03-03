@@ -3,6 +3,7 @@ package xyz.phanta.libnine.util.render
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.util.ResourceLocation
 import xyz.phanta.libnine.util.bindTexture
+import xyz.phanta.libnine.util.math.PlanarVec
 
 interface ScreenDrawable {
 
@@ -14,11 +15,22 @@ interface ScreenDrawable {
 
     fun draw(x: Int, y: Int, width: Int, height: Int)
 
+    fun draw(pos: PlanarVec, width: Int, height: Int) = draw(pos.x, pos.y, width, height)
+
     fun draw(x: Int, y: Int) = draw(x, y, width, height)
+
+    fun draw(pos: PlanarVec) = draw(pos.x, pos.y)
 
     fun drawPartial(x: Int, y: Int, width: Int, height: Int, x1: Float, y1: Float, x2: Float, y2: Float)
 
-    fun drawPartial(x: Int, y: Int, x1: Float, y1: Float, x2: Float, y2: Float) = drawPartial(x, y, width, height, x1, y1, x2, y2)
+    fun drawPartial(pos: PlanarVec, width: Int, height: Int, x1: Float, y1: Float, x2: Float, y2: Float) =
+            drawPartial(pos.x, pos.y, width, height, x1, y1, x2, y2)
+
+    fun drawPartial(x: Int, y: Int, x1: Float, y1: Float, x2: Float, y2: Float) =
+            drawPartial(x, y, width, height, x1, y1, x2, y2)
+
+    fun drawPartial(pos: PlanarVec, x1: Float, y1: Float, x2: Float, y2: Float) =
+            drawPartial(pos.x, pos.y, width, height, x1, y1, x2, y2)
 
 }
 

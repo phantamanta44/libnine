@@ -12,6 +12,9 @@ import xyz.phanta.libnine.util.math.PlanarVec
 
 const val DEF_TEXT_COL = 0x404040
 
+val FONT_HEIGHT: Int
+    get() = Minecraft.getInstance().fontRenderer.FONT_HEIGHT
+
 object DrawUtil {
 
     fun rect(pos: PlanarVec, width: Int, height: Int, colour: Int) {
@@ -29,9 +32,6 @@ object DrawUtil {
 
 }
 
-@Suppress("unused")
-fun String.getMcHeight(): Int = Minecraft.getInstance().fontRenderer.FONT_HEIGHT
-
 fun String.getMcWidth(): Int = Minecraft.getInstance().fontRenderer.getStringWidth(this)
 
 fun GuiScreen.drawTooltip(pos: PlanarVec, vararg lines: String) {
@@ -43,7 +43,5 @@ fun GuiScreen.drawTooltip(pos: PlanarVec, lines: List<String>) {
     this.drawHoveringText(lines, pos.x, pos.y)
     RenderHelper.enableGUIStandardItemLighting()
 }
-
-fun SoundEvent.play() = Minecraft.getInstance().soundHandler.play(SimpleSound.getMasterRecord(this, 1.0f))
 
 fun ResourceLocation.bindTexture() = Minecraft.getInstance().textureManager.bindTexture(this)

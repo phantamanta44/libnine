@@ -43,4 +43,22 @@ enum class RedstoneBehaviour(private val condition: (World, BlockPos) -> Boolean
 
     fun canWork(world: World, pos: BlockPos): Boolean = condition(world, pos)
 
+    fun next(): RedstoneBehaviour = when (this) {
+        IGNORED -> DIRECT
+        DIRECT -> INVERTED
+        INVERTED -> IGNORED
+    }
+
+    fun prev(): RedstoneBehaviour = when (this) {
+        IGNORED -> INVERTED
+        INVERTED -> DIRECT
+        DIRECT -> IGNORED
+    }
+
+}
+
+interface RedstoneControllable {
+
+    var redstoneBehaviour: RedstoneBehaviour
+
 }
