@@ -7,6 +7,7 @@ import xyz.phanta.libnine.container.ContainerHandler
 import xyz.phanta.libnine.definition.InitializationContext
 import xyz.phanta.libnine.network.NetworkHandler
 import xyz.phanta.libnine.network.PacketClientContainerInteraction
+import xyz.phanta.libnine.network.PacketServerSyncRecipeSet
 import xyz.phanta.libnine.network.PacketServerSyncTileEntity
 import xyz.phanta.libnine.util.render.TextureResource
 import java.util.concurrent.ConcurrentHashMap
@@ -40,12 +41,14 @@ abstract class Virtue {
 
     private var usesTileEntities: Boolean = false
     private var usesContainers: Boolean = false
+    private var usesRecipes: Boolean = false
 
     // init
 
     internal fun initialize(eventBus: IEventBus) {
         virtueMap[modId] = this
         init(InitializationContext(this, eventBus))
+
     }
 
     protected abstract fun init(context: InitializationContext)
@@ -63,6 +66,13 @@ abstract class Virtue {
         if (!usesContainers) {
             usesContainers = true
             netHandler.registerType(254, PacketClientContainerInteraction)
+        }
+    }
+
+    internal fun markUsesRecipes() {
+        if (!usesRecipes) {
+            usesRecipes = true
+            netHandler.registerType(253, PacketServerSyncRecipeSet)
         }
     }
 

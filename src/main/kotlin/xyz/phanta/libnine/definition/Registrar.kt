@@ -13,7 +13,7 @@ private fun <T : IForgeRegistryEntry<T>> newQueue(bus: IEventBus): MutableList<T
     bus.addListener(Consumer<RegistryEvent.Register<T>> { e -> it.forEach(e.registry::register) })
 }
 
-class Registrar(internal val mod: Virtue, bus: IEventBus) {
+class Registrar(internal val mod: Virtue, internal val bus: IEventBus) {
 
     internal val blocks: MutableList<Block> = newQueue(bus)
     internal val items: MutableList<Item> = newQueue(bus)

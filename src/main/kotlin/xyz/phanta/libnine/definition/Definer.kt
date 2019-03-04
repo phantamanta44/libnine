@@ -4,6 +4,7 @@ import net.minecraft.block.Block
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.player.InventoryPlayer
 import net.minecraft.item.Item
+import net.minecraft.resources.IResource
 import net.minecraft.tileentity.TileEntityType
 import net.minecraft.util.math.BlockPos
 import org.apache.commons.lang3.mutable.MutableObject
@@ -15,6 +16,10 @@ import xyz.phanta.libnine.container.ContainerType
 import xyz.phanta.libnine.container.NineContainer
 import xyz.phanta.libnine.item.ItemDefBuilder
 import xyz.phanta.libnine.item.ItemTemplate
+import xyz.phanta.libnine.recipe.Recipe
+import xyz.phanta.libnine.recipe.RecipeParser
+import xyz.phanta.libnine.recipe.RecipeSet
+import xyz.phanta.libnine.recipe.RecipeType
 import xyz.phanta.libnine.tile.NineTile
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
@@ -81,6 +86,17 @@ class DefinitionDefContext(private val reg: Registrar) {
             ByteReader::blockPos,
             guiFactory
     )
+
+    fun <I, O, R : Recipe<I, O>> recipeType(
+            dest: KMutableProperty0<in RecipeType<I, O, R>>,
+            parser: RecipeParser<I, O, R>,
+            serializer: (ByteWriter, R) -> Unit,
+            deserializer: (ByteReader) -> R
+    ) {
+        val type = RecipeType(reg.mod.resource(dest.name.snakeify()), parser, serializer, deserializer)
+        RecipeSet.registerType(type, reg)
+        dest.set(type)
+    }
 
 }
 
