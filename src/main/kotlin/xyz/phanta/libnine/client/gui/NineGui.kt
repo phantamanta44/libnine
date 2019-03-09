@@ -10,7 +10,6 @@ import xyz.phanta.libnine.client.gui.component.GuiComponent
 import xyz.phanta.libnine.client.gui.component.GuiComponentManager
 import xyz.phanta.libnine.container.NineContainer
 import xyz.phanta.libnine.util.DEF_TEXT_COL
-import xyz.phanta.libnine.util.DrawUtil
 import xyz.phanta.libnine.util.bindTexture
 import xyz.phanta.libnine.util.math.MutablePlanarVec
 import xyz.phanta.libnine.util.math.PlanarVec

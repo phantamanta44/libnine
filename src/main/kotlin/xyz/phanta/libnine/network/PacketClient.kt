@@ -13,10 +13,10 @@ object PacketClientContainerInteraction : PacketType<PacketClientContainerIntera
         get() = Packet::class.java
 
     override fun serialize(stream: ByteWriter, data: Packet) {
-        stream.int(data.data.size).bytes(data.data)
+        stream.varPrecision(data.data.size).bytes(data.data)
     }
 
-    override fun deserialize(stream: ByteReader): Packet = Packet(stream.bytes(stream.int()))
+    override fun deserialize(stream: ByteReader): Packet = Packet(stream.bytes(stream.varPrecision()))
 
     override fun handle(packet: Packet, context: () -> NetworkEvent.Context) {
         context().let { ctx ->

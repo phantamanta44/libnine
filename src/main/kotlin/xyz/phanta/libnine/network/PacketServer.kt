@@ -18,10 +18,10 @@ object PacketServerSyncTileEntity : PacketType<PacketServerSyncTileEntity.Packet
         get() = Packet::class.java
 
     override fun serialize(stream: ByteWriter, data: Packet) {
-        stream.blockPos(data.pos).int(data.data.size).bytes(data.data)
+        stream.blockPos(data.pos).varPrecision(data.data.size).bytes(data.data)
     }
 
-    override fun deserialize(stream: ByteReader): Packet = Packet(stream.blockPos(), stream.bytes(stream.int()))
+    override fun deserialize(stream: ByteReader): Packet = Packet(stream.blockPos(), stream.bytes(stream.varPrecision()))
 
     override fun handle(packet: Packet, context: () -> NetworkEvent.Context) {
         context().enqueueWork<Nothing?> {
@@ -48,7 +48,7 @@ object PacketServerSyncRecipeSet : PacketType<PacketServerSyncRecipeSet.Packet> 
 
     @Suppress("UNCHECKED_CAST")
     private fun <I, O, R : Recipe<I, O>> serializeList(stream: ByteWriter, data: Packet) {
-        stream.int(data.recipes.size)
+        stream.varPrecision(data.recipes.size)
         data.recipes.forEach { (data.type as RecipeType<I, O, R>).serializer(stream, it as R) }
     }
 
@@ -60,7 +60,7 @@ object PacketServerSyncRecipeSet : PacketType<PacketServerSyncRecipeSet.Packet> 
     }
 
     private fun <I, O, R : Recipe<I, O>> deserializeList(type: RecipeType<I, O, R>, stream: ByteReader, list: MutableList<Recipe<I, O>>) {
-        for (i in 0 until stream.int()) list += type.deserializer(stream)
+        for (i in 0 until stream.varPrecision()) list += type.deserializer(stream)
     }
 
     @Suppress("UNCHECKED_CAST")
