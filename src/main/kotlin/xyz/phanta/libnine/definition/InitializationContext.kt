@@ -16,7 +16,8 @@ class InitializationContext(mod: Virtue, val eventBus: IEventBus) {
     inline fun <reified E : Event> listen(
             priority: EventPriority = EventPriority.NORMAL,
             receiveCancelled: Boolean = false,
-            noinline listener: (E) -> Unit) {
+            noinline listener: (E) -> Unit
+    ) {
         eventBus.addListener(priority, receiveCancelled, E::class.java, listener)
     }
 

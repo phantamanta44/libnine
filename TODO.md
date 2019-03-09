@@ -4,6 +4,4 @@
 * sound system impl
 * block state abstraction
 * parametric item model (is this still needed in 1.13?)
-* default recipe parser impls
-* maybe some default static recipe serializer impls
 * config gui

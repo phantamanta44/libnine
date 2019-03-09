@@ -11,7 +11,9 @@ import net.minecraft.world.World
 import net.minecraftforge.fml.network.PacketDistributor
 
 operator fun BlockPos.plus(other: Vec3i): BlockPos = this.add(other)
+operator fun BlockPos.plus(dir: EnumFacing): BlockPos = this.offset(dir)
 operator fun BlockPos.minus(other: Vec3i): BlockPos = this.subtract(other)
+operator fun BlockPos.minus(dir: EnumFacing): BlockPos = this.offset(dir.opposite)
 
 fun World.dropItem(pos: Vec3d, stack: ItemStack) {
     if (!this.isRemote && !stack.isEmpty) {

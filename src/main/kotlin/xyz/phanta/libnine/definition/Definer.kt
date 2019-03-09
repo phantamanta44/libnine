@@ -4,9 +4,12 @@ import net.minecraft.block.Block
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.player.InventoryPlayer
 import net.minecraft.item.Item
-import net.minecraft.resources.IResource
 import net.minecraft.tileentity.TileEntityType
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.gen.GenerationStage
+import net.minecraft.world.gen.feature.CompositeFeature
+import net.minecraft.world.gen.feature.IFeatureConfig
+import net.minecraft.world.gen.placement.IPlacementConfig
 import org.apache.commons.lang3.mutable.MutableObject
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.block.BlockDefBuilder
@@ -24,6 +27,9 @@ import xyz.phanta.libnine.tile.NineTile
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
 import xyz.phanta.libnine.util.snakeify
+import xyz.phanta.libnine.worldgen.BiomeSet
+import xyz.phanta.libnine.worldgen.NineFeature
+import xyz.phanta.libnine.worldgen.NineFeatureDistribution
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.jvm.jvmErasure
 
@@ -96,6 +102,20 @@ class DefinitionDefContext(private val reg: Registrar) {
         val type = RecipeType(reg.mod.resource(dest.name.snakeify()), parser, serializer, deserializer)
         RecipeSet.registerType(type, reg)
         dest.set(type)
+    }
+
+    fun worldGenFeature(
+            feature: NineFeature,
+            distribution: NineFeatureDistribution,
+            stage: GenerationStage.Decoration,
+            target: BiomeSet
+    ) {
+        reg.features += Triple(CompositeFeature(
+                feature.buildFeature(),
+                IFeatureConfig.NO_FEATURE_CONFIG,
+                distribution.buildDistribution(),
+                IPlacementConfig.NO_PLACEMENT_CONFIG
+        ), stage, target)
     }
 
 }
