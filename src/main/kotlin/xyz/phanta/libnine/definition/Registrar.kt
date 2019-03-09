@@ -14,8 +14,8 @@ import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.worldgen.BiomeSet
 import java.util.function.Consumer
 
-private fun <T : IForgeRegistryEntry<T>> newQueue(bus: IEventBus): MutableList<T> = mutableListOf<T>().also {
-    bus.addListener(Consumer<RegistryEvent.Register<T>> { e -> it.forEach(e.registry::register) })
+private inline fun <reified T : IForgeRegistryEntry<T>> newQueue(bus: IEventBus): MutableList<T> = mutableListOf<T>().also {
+    bus.addGenericListener(T::class.java) { e: RegistryEvent.Register<T> -> it.forEach(e.registry::register) }
 }
 
 class Registrar(internal val mod: Virtue, internal val bus: IEventBus) {

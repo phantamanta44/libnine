@@ -28,8 +28,11 @@ abstract class Virtue {
     // mod identity
 
     var modId: String = "nonary_invalid"
-        internal set
-    private val modPrefix: String = "$modId:"
+        internal set(value) {
+            field = value
+            modPrefix = "$value:"
+        }
+    private lateinit var modPrefix: String
 
     // handlers
 

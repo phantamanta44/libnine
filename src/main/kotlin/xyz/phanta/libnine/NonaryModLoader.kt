@@ -51,7 +51,7 @@ private class NonaryLoader(private val modClass: String, internal val modId: Str
 
 private typealias LifecycleHandler = Consumer<LifecycleEventProvider.LifecycleEvent>
 
-private class NonaryModContainer(info: IModInfo, private val modInstance: Any, private val scan: ModFileScanData) : ModContainer(info) {
+internal class NonaryModContainer(info: IModInfo, private val modInstance: Any, private val scan: ModFileScanData) : ModContainer(info) {
 
     private val eventBus: IEventBus
     private val logger: Logger = LogManager.getLogger("Nonary-${info.modId}")

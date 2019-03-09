@@ -4,6 +4,8 @@ import net.minecraft.block.Block
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.player.InventoryPlayer
 import net.minecraft.item.Item
+import net.minecraft.item.ItemGroup
+import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntityType
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.gen.GenerationStage
@@ -46,6 +48,12 @@ class DefinitionDefContext(private val reg: Registrar) {
     fun <I : Item> itemsBy(template: ItemTemplate<I>, body: DefBody<ItemDefContext<I>>) = body(ItemDefContext(template, reg))
 
     fun <B : Block> blocksBy(template: BlockTemplate<B>, body: DefBody<BlockDefContext<B>>) = body(BlockDefContext(template, reg))
+
+    fun itemGroup(dest: KMutableProperty0<ItemGroup>, icon: () -> ItemStack) {
+        dest.set(object : ItemGroup(reg.mod.prefix(dest.name.snakeify())) {
+            override fun createIcon(): ItemStack = icon()
+        })
+    }
 
     fun <T : NineTile> tileEntity(dest: KMutableProperty0<() -> T>, factory: (Virtue, TileEntityType<*>) -> T) {
         val type = MutableObject<TileEntityType<*>>()
@@ -122,7 +130,7 @@ class DefinitionDefContext(private val reg: Registrar) {
 
 class ItemDefContext<I : Item>(private val template: ItemTemplate<I>, private val reg: Registrar) {
 
-    fun item(dest: KMutableProperty0<in I>, body: (ItemDefBuilder<I>) -> I) {
+    fun item(dest: KMutableProperty0<in I>, body: (ItemDefBuilder<I>) -> I = { it.build() }) {
         val item = body(template.newBuilder(reg, dest.name.snakeify()))
         reg.items += item
         dest.set(item)
@@ -132,7 +140,7 @@ class ItemDefContext<I : Item>(private val template: ItemTemplate<I>, private va
 
 class BlockDefContext<B : Block>(private val template: BlockTemplate<B>, private val reg: Registrar) {
 
-    fun block(dest: KMutableProperty0<in B>, body: (BlockDefBuilder<B>) -> B) {
+    fun block(dest: KMutableProperty0<in B>, body: (BlockDefBuilder<B>) -> B = { it.build() }) {
         val block = body(template.newBuilder(reg, dest.name.snakeify()))
         reg.blocks += block
         dest.set(block)
