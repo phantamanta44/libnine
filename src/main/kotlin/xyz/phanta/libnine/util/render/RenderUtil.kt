@@ -5,18 +5,13 @@ import net.minecraft.client.renderer.OpenGlHelper
 import net.minecraftforge.fml.ModList
 import xyz.phanta.libnine.Nine
 
-private var optifined: Boolean? = null
-
-private fun checkOptifine(): Boolean {
-    if (optifined == null) {
-        optifined = if (ModList.get().isLoaded("optifine")) {
-            Nine.LOGGER.warn("Whoops! You have Optifine installed. That might cause some weird rendering issues.")
-            true
-        } else {
-            false
-        }
+private val optifined: Boolean by lazy {
+    if (ModList.get().isLoaded("optifine")) {
+        Nine.LOGGER.warn("Whoops! You have Optifine installed. That might cause some weird rendering issues.")
+        true
+    } else {
+        false
     }
-    return optifined!!
 }
 
 object Lightmap {
@@ -26,7 +21,7 @@ object Lightmap {
     private var cachedY: Float = 0.toFloat()
 
     fun setCoords(x: Float, y: Float) {
-        if (checkOptifine()) return
+        if (optifined) return
         if (!cached) cacheCoords(OpenGlHelper.lastBrightnessX, OpenGlHelper.lastBrightnessY)
         OpenGlHelper.glMultiTexCoord2f(OpenGlHelper.GL_TEXTURE1, x, y)
     }
@@ -39,7 +34,7 @@ object Lightmap {
     }
 
     fun restore() {
-        if (checkOptifine()) return
+        if (optifined) return
         OpenGlHelper.glMultiTexCoord2f(OpenGlHelper.GL_TEXTURE1, cachedX, cachedY)
         GlStateManager.enableLighting()
         cached = false
