@@ -1,5 +1,5 @@
 modLoader="nonary"
-loaderVersion="[25,)" # don't even know if this is used
+loaderVersion="[1.0.0,)" # don't even know if this is used
 issueTrackerURL="https://github.com/phantamanta44/libnine/issues/"
 
 [[mods]]
@@ -8,4 +8,4 @@ version="${file.jarVersion}"
 displayName="libnine"
 displayURL="https://github.com/phantamanta44/libnine/"
 authors="Phanta"
-description='Library for writing Good and Cool mods in Good and Cool languages'
+description="Library for writing Good and Cool mods in Good and Cool languages"

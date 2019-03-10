@@ -13,13 +13,13 @@ class ItemTemplate<I : Item>(
         internal val propsFactory: () -> Item.Properties = { Item.Properties() }
 ) {
 
-    fun newBuilder(reg: Registrar, name: String): ItemDefBuilder<I> = ItemDefBuilder(reg, this, name)
+    fun newBuilder(reg: Registrar, name: String): ItemDefBuilder<I> = ItemDefBuilderImpl(reg, this, name)
 
 }
 
-class ItemDefBuilder<I : Item>(private val reg: Registrar, private val template: ItemTemplate<I>, private val name: String) {
+abstract class ItemDefBuilder<I : Item> {
 
-    private val properties = template.propsFactory()
+    protected abstract val properties: Item.Properties
 
     fun withStackSize(stackSize: Int): ItemDefBuilder<I> = also { properties.maxStackSize(stackSize) }
 
@@ -41,6 +41,18 @@ class ItemDefBuilder<I : Item>(private val reg: Registrar, private val template:
         properties.setTEISR { Callable { rendererFactory() } }
     }
 
-    fun build(): I = template.itemFactory(properties).also { it.setRegistryName(reg.mod.prefix(name)) }
+    abstract fun build(): I
+
+}
+
+private class ItemDefBuilderImpl<I : Item>(
+        private val reg: Registrar,
+        private val template: ItemTemplate<I>,
+        private val name: String
+) : ItemDefBuilder<I>() {
+
+    override val properties: Item.Properties = template.propsFactory()
+
+    override fun build(): I = template.itemFactory(properties).also { it.setRegistryName(reg.mod.prefix(name)) }
 
 }

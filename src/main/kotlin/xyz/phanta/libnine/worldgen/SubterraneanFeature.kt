@@ -19,8 +19,8 @@ class SubterraneanFeatureClump(
 ) : NineFeature() {
 
     override fun generate(world: IWorld, chunkGen: IChunkGenerator<out IChunkGenSettings>, origin: BlockPos, rand: Random): Boolean {
-        val length = lengthMin + rand.nextInt(lengthVariation)
-        val radius = radiusMin + rand.nextInt(radiusVariation)
+        val length = lengthMin + rand.nextInt(lengthVariation + 1)
+        val radius = radiusMin + rand.nextInt(radiusVariation + 1)
         val dir = Vec3d(rand.nextDouble(), rand.nextDouble().randomNonZero(), rand.nextDouble()).normalize()
         val basisU = dir.findOrthogonal().normalize()
         val basisV = (dir cross basisU).normalize()
@@ -55,7 +55,7 @@ class SubterraneanFeaturePath(
         var pos = Vec3d(origin)
         var dir = Vec3d(rand.nextDouble(), rand.nextDouble().randomNonZero(), rand.nextDouble()).normalize()
         var success = false
-        for (i in 1..(lengthMin + rand.nextInt(lengthVariation))) {
+        for (i in 1..(lengthMin + rand.nextInt(lengthVariation + 1))) {
             pos += dir
             val blockPos = BlockPos(pos)
             if (world.getBlockState(blockPos).isReplaceableOreGen(world.world, blockPos, replacementTest)) {
@@ -78,7 +78,7 @@ class SubterraneanFeatureRadiate(
 ) : NineFeature() {
 
     override fun generate(world: IWorld, chunkGen: IChunkGenerator<out IChunkGenSettings>, origin: BlockPos, rand: Random): Boolean {
-        val radius = radiusMin + rand.nextInt(radiusVariation)
+        val radius = radiusMin + rand.nextInt(radiusVariation + 1)
         val radiusSq = radius * radius
         var success = false
         for (i in -radius..radius) {

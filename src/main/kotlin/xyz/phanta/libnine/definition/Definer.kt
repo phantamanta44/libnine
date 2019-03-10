@@ -4,6 +4,7 @@ import net.minecraft.block.Block
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.player.InventoryPlayer
 import net.minecraft.item.Item
+import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemGroup
 import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntityType
@@ -140,9 +141,10 @@ class ItemDefContext<I : Item>(private val template: ItemTemplate<I>, private va
 
 class BlockDefContext<B : Block>(private val template: BlockTemplate<B>, private val reg: Registrar) {
 
-    fun block(dest: KMutableProperty0<in B>, body: (BlockDefBuilder<B>) -> B = { it.build() }) {
-        val block = body(template.newBuilder(reg, dest.name.snakeify()))
+    fun block(dest: KMutableProperty0<in B>, body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock> = { it.build() }) {
+        val (block, itemBlock) = body(template.newBuilder(reg, dest.name.snakeify()))
         reg.blocks += block
+        reg.items += itemBlock
         dest.set(block)
     }
 
