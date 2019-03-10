@@ -43,6 +43,12 @@ abstract class BiomeSet {
 
     }
 
+    companion object {
+        val OTHERWORLD: BiomeSet = Category.NETHER union Category.THEEND
+        val OVERWORLD: BiomeSet = !(OTHERWORLD union Category.NONE)
+        val WATER_BODY: BiomeSet = Category.OCEAN union Category.RIVER
+    }
+
     class Category(private val category: Biome.Category) : BiomeSet() {
 
         override fun contains(biome: Biome): Boolean = biome.category == category
