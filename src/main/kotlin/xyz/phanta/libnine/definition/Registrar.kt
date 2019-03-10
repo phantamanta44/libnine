@@ -13,23 +13,12 @@ import net.minecraftforge.registries.IForgeRegistryEntry
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.worldgen.BiomeSet
 import java.util.function.Consumer
-import kotlin.concurrent.withLock
-
-private inline fun <reified T : IForgeRegistryEntry<T>> newQueue(mod: Virtue, bus: IEventBus): MutableList<T> =
-        mutableListOf<T>().also {
-            bus.addGenericListener(T::class.java) { e: RegistryEvent.Register<T> ->
-                mod.initLock.withLock {
-                    while (!mod.initialized.get()) mod.initCondition.await()
-                }
-                it.forEach(e.registry::register)
-            }
-}
 
 class Registrar(internal val mod: Virtue, internal val bus: IEventBus) {
 
-    internal val blocks: MutableList<Block> = newQueue(mod, bus)
-    internal val items: MutableList<Item> = newQueue(mod, bus)
-    internal val tileEntities: MutableList<TileEntityType<*>> = newQueue(mod, bus)
+    internal val blocks: MutableList<Block> = newQueue()
+    internal val items: MutableList<Item> = newQueue()
+    internal val tileEntities: MutableList<TileEntityType<*>> = newQueue()
     internal val features: MutableList<Triple<CompositeFeature<*, *>, GenerationStage.Decoration, BiomeSet>> = mutableListOf()
 
     // TODO potions
@@ -46,5 +35,18 @@ class Registrar(internal val mod: Virtue, internal val bus: IEventBus) {
             features.forEach { (feature, stage, biomes) -> biomes.biomes.forEach { it.addFeature(stage, feature) } }
         })
     }
+
+    @Suppress("UNCHECKED_CAST")
+    private inline fun <reified T : IForgeRegistryEntry<T>> newQueue(): MutableList<T> =
+            mutableListOf<T>().also {
+                bus.addGenericListener(
+                        T::class.java,
+                        EventPriority.NORMAL,
+                        true,
+                        RegistryEvent.Register::class.java as Class<RegistryEvent.Register<T>>
+                ) { e ->
+                    it.forEach(e.registry::register)
+                }
+            }
 
 }

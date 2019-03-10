@@ -11,11 +11,6 @@ import xyz.phanta.libnine.network.PacketServerSyncRecipeSet
 import xyz.phanta.libnine.network.PacketServerSyncTileEntity
 import xyz.phanta.libnine.util.render.TextureResource
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.locks.Condition
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 
 abstract class Virtue {
 
@@ -50,19 +45,12 @@ abstract class Virtue {
     private var usesTileEntities: Boolean = false
     private var usesContainers: Boolean = false
     private var usesRecipes: Boolean = false
-    internal val initLock: Lock = ReentrantLock()
-    internal val initCondition: Condition = initLock.newCondition()
-    internal val initialized: AtomicBoolean = AtomicBoolean(false)
 
     // init
 
     internal fun initialize(eventBus: IEventBus) {
         virtueMap[modId] = this
         init(InitializationContext(this, eventBus))
-        initLock.withLock {
-            initialized.set(true)
-            initCondition.signalAll()
-        }
     }
 
     protected abstract fun init(context: InitializationContext)
