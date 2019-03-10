@@ -8,7 +8,8 @@ import xyz.phanta.libnine.util.math.clamp
 import java.util.*
 import kotlin.math.floor
 
-class FeatureDistributionUniform(private val count: Int, private val minHeight: Int, private val variation: Int) : NineFeatureDistribution() {
+class FeatureDistributionUniform(private val count: Int, private val minHeight: Int, private val variation: Int)
+    : NineFeatureDistribution() {
 
     override fun computeDistribution(
             world: IWorld,
@@ -21,7 +22,8 @@ class FeatureDistributionUniform(private val count: Int, private val minHeight: 
 
 }
 
-class FeatureDistributionNormal(private val count: Int, private val mean: Double, private val variation: Double) : NineFeatureDistribution() {
+class FeatureDistributionNormal(private val count: Int, private val mean: Double, private val variation: Double)
+    : NineFeatureDistribution() {
 
     override fun computeDistribution(
             world: IWorld,
@@ -34,6 +36,22 @@ class FeatureDistributionNormal(private val count: Int, private val mean: Double
                 floor((rand.nextGaussian() * variation / 2).clamp(-variation, variation) + mean).toInt().clamp(0, chunkGen.maxHeight),
                 rand.nextInt(16)
         )
+    }
+
+}
+
+class FeatureDistributionSparse(private val probability: Double, private val delegate: NineFeatureDistribution)
+    : NineFeatureDistribution() {
+
+    override fun computeDistribution(
+            world: IWorld,
+            chunkGen: IChunkGenerator<out IChunkGenSettings>,
+            origin: BlockPos,
+            rand: Random
+    ): List<BlockPos> = if (rand.nextDouble() < probability) {
+        delegate.computeDistribution(world, chunkGen, origin, rand)
+    } else {
+        Collections.emptyList()
     }
 
 }
