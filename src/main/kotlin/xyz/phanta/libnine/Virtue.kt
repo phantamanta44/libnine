@@ -48,9 +48,9 @@ abstract class Virtue {
 
     // init
 
-    internal fun initialize(eventBus: IEventBus) {
+    internal fun initialize(eventBus: IEventBus, regHandler: RegistryHandler) {
         virtueMap[modId] = this
-        init(InitializationContext(this, eventBus))
+        init(InitializationContext(this, eventBus, regHandler))
     }
 
     protected abstract fun init(context: InitializationContext)

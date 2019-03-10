@@ -1,5 +1,6 @@
 package xyz.phanta.libnine
 
+import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.eventbus.EventBusErrorMessage
 import net.minecraftforge.eventbus.api.BusBuilder
 import net.minecraftforge.eventbus.api.IEventBus
@@ -11,6 +12,8 @@ import net.minecraftforge.forgespi.language.ILifecycleEvent
 import net.minecraftforge.forgespi.language.IModInfo
 import net.minecraftforge.forgespi.language.IModLanguageProvider
 import net.minecraftforge.forgespi.language.ModFileScanData
+import net.minecraftforge.registries.IForgeRegistry
+import net.minecraftforge.registries.IForgeRegistryEntry
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import java.util.*
@@ -53,33 +56,49 @@ private typealias LifecycleHandler = Consumer<LifecycleEventProvider.LifecycleEv
 
 internal class NonaryModContainer(info: IModInfo, private val modInstance: Any, private val scan: ModFileScanData) : ModContainer(info) {
 
-    private val eventBus: IEventBus
     private val logger: Logger = LogManager.getLogger("Nonary-${info.modId}")
+    private val eventBus: IEventBus = BusBuilder.builder()
+            .setExceptionHandler { _, event, handlers, index, error ->
+                logger.error(EventBusErrorMessage(event, index, handlers, error))
+            }
+            .setTrackPhases(false)
+            .build()
+    private val registryHandler: RegistryHandler = RegistryHandler(this)
 
     init {
         modInstance as Virtue
         modInstance.modId = info.modId
-        eventBus = BusBuilder.builder()
-                .setExceptionHandler { _, event, handlers, index, error ->
-                    logger.error(EventBusErrorMessage(event, index, handlers, error))
-                }
-                .setTrackPhases(false)
-                .build()
         configHandler = Optional.of(Consumer { event -> this.eventBus.post(event) })
         contextExtension = Supplier { null }
 
-        triggerMap[ModLoadingStage.CONSTRUCT] = LifecycleHandler { modInstance.initialize(eventBus) }
+        triggerMap[ModLoadingStage.CONSTRUCT] = LifecycleHandler { modInstance.initialize(eventBus, registryHandler) }
         LifecycleHandler { eventBus.post(it.getOrBuildEvent(this)) }.let { fireEvent ->
             listOf(
-                    ModLoadingStage.CREATE_REGISTRIES, ModLoadingStage.LOAD_REGISTRIES,
-                    ModLoadingStage.COMMON_SETUP, ModLoadingStage.SIDED_SETUP, ModLoadingStage.ENQUEUE_IMC,
-                    ModLoadingStage.PROCESS_IMC, ModLoadingStage.COMPLETE
+                    ModLoadingStage.CREATE_REGISTRIES, ModLoadingStage.COMMON_SETUP, ModLoadingStage.SIDED_SETUP,
+                    ModLoadingStage.ENQUEUE_IMC, ModLoadingStage.PROCESS_IMC, ModLoadingStage.COMPLETE
             ).forEach { triggerMap[it] = fireEvent }
         }
+        triggerMap[ModLoadingStage.LOAD_REGISTRIES] = registryHandler
     }
 
     override fun getMod(): Any = modInstance
 
     override fun matches(mod: Any): Boolean = modInstance === mod
+
+}
+
+internal class RegistryHandler(private val modContainer: ModContainer) : Consumer<LifecycleEventProvider.LifecycleEvent> {
+
+    private val handlers: MutableMap<Class<out IForgeRegistryEntry<*>>, MutableList<(IForgeRegistry<*>) -> Unit>> = mutableMapOf()
+
+    override fun accept(event: LifecycleEventProvider.LifecycleEvent) {
+        val reg = (event.getOrBuildEvent(modContainer) as RegistryEvent.Register<*>).getRegistry()
+        handlers[reg.getRegistrySuperType()]?.forEach { it(reg) }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    inline fun <reified T : IForgeRegistryEntry<T>> registerProvider(noinline provider: (IForgeRegistry<T>) -> Unit) {
+        handlers.computeIfAbsent(T::class.java) { mutableListOf() } += provider as (IForgeRegistry<*>) -> Unit
+    }
 
 }

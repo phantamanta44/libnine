@@ -3,11 +3,12 @@ package xyz.phanta.libnine.definition
 import net.minecraftforge.eventbus.api.Event
 import net.minecraftforge.eventbus.api.EventPriority
 import net.minecraftforge.eventbus.api.IEventBus
+import xyz.phanta.libnine.RegistryHandler
 import xyz.phanta.libnine.Virtue
 
-class InitializationContext(mod: Virtue, val eventBus: IEventBus) {
+class InitializationContext internal constructor(mod: Virtue, val eventBus: IEventBus, regHandler: RegistryHandler) {
 
-    private val registrar: Registrar = Registrar(mod, eventBus)
+    private val registrar: Registrar = Registrar(mod, eventBus, regHandler)
 
     fun define(vararg definers: Definer) {
         DefinitionDefContext(registrar).let { ctx -> definers.forEach { it.definitions()(ctx) } }
