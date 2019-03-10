@@ -19,11 +19,27 @@ abstract class BiomeSet {
 
     abstract fun contains(biome: Biome): Boolean
 
-    infix fun and(other: BiomeSet): BiomeSet = ConjoinedBiomeSet(this, other)
+    infix fun union(other: BiomeSet): BiomeSet = UnionBiomeSet(this, other)
 
-    private class ConjoinedBiomeSet(private vararg val delegates: BiomeSet) : BiomeSet() {
+    infix fun intersect(other: BiomeSet): BiomeSet = IntersectionBiomeSet(this, other)
+
+    operator fun not(): BiomeSet = ComplementBiomeSet(this)
+
+    private class UnionBiomeSet(private vararg val delegates: BiomeSet) : BiomeSet() {
 
         override fun contains(biome: Biome): Boolean = delegates.any { it.contains(biome) }
+
+    }
+
+    private class IntersectionBiomeSet(private vararg val delegates: BiomeSet) : BiomeSet() {
+
+        override fun contains(biome: Biome): Boolean = delegates.all { it.contains(biome) }
+
+    }
+
+    private class ComplementBiomeSet(private val negativeSet: BiomeSet) : BiomeSet() {
+
+        override fun contains(biome: Biome): Boolean = !negativeSet.contains(biome)
 
     }
 
