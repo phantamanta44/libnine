@@ -13,16 +13,23 @@ import net.minecraftforge.registries.IForgeRegistryEntry
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.worldgen.BiomeSet
 import java.util.function.Consumer
+import kotlin.concurrent.withLock
 
-private inline fun <reified T : IForgeRegistryEntry<T>> newQueue(bus: IEventBus): MutableList<T> = mutableListOf<T>().also {
-    bus.addGenericListener(T::class.java) { e: RegistryEvent.Register<T> -> it.forEach(e.registry::register) }
+private inline fun <reified T : IForgeRegistryEntry<T>> newQueue(mod: Virtue, bus: IEventBus): MutableList<T> =
+        mutableListOf<T>().also {
+            bus.addGenericListener(T::class.java) { e: RegistryEvent.Register<T> ->
+                mod.initLock.withLock {
+                    while (!mod.initialized.get()) mod.initCondition.await()
+                }
+                it.forEach(e.registry::register)
+            }
 }
 
 class Registrar(internal val mod: Virtue, internal val bus: IEventBus) {
 
-    internal val blocks: MutableList<Block> = newQueue(bus)
-    internal val items: MutableList<Item> = newQueue(bus)
-    internal val tileEntities: MutableList<TileEntityType<*>> = newQueue(bus)
+    internal val blocks: MutableList<Block> = newQueue(mod, bus)
+    internal val items: MutableList<Item> = newQueue(mod, bus)
+    internal val tileEntities: MutableList<TileEntityType<*>> = newQueue(mod, bus)
     internal val features: MutableList<Triple<CompositeFeature<*, *>, GenerationStage.Decoration, BiomeSet>> = mutableListOf()
 
     // TODO potions
