@@ -56,8 +56,8 @@ class DefinitionDefContext(private val reg: Registrar) {
         })
     }
 
-    fun <T : NineTile> tileEntity(dest: KMutableProperty0<() -> T>, factory: (Virtue, TileEntityType<*>) -> T) {
-        val type = MutableObject<TileEntityType<*>>()
+    fun <T : NineTile> tileEntity(dest: KMutableProperty0<() -> T>, factory: (Virtue, TileEntityType<T>) -> T) {
+        val type = MutableObject<TileEntityType<T>>()
         val creator = { factory(reg.mod, type.value) }
         type.value = TileEntityType.register(
                 reg.mod.prefix(dest.name.snakeify()),
