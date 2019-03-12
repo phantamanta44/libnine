@@ -15,6 +15,8 @@ operator fun BlockPos.plus(dir: EnumFacing): BlockPos = this.offset(dir)
 operator fun BlockPos.minus(other: Vec3i): BlockPos = this.subtract(other)
 operator fun BlockPos.minus(dir: EnumFacing): BlockPos = this.offset(dir.opposite)
 
+fun BlockPos.walk(dir: EnumFacing): Sequence<BlockPos> = generateSequence(this + dir) { it + dir }
+
 fun World.dropItem(pos: Vec3d, stack: ItemStack) {
     if (!this.isRemote && !stack.isEmpty) {
         val ent = EntityItem(this, pos.x, pos.y, pos.z, stack)
