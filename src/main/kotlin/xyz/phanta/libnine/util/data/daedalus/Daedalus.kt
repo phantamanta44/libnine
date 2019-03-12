@@ -6,6 +6,7 @@ import xyz.phanta.libnine.util.data.ByteWriter
 import xyz.phanta.libnine.util.data.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
+import kotlin.reflect.KProperty1
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.jvmErasure
 
@@ -24,25 +25,22 @@ class Daedalus<T : Any>(private val target: T) : Serializable {
         private fun <T : Any> calculateMappings(type: KClass<out T>): TypeMapping<T> = mappings.computeIfAbsent(type) {
             (type.allSuperclasses + type)
                     .flatMap { it.declaredMemberProperties }
-                    .filterIsInstance<KMutableProperty1<T, Any>>()
+                    .filterIsInstance<KProperty1<T, Any>>()
                     .mapNotNull {
                         it.findAnnotation<Persistent>()?.let { annot -> wrapProperty(getPropertyName(annot.value, it), it) }
                     }
                     .sortedBy { it.name }
         } as TypeMapping<T>
 
-        private fun getPropertyName(annotValue: String, property: KMutableProperty1<*, *>) = if (annotValue.isEmpty()) {
-            property.name
-        } else {
-            annotValue
-        }
+        private fun getPropertyName(annotValue: String, property: KProperty1<*, *>) =
+                if (annotValue.isEmpty()) property.name else annotValue
 
         @Suppress("UNCHECKED_CAST")
-        private fun <T : Any> wrapProperty(name: String, property: KMutableProperty1<T, Any>): PersistentProperty<T> =
+        private fun <T : Any> wrapProperty(name: String, property: KProperty1<T, Any>): PersistentProperty<T> =
                 if (property.getter.returnType.isSubtypeOf(Serializable::class.starProjectedType)) {
-                    SerializableProperty(name, property as KMutableProperty1<T, Serializable>)
+                    SerializableProperty(name, property as KProperty1<T, Serializable>)
                 } else {
-                    SerializerBackedProperty(name, property)
+                    SerializerBackedProperty(name, property as KMutableProperty1<T, Any>)
                 }
 
     }
@@ -75,7 +73,7 @@ private interface PersistentProperty<T : Any> {
 
 }
 
-private class SerializableProperty<T : Any>(override val name: String, private val property: KMutableProperty1<T, Serializable>)
+private class SerializableProperty<T : Any>(override val name: String, private val property: KProperty1<T, Serializable>)
     : PersistentProperty<T> {
 
     override fun extractNbt(tag: NBTTagCompound, target: T) = tag.setTag(name, property.get(target).createSerializedNbt())
