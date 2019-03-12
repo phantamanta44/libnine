@@ -4,22 +4,13 @@ import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer
 import net.minecraft.item.EnumRarity
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
+import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.ToolType
-import xyz.phanta.libnine.definition.Registrar
 import java.util.concurrent.Callable
-
-class ItemTemplate<I : Item>(
-        internal val itemFactory: (Item.Properties) -> I,
-        internal val propsFactory: () -> Item.Properties = { Item.Properties() }
-) {
-
-    fun newBuilder(reg: Registrar, name: String): ItemDefBuilder<I> = ItemDefBuilderImpl(reg, this, name)
-
-}
 
 abstract class ItemDefBuilder<I : Item> {
 
-    protected abstract val properties: Item.Properties
+    protected val properties: Item.Properties = Item.Properties()
 
     fun withStackSize(stackSize: Int): ItemDefBuilder<I> = also { properties.maxStackSize(stackSize) }
 
@@ -45,14 +36,11 @@ abstract class ItemDefBuilder<I : Item> {
 
 }
 
-private class ItemDefBuilderImpl<I : Item>(
-        private val reg: Registrar,
-        private val template: ItemTemplate<I>,
-        private val name: String
+internal class ItemDefBuilderImpl<I : Item>(
+        private val name: ResourceLocation,
+        private val itemFactory: (Item.Properties) -> I
 ) : ItemDefBuilder<I>() {
 
-    override val properties: Item.Properties = template.propsFactory()
-
-    override fun build(): I = template.itemFactory(properties).also { it.setRegistryName(reg.mod.prefix(name)) }
+    override fun build(): I = itemFactory(properties).also { it.registryName = name }
 
 }

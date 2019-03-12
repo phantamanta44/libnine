@@ -1,6 +1,7 @@
 package xyz.phanta.libnine.definition
 
 import net.minecraft.block.Block
+import net.minecraft.block.material.Material
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.player.InventoryPlayer
 import net.minecraft.item.Item
@@ -16,12 +17,16 @@ import net.minecraft.world.gen.placement.IPlacementConfig
 import org.apache.commons.lang3.mutable.MutableObject
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.block.BlockDefBuilder
-import xyz.phanta.libnine.block.BlockTemplate
+import xyz.phanta.libnine.block.BlockDefContext
+import xyz.phanta.libnine.block.BlockDefContextAugmented
+import xyz.phanta.libnine.block.BlockDefContextBaseImpl
 import xyz.phanta.libnine.client.gui.NineGuiContainer
 import xyz.phanta.libnine.container.ContainerType
 import xyz.phanta.libnine.container.NineContainer
 import xyz.phanta.libnine.item.ItemDefBuilder
-import xyz.phanta.libnine.item.ItemTemplate
+import xyz.phanta.libnine.item.ItemDefContext
+import xyz.phanta.libnine.item.ItemDefContextAugmented
+import xyz.phanta.libnine.item.ItemDefContextBaseImpl
 import xyz.phanta.libnine.recipe.Recipe
 import xyz.phanta.libnine.recipe.RecipeParser
 import xyz.phanta.libnine.recipe.RecipeSet
@@ -46,9 +51,68 @@ interface Definer {
 
 class DefinitionDefContext(private val reg: Registrar) {
 
-    fun <I : Item> itemsBy(template: ItemTemplate<I>, body: DefBody<ItemDefContext<I>>) = body(ItemDefContext(template, reg))
+    private val blockDefiner: BlockDefContext<*> by lazy {
+        object : BlockDefContextBaseImpl<Block>(reg), BlockDefContext<Block> {}
+    }
+    private val itemDefiner: ItemDefContext<*> by lazy {
+        object : ItemDefContextBaseImpl<Item>(reg), ItemDefContext<Item> {}
+    }
 
-    fun <B : Block> blocksBy(template: BlockTemplate<B>, body: DefBody<BlockDefContext<B>>) = body(BlockDefContext(template, reg))
+    @Suppress("UNCHECKED_CAST")
+    private fun <B : Block> getBlockContext(): BlockDefContext<B> = blockDefiner as BlockDefContext<B>
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <I : Item> getItemContext(): ItemDefContext<I> = itemDefiner as ItemDefContext<I>
+
+    fun <B : Block> block(
+            dest: KMutableProperty0<in B>,
+            blockFactory: (Block.Properties) -> B,
+            propsFactory: () -> Block.Properties,
+            itemBlockFactory: (B, Item.Properties) -> ItemBlock = ::ItemBlock,
+            body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock> = { it.build() }
+    ) = getBlockContext<B>().block(dest, blockFactory, propsFactory, itemBlockFactory, body)
+
+    fun <B : Block> block(
+            dest: KMutableProperty0<in B>,
+            blockFactory: (Block.Properties) -> B,
+            material: Material,
+            itemBlockFactory: (B, Item.Properties) -> ItemBlock = ::ItemBlock,
+            body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock> = { it.build() }
+    ) = getBlockContext<B>().block(dest, blockFactory, material, itemBlockFactory, body)
+
+    fun <B : Block> blocksBy(primer: (BlockDefBuilder<B>) -> BlockDefBuilder<B>, body: DefBody<BlockDefContext<B>>) =
+            getBlockContext<B>().blocksBy(primer, body)
+
+    fun <B : Block> blocksAug(
+            blockFactory: (Block.Properties) -> B,
+            propsFactory: () -> Block.Properties,
+            itemBlockFactory: (B, Item.Properties) -> ItemBlock = ::ItemBlock,
+            primer: (BlockDefBuilder<B>) -> BlockDefBuilder<B> = { it },
+            body: DefBody<BlockDefContextAugmented<B>>
+    ) = getBlockContext<B>().blocksAug(blockFactory, propsFactory, itemBlockFactory, primer, body)
+
+    fun <B : Block> blocksAug(
+            blockFactory: (Block.Properties) -> B,
+            material: Material,
+            itemBlockFactory: (B, Item.Properties) -> ItemBlock = ::ItemBlock,
+            primer: (BlockDefBuilder<B>) -> BlockDefBuilder<B> = { it },
+            body: DefBody<BlockDefContextAugmented<B>>
+    ) = getBlockContext<B>().blocksAug(blockFactory, material, itemBlockFactory, primer, body)
+
+    fun <I : Item> item(
+            dest: KMutableProperty0<in I>,
+            factory: (Item.Properties) -> I,
+            body: (ItemDefBuilder<I>) -> I = { it.build() }
+    ) = getItemContext<I>().item(dest, factory, body)
+
+    fun <I : Item> itemsBy(primer: (ItemDefBuilder<I>) -> ItemDefBuilder<I>, body: DefBody<ItemDefContext<I>>) =
+            getItemContext<I>().itemsBy(primer, body)
+
+    fun <I : Item> itemsAug(
+            factory: (Item.Properties) -> I,
+            primer: (ItemDefBuilder<I>) -> ItemDefBuilder<I> = { it },
+            body: DefBody<ItemDefContextAugmented<I>>
+    ) = getItemContext<I>().itemsAug(factory, primer, body)
 
     fun itemGroup(dest: KMutableProperty0<ItemGroup>, icon: () -> ItemStack) {
         dest.set(object : ItemGroup(reg.mod.prefix(dest.name.snakeify())) {
@@ -125,27 +189,6 @@ class DefinitionDefContext(private val reg: Registrar) {
                 distribution.buildDistribution(),
                 IPlacementConfig.NO_PLACEMENT_CONFIG
         ), stage, target)
-    }
-
-}
-
-class ItemDefContext<I : Item>(private val template: ItemTemplate<I>, private val reg: Registrar) {
-
-    fun item(dest: KMutableProperty0<in I>, body: (ItemDefBuilder<I>) -> I = { it.build() }) {
-        val item = body(template.newBuilder(reg, dest.name.snakeify()))
-        reg.items += item
-        dest.set(item)
-    }
-
-}
-
-class BlockDefContext<B : Block>(private val template: BlockTemplate<B>, private val reg: Registrar) {
-
-    fun block(dest: KMutableProperty0<in B>, body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock> = { it.build() }) {
-        val (block, itemBlock) = body(template.newBuilder(reg, dest.name.snakeify()))
-        reg.blocks += block
-        reg.items += itemBlock
-        dest.set(block)
     }
 
 }
