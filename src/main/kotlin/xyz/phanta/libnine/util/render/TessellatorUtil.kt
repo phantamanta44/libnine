@@ -3,6 +3,7 @@ package xyz.phanta.libnine.util.render
 import net.minecraft.client.renderer.BufferBuilder
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.vertex.VertexFormat
+import net.minecraft.util.math.Vec3d
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL32
 
@@ -26,3 +27,5 @@ inline fun tessellate(mode: DrawMode, vertexFormat: VertexFormat, body: BufferBu
 }
 
 fun BufferBuilder.pos(x: Number, y: Number, z: Number = 0): BufferBuilder = pos(x.toDouble(), y.toDouble(), z.toDouble())
+
+fun BufferBuilder.pos(pos: Vec3d): BufferBuilder = pos(pos.x, pos.y, pos.z)
