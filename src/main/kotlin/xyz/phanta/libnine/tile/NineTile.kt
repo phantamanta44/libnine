@@ -27,8 +27,7 @@ abstract class NineTile(
 
     @Suppress("LeakingThis")
     protected val serializer: Daedalus<*> = Daedalus(this)
-    @Suppress("LeakingThis")
-    protected val capabilities: ICapabilityProvider? = initCapabilities()
+    protected val capabilities: ICapabilityProvider? by lazy { initCapabilities() }
 
     // init
 

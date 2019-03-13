@@ -7,87 +7,88 @@ import xyz.phanta.libnine.definition.Registrar
 import xyz.phanta.libnine.util.snakeify
 import kotlin.reflect.KMutableProperty0
 
-interface ItemDefContextBase<I : Item> {
+typealias ItemPrimer = (ItemDefBuilder<*>) -> ItemDefBuilder<*>
+
+interface ItemDefContextBase {
 
     val registrar: Registrar
 
-    fun item(
+    fun <I : Item> item(
             dest: KMutableProperty0<in I>,
             factory: (Item.Properties) -> I,
             body: (ItemDefBuilder<I>) -> I = { it.build() }
     )
 
-    fun itemsAug(
+    fun <I : Item> itemsAug(
             factory: (Item.Properties) -> I,
-            primer: (ItemDefBuilder<I>) -> ItemDefBuilder<I> = { it },
+            primer: ItemPrimer = { it },
             body: DefBody<ItemDefContextAugmented<I>>
     ) = body(MappingItemDefContextAugmented(registrar, this, factory, primer))
 
-    fun createDefBuilder(name: ResourceLocation, factory: (Item.Properties) -> I): ItemDefBuilder<I>
+    fun <I : Item> createItemBuilder(name: ResourceLocation, factory: (Item.Properties) -> I): ItemDefBuilder<I>
 
 }
 
-interface ItemDefContext<I : Item> : ItemDefContextBase<I> {
+interface ItemDefContext : ItemDefContextBase {
 
-    fun itemsBy(primer: (ItemDefBuilder<I>) -> ItemDefBuilder<I>, body: DefBody<ItemDefContext<I>>) =
+    fun itemsBy(primer: ItemPrimer, body: DefBody<ItemDefContext>) =
             body(MappingItemDefContext(registrar, this, primer))
 
 }
 
-interface ItemDefContextAugmented<I : Item> : ItemDefContextBase<I> {
+interface ItemDefContextAugmented<A : Item> : ItemDefContextBase {
 
-    fun item(dest: KMutableProperty0<in I>, body: (ItemDefBuilder<I>) -> I = { it.build() })
+    fun item(dest: KMutableProperty0<in A>, body: (ItemDefBuilder<A>) -> A = { it.build() })
 
-    fun itemsBy(primer: (ItemDefBuilder<I>) -> ItemDefBuilder<I>, body: DefBody<ItemDefContextAugmented<I>>)
+    fun itemsBy(primer: ItemPrimer, body: DefBody<ItemDefContextAugmented<A>>)
 
 }
 
-internal open class ItemDefContextBaseImpl<I : Item>(
-        override val registrar: Registrar
-) : ItemDefContextBase<I> {
+internal open class ItemDefContextBaseImpl(override val registrar: Registrar) : ItemDefContextBase {
 
-    override fun item(dest: KMutableProperty0<in I>, factory: (Item.Properties) -> I, body: (ItemDefBuilder<I>) -> I) {
-        val item = body(createDefBuilder(registrar.mod.resource(dest.name.snakeify()), factory))
+    override fun <I : Item> item(dest: KMutableProperty0<in I>, factory: (Item.Properties) -> I, body: (ItemDefBuilder<I>) -> I) {
+        val item = body(createItemBuilder(registrar.mod.resource(dest.name.snakeify()), factory))
         registrar.items += item
         dest.set(item)
     }
 
-    override fun createDefBuilder(name: ResourceLocation, factory: (Item.Properties) -> I): ItemDefBuilder<I> =
+    override fun <I : Item> createItemBuilder(name: ResourceLocation, factory: (Item.Properties) -> I): ItemDefBuilder<I> =
             ItemDefBuilderImpl(name, factory)
 
 }
 
-private open class MappingItemDefContextBase<I : Item>(
+private open class MappingItemDefContextBase(
         registrar: Registrar,
-        private val parent: ItemDefContextBase<I>,
-        private val primer: (ItemDefBuilder<I>) -> ItemDefBuilder<I>
-) : ItemDefContextBaseImpl<I>(registrar) {
+        private val parent: ItemDefContextBase,
+        private val primer: ItemPrimer
+) : ItemDefContextBaseImpl(registrar) {
 
-    override fun createDefBuilder(name: ResourceLocation, factory: (Item.Properties) -> I): ItemDefBuilder<I> =
-            primer(parent.createDefBuilder(name, factory))
+    @Suppress("UNCHECKED_CAST")
+    override fun <I : Item> createItemBuilder(name: ResourceLocation, factory: (Item.Properties) -> I): ItemDefBuilder<I> =
+            primer(parent.createItemBuilder(name, factory)) as ItemDefBuilder<I>
 
 }
 
-private class MappingItemDefContext<I : Item>(
+private class MappingItemDefContext(
         registrar: Registrar,
-        parent: ItemDefContextBase<I>,
-        primer: (ItemDefBuilder<I>) -> ItemDefBuilder<I>
-) : MappingItemDefContextBase<I>(registrar, parent, primer), ItemDefContext<I>
+        parent: ItemDefContextBase,
+        primer: ItemPrimer
+) : MappingItemDefContextBase(registrar, parent, primer), ItemDefContext
 
-private class MappingItemDefContextAugmented<I : Item>(
+private class MappingItemDefContextAugmented<A : Item>(
         registrar: Registrar,
-        parent: ItemDefContextBase<I>,
-        private val factory: (Item.Properties) -> I,
-        primer: (ItemDefBuilder<I>) -> ItemDefBuilder<I>
-) : MappingItemDefContextBase<I>(registrar, parent, primer), ItemDefContextAugmented<I> {
+        parent: ItemDefContextBase,
+        private val factory: (Item.Properties) -> A,
+        primer: ItemPrimer
+) : MappingItemDefContextBase(registrar, parent, primer), ItemDefContextAugmented<A> {
 
-    override fun item(dest: KMutableProperty0<in I>, body: (ItemDefBuilder<I>) -> I) {
-        val item = body(createDefBuilder(registrar.mod.resource(dest.name.snakeify()), factory))
+    override fun item(dest: KMutableProperty0<in A>, body: (ItemDefBuilder<A>) -> A) {
+        val item = body(createItemBuilder(registrar.mod.resource(dest.name.snakeify()), factory))
         registrar.items += item
         dest.set(item)
     }
 
-    override fun itemsBy(primer: (ItemDefBuilder<I>) -> ItemDefBuilder<I>, body: DefBody<ItemDefContextAugmented<I>>) =
+    override fun itemsBy(primer: ItemPrimer, body: DefBody<ItemDefContextAugmented<A>>) =
             body(MappingItemDefContextAugmented(registrar, this, factory, primer))
 
 }

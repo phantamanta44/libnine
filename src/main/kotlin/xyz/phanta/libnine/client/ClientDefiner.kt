@@ -1,10 +1,9 @@
 package xyz.phanta.libnine.client
 
-import net.minecraft.client.Minecraft
 import net.minecraft.particles.IParticleData
 import net.minecraft.util.ResourceLocation
-import net.minecraft.util.registry.IRegistry
 import net.minecraftforge.eventbus.api.IEventBus
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent
 import xyz.phanta.libnine.RegistryHandler
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.client.fx.NineParticleType
@@ -22,22 +21,26 @@ interface ClientDefiner {
 class ClientDefContext(private val reg: ClientRegistrar) {
 
     fun <X> particleCtx(dest: KMutableProperty0<(X) -> IParticleData>, typeFactory: (ResourceLocation) -> NineParticleType<X>) {
-        val name = reg.mod.resource(dest.name.snakeify())
-        val type = typeFactory(name)
-        IRegistry.field_212632_u.put(name, type.type)
-        Minecraft.getInstance().particles.registerFactory(type.type, type.factory)
+        val type = typeFactory(reg.mod.resource(dest.name.snakeify()))
+        reg.particles += type
         dest.set { NineParticleType.Data(type, it) }
     }
 
     fun particle(dest: KMutableProperty0<() -> IParticleData>, typeFactory: (ResourceLocation) -> NineParticleType<Unit>) {
-        val name = reg.mod.resource(dest.name.snakeify())
-        val type = typeFactory(name)
-        IRegistry.field_212632_u.put(name, type.type)
-        Minecraft.getInstance().particles.registerFactory(type.type, type.factory)
+        val type = typeFactory(reg.mod.resource(dest.name.snakeify()))
+        reg.particles += type
         dest.set { NineParticleType.Data(type, Unit) }
     }
 
 }
 
 class ClientRegistrar internal constructor(mod: Virtue, bus: IEventBus, regHandler: RegistryHandler)
-    : Registrar(mod, bus, regHandler)
+    : Registrar(mod, bus, regHandler) {
+
+    internal val particles: MutableList<NineParticleType<*>> = mutableListOf()
+
+    init {
+        bus.addListener { e: FMLLoadCompleteEvent -> particles.forEach { it.register() } }
+    }
+
+}

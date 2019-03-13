@@ -1,12 +1,14 @@
 package xyz.phanta.libnine.client.fx
 
 import com.mojang.brigadier.StringReader
+import net.minecraft.client.Minecraft
 import net.minecraft.client.particle.IParticleFactory
 import net.minecraft.client.particle.Particle
 import net.minecraft.network.PacketBuffer
 import net.minecraft.particles.IParticleData
 import net.minecraft.particles.ParticleType
 import net.minecraft.util.ResourceLocation
+import net.minecraft.util.registry.IRegistry
 import net.minecraft.world.World
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
@@ -41,6 +43,11 @@ abstract class NineParticleType<X>(private val name: ResourceLocation, private v
         override fun read(type: ParticleType<Data<X>>, buf: PacketBuffer): Data<X> =
                 Data(nineType, nineType.deserialize(ByteReader(buf.readByteArray())))
 
+    }
+
+    internal fun register() {
+        IRegistry.field_212632_u.put(name, type)
+        Minecraft.getInstance().particles.registerFactory(type, factory)
     }
 
     abstract fun serialize(stream: ByteWriter, data: X)

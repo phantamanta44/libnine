@@ -1,7 +1,6 @@
 package xyz.phanta.libnine.definition
 
 import net.minecraft.block.Block
-import net.minecraft.block.material.Material
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.player.InventoryPlayer
 import net.minecraft.item.Item
@@ -9,6 +8,7 @@ import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemGroup
 import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntityType
+import net.minecraft.util.ResourceLocation
 import net.minecraft.util.SoundEvent
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.gen.GenerationStage
@@ -19,15 +19,12 @@ import org.apache.commons.lang3.mutable.MutableObject
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.block.BlockDefBuilder
 import xyz.phanta.libnine.block.BlockDefContext
-import xyz.phanta.libnine.block.BlockDefContextAugmented
-import xyz.phanta.libnine.block.BlockDefContextBaseImpl
 import xyz.phanta.libnine.client.gui.NineGuiContainer
 import xyz.phanta.libnine.container.ContainerType
 import xyz.phanta.libnine.container.NineContainer
 import xyz.phanta.libnine.item.ItemDefBuilder
+import xyz.phanta.libnine.item.ItemDefBuilderImpl
 import xyz.phanta.libnine.item.ItemDefContext
-import xyz.phanta.libnine.item.ItemDefContextAugmented
-import xyz.phanta.libnine.item.ItemDefContextBaseImpl
 import xyz.phanta.libnine.recipe.Recipe
 import xyz.phanta.libnine.recipe.RecipeParser
 import xyz.phanta.libnine.recipe.RecipeSet
@@ -50,87 +47,58 @@ interface Definer {
 
 }
 
-class DefinitionDefContext(private val reg: Registrar) {
+class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, BlockDefContext {
 
-    private val blockDefiner: BlockDefContext<*> by lazy {
-        object : BlockDefContextBaseImpl<Block>(reg), BlockDefContext<Block> {}
+    override fun <I : Item> item(dest: KMutableProperty0<in I>, factory: (Item.Properties) -> I, body: (ItemDefBuilder<I>) -> I) {
+        val item = body(createItemBuilder(registrar.mod.resource(dest.name.snakeify()), factory))
+        registrar.items += item
+        dest.set(item)
     }
-    private val itemDefiner: ItemDefContext<*> by lazy {
-        object : ItemDefContextBaseImpl<Item>(reg), ItemDefContext<Item> {}
-    }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun <B : Block> getBlockContext(): BlockDefContext<B> = blockDefiner as BlockDefContext<B>
+    override fun <I : Item> createItemBuilder(name: ResourceLocation, factory: (Item.Properties) -> I): ItemDefBuilder<I> =
+            ItemDefBuilderImpl(name, factory)
 
-    @Suppress("UNCHECKED_CAST")
-    private fun <I : Item> getItemContext(): ItemDefContext<I> = itemDefiner as ItemDefContext<I>
-
-    fun <B : Block> block(
+    override fun <B : Block> block(
             dest: KMutableProperty0<in B>,
             blockFactory: (Block.Properties) -> B,
             propsFactory: () -> Block.Properties,
-            itemBlockFactory: (B, Item.Properties) -> ItemBlock = ::ItemBlock,
-            body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock> = { it.build() }
-    ) = getBlockContext<B>().block(dest, blockFactory, propsFactory, itemBlockFactory, body)
+            itemBlockFactory: (B, Item.Properties) -> ItemBlock,
+            body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock>
+    ) {
+        val (block, itemBlock) = body(createBlockBuilder(
+                registrar.mod.resource(dest.name.snakeify()),
+                propsFactory(),
+                blockFactory,
+                itemBlockFactory
+        ))
+        registrar.blocks += block
+        registrar.items += itemBlock
+        dest.set(block)
+    }
 
-    fun <B : Block> block(
-            dest: KMutableProperty0<in B>,
+    override fun <B : Block> createBlockBuilder(
+            name: ResourceLocation,
+            properties: Block.Properties,
             blockFactory: (Block.Properties) -> B,
-            material: Material,
-            itemBlockFactory: (B, Item.Properties) -> ItemBlock = ::ItemBlock,
-            body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock> = { it.build() }
-    ) = getBlockContext<B>().block(dest, blockFactory, material, itemBlockFactory, body)
-
-    fun <B : Block> blocksBy(primer: (BlockDefBuilder<B>) -> BlockDefBuilder<B>, body: DefBody<BlockDefContext<B>>) =
-            getBlockContext<B>().blocksBy(primer, body)
-
-    fun <B : Block> blocksAug(
-            blockFactory: (Block.Properties) -> B,
-            propsFactory: () -> Block.Properties,
-            itemBlockFactory: (B, Item.Properties) -> ItemBlock = ::ItemBlock,
-            primer: (BlockDefBuilder<B>) -> BlockDefBuilder<B> = { it },
-            body: DefBody<BlockDefContextAugmented<B>>
-    ) = getBlockContext<B>().blocksAug(blockFactory, propsFactory, itemBlockFactory, primer, body)
-
-    fun <B : Block> blocksAug(
-            blockFactory: (Block.Properties) -> B,
-            material: Material,
-            itemBlockFactory: (B, Item.Properties) -> ItemBlock = ::ItemBlock,
-            primer: (BlockDefBuilder<B>) -> BlockDefBuilder<B> = { it },
-            body: DefBody<BlockDefContextAugmented<B>>
-    ) = getBlockContext<B>().blocksAug(blockFactory, material, itemBlockFactory, primer, body)
-
-    fun <I : Item> item(
-            dest: KMutableProperty0<in I>,
-            factory: (Item.Properties) -> I,
-            body: (ItemDefBuilder<I>) -> I = { it.build() }
-    ) = getItemContext<I>().item(dest, factory, body)
-
-    fun <I : Item> itemsBy(primer: (ItemDefBuilder<I>) -> ItemDefBuilder<I>, body: DefBody<ItemDefContext<I>>) =
-            getItemContext<I>().itemsBy(primer, body)
-
-    fun <I : Item> itemsAug(
-            factory: (Item.Properties) -> I,
-            primer: (ItemDefBuilder<I>) -> ItemDefBuilder<I> = { it },
-            body: DefBody<ItemDefContextAugmented<I>>
-    ) = getItemContext<I>().itemsAug(factory, primer, body)
+            itemBlockFactory: (B, Item.Properties) -> ItemBlock
+    ): BlockDefBuilder<B> = BlockDefBuilder(name, properties, blockFactory, itemBlockFactory)
 
     fun itemGroup(dest: KMutableProperty0<ItemGroup>, icon: () -> ItemStack) {
-        dest.set(object : ItemGroup(reg.mod.prefix(dest.name.snakeify())) {
+        dest.set(object : ItemGroup(registrar.mod.prefix(dest.name.snakeify())) {
             override fun createIcon(): ItemStack = icon()
         })
     }
 
     fun <T : NineTile> tileEntity(dest: KMutableProperty0<() -> T>, factory: (Virtue, TileEntityType<T>) -> T) {
         val type = MutableObject<TileEntityType<T>>()
-        val creator = { factory(reg.mod, type.value) }
+        val creator = { factory(registrar.mod, type.value) }
         type.value = TileEntityType.register(
-                reg.mod.prefix(dest.name.snakeify()),
+                registrar.mod.prefix(dest.name.snakeify()),
                 TileEntityType.Builder.create(creator)
         )
-        reg.tileEntities += type.value
+        registrar.tileEntities += type.value
         dest.set(creator)
-        reg.mod.markUsesTileEntities()
+        registrar.mod.markUsesTileEntities()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -142,16 +110,16 @@ class DefinitionDefContext(private val reg: Registrar) {
             guiFactory: (C) -> G
     ) {
         val type = ContainerType(
-                reg.mod.resource(dest.name.snakeify()),
+                registrar.mod.resource(dest.name.snakeify()),
                 dest.returnType.jvmErasure.java as Class<C>,
                 containerFactory,
                 contextSerializer,
                 contextDeserializer,
                 guiFactory
         )
-        reg.mod.containerHandler.register(type)
+        registrar.mod.containerHandler.register(type)
         dest.set(type)
-        reg.mod.markUsesContainers()
+        registrar.mod.markUsesContainers()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -168,9 +136,9 @@ class DefinitionDefContext(private val reg: Registrar) {
     )
 
     fun soundEvent(dest: KMutableProperty0<SoundEvent>, name: String) {
-        val event = SoundEvent(reg.mod.resource(name))
-        event.registryName = reg.mod.resource(dest.name.snakeify())
-        reg.soundEvents += event
+        val event = SoundEvent(registrar.mod.resource(name))
+        event.registryName = registrar.mod.resource(dest.name.snakeify())
+        registrar.soundEvents += event
         dest.set(event)
     }
 
@@ -180,8 +148,8 @@ class DefinitionDefContext(private val reg: Registrar) {
             serializer: (ByteWriter, R) -> Unit,
             deserializer: (ByteReader) -> R
     ) {
-        val type = RecipeType(reg.mod.resource(dest.name.snakeify()), parser, serializer, deserializer)
-        RecipeSet.registerType(type, reg)
+        val type = RecipeType(registrar.mod.resource(dest.name.snakeify()), parser, serializer, deserializer)
+        RecipeSet.registerType(type, registrar)
         dest.set(type)
     }
 
@@ -191,7 +159,7 @@ class DefinitionDefContext(private val reg: Registrar) {
             stage: GenerationStage.Decoration,
             target: BiomeSet
     ) {
-        reg.features += Triple(CompositeFeature(
+        registrar.features += Triple(CompositeFeature(
                 feature.buildFeature(),
                 IFeatureConfig.NO_FEATURE_CONFIG,
                 distribution.buildDistribution(),
