@@ -40,7 +40,7 @@ class ClientRegistrar internal constructor(mod: Virtue, bus: IEventBus, regHandl
     internal val particles: MutableList<NineParticleType<*>> = mutableListOf()
 
     init {
-        bus.addListener { e: FMLLoadCompleteEvent -> particles.forEach { it.register() } }
+        bus.addListener<FMLLoadCompleteEvent> { particles.forEach { it.register() } }
     }
 
 }
