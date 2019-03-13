@@ -23,8 +23,8 @@ object PacketServerSyncTileEntity : PacketType<PacketServerSyncTileEntity.Packet
 
     override fun deserialize(stream: ByteReader): Packet = Packet(stream.blockPos(), stream.bytes(stream.varPrecision()))
 
-    override fun handle(packet: Packet, context: () -> NetworkEvent.Context) {
-        context().enqueueWork<Nothing?> {
+    override fun handle(packet: Packet, context: NetworkEvent.Context) {
+        context.enqueueWork<Nothing?> {
             ((Minecraft.getInstance().world.getTileEntity(packet.pos)
                     ?: throw IllegalStateException("Expected tile entity at ${packet.pos}!"))
                     as? NineTile ?: throw IllegalStateException("Expected libnine tile entity at ${packet.pos}!"))
@@ -64,7 +64,7 @@ object PacketServerSyncRecipeSet : PacketType<PacketServerSyncRecipeSet.Packet> 
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun handle(packet: Packet, context: () -> NetworkEvent.Context) {
+    override fun handle(packet: Packet, context: NetworkEvent.Context) {
         (RecipeSet.setForType(packet.type).recipes as MutableList<Recipe<Any, Any>>)
                 .addAll(packet.recipes as List<Recipe<Any, Any>>)
     }

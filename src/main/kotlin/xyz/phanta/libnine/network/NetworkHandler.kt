@@ -46,7 +46,12 @@ class NetworkHandler(channelId: ResourceLocation) {
 
     private class Handler<T : PacketData>(private val type: PacketType<T>) : BiConsumer<T, Supplier<NetworkEvent.Context>> {
 
-        override fun accept(packet: T, context: Supplier<NetworkEvent.Context>) = type.handle(packet, context::get)
+        override fun accept(packet: T, context: Supplier<NetworkEvent.Context>) {
+            context.get().let {
+                type.handle(packet, it)
+                it.packetHandled = true
+            }
+        }
 
     }
 
@@ -60,7 +65,7 @@ interface PacketType<T : PacketData> {
 
     fun deserialize(stream: ByteReader): T
 
-    fun handle(packet: T, context: () -> NetworkEvent.Context)
+    fun handle(packet: T, context: NetworkEvent.Context)
 
 }
 
