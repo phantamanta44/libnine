@@ -8,7 +8,9 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.Vec3i
 import net.minecraft.world.World
+import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.fml.network.PacketDistributor
+import xyz.phanta.libnine.util.orNull
 
 operator fun BlockPos.plus(other: Vec3i): BlockPos = this.add(other)
 operator fun BlockPos.plus(dir: EnumFacing): BlockPos = this.offset(dir)
@@ -47,7 +49,13 @@ fun World.getPacketRange(pos: BlockPos, dist: Double): PacketDistributor.TargetP
 
 fun TileEntity.adjacentTiles(): List<TileEntity> = enumValues<EnumFacing>().mapNotNull { this.getAdjacentTile(it) }
 
-fun TileEntity.getAdjacentTile(dir: EnumFacing): TileEntity? = this.world!!.getTileEntity(this.pos + dir.directionVec)
+fun TileEntity.getAdjacentTile(dir: EnumFacing): TileEntity? = this.world!!.getTileEntity(this.pos + dir)
+
+fun <T : Any> TileEntity.adjacentCaps(cap: Capability<T>): List<T> =
+        enumValues<EnumFacing>().mapNotNull { getAdjacentCap(it, cap) }
+
+fun <T> TileEntity.getAdjacentCap(dir: EnumFacing, cap: Capability<T>): T? =
+        getAdjacentTile(dir)?.getCapability(cap, dir.opposite)?.orNull()
 
 fun BlockPos.getCenter(): Vec3d = Vec3d(this.x + 0.5, this.y + 0.5, this.z + 0.5)
 
