@@ -21,12 +21,20 @@ interface ClientDefiner {
 
 class ClientDefContext(private val reg: ClientRegistrar) {
 
-    fun <X> particle(dest: KMutableProperty0<(X) -> IParticleData>, typeFactory: (ResourceLocation) -> NineParticleType<X>) {
+    fun <X> particleCtx(dest: KMutableProperty0<(X) -> IParticleData>, typeFactory: (ResourceLocation) -> NineParticleType<X>) {
         val name = reg.mod.resource(dest.name.snakeify())
         val type = typeFactory(name)
         IRegistry.field_212632_u.put(name, type.type)
         Minecraft.getInstance().particles.registerFactory(type.type, type.factory)
         dest.set { NineParticleType.Data(type, it) }
+    }
+
+    fun particle(dest: KMutableProperty0<() -> IParticleData>, typeFactory: (ResourceLocation) -> NineParticleType<Unit>) {
+        val name = reg.mod.resource(dest.name.snakeify())
+        val type = typeFactory(name)
+        IRegistry.field_212632_u.put(name, type.type)
+        Minecraft.getInstance().particles.registerFactory(type.type, type.factory)
+        dest.set { NineParticleType.Data(type, Unit) }
     }
 
 }
