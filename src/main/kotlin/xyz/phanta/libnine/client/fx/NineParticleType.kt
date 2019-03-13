@@ -61,3 +61,32 @@ abstract class NineParticleType<X>(private val name: ResourceLocation, private v
     ): Particle
 
 }
+
+abstract class NineSimpleParticleType(name: ResourceLocation, force: Boolean) : NineParticleType<Unit>(name, force) {
+
+    override fun serialize(stream: ByteWriter, data: Unit) {
+        // NO-OP
+    }
+
+    override fun deserialize(stream: ByteReader) {
+        // NO-OP
+    }
+
+    override fun deserialize(cmd: StringReader) {
+        // NO-OP
+    }
+
+    override fun createParticle(
+            context: Unit,
+            world: World,
+            x: Double,
+            y: Double,
+            z: Double,
+            velX: Double,
+            velY: Double,
+            velZ: Double
+    ): Particle = createParticle(world, x, y, z, velX, velY, velZ)
+
+    abstract fun createParticle(world: World, x: Double, y: Double, z: Double, velX: Double, velY: Double, velZ: Double): Particle
+
+}
