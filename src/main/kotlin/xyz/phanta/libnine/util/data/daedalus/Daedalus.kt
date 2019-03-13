@@ -8,6 +8,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.*
+import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.jvmErasure
 
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD)
@@ -36,12 +37,14 @@ class Daedalus<T : Any>(private val target: T) : Serializable {
                 if (annotValue.isEmpty()) property.name else annotValue
 
         @Suppress("UNCHECKED_CAST")
-        private fun <T : Any> wrapProperty(name: String, property: KProperty1<T, Any>): PersistentProperty<T> =
-                if (property.getter.returnType.isSubtypeOf(Serializable::class.starProjectedType)) {
-                    SerializableProperty(name, property as KProperty1<T, Serializable>)
-                } else {
-                    SerializerBackedProperty(name, property as KMutableProperty1<T, Any>)
-                }
+        private fun <T : Any> wrapProperty(name: String, property: KProperty1<T, Any>): PersistentProperty<T> {
+            property.isAccessible = true
+            return if (property.getter.returnType.isSubtypeOf(Serializable::class.starProjectedType)) {
+                SerializableProperty(name, property as KProperty1<T, Serializable>)
+            } else {
+                SerializerBackedProperty(name, property as KMutableProperty1<T, Any>)
+            }
+        }
 
     }
 

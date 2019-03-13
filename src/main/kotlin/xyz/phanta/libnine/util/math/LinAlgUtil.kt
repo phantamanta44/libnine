@@ -34,7 +34,19 @@ fun Vec3d.castOntoPlane(dir: Vec3d, planarPoint: Vec3d, planeNormal: Vec3d): Vec
     return if (scale > 0) this + dir * scale else null
 }
 
-fun Vec3d.findOrthogonal(): Vec3d = Vec3d(x, -y, (y * y - x * x) / z)
+fun Vec3d.findOrthogonal(): Vec3d = if (z == 0.0) {
+    if (y == 0.0) {
+        if (x == 0.0) {
+            this
+        } else {
+            Vec3d((z * z - y * y) / x, y, -z)
+        }
+    } else {
+        Vec3d(x, (z * z - x * x) / y, -z)
+    }
+} else {
+    Vec3d(x, -y, (y * y - x * x) / z)
+}
 
 fun Vec3d.rotateAbout(axis: Vec3d, radians: Double): Vec3d {
     val parallelComponent = this onto axis
