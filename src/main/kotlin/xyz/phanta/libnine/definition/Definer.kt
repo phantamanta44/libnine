@@ -124,10 +124,12 @@ class DefinitionDefContext(private val reg: Registrar) {
     fun <T : NineTile> tileEntity(dest: KMutableProperty0<() -> T>, factory: (Virtue, TileEntityType<T>) -> T) {
         val type = MutableObject<TileEntityType<T>>()
         val creator = { factory(reg.mod, type.value) }
+        val name = reg.mod.resource(dest.name.snakeify())
         type.value = TileEntityType.register(
-                reg.mod.prefix(dest.name.snakeify()),
+                name.toString(),
                 TileEntityType.Builder.create(creator)
         )
+        type.value.registryName = name
         reg.tileEntities += type.value
         dest.set(creator)
         reg.mod.markUsesTileEntities()
@@ -169,6 +171,7 @@ class DefinitionDefContext(private val reg: Registrar) {
 
     fun soundEvent(dest: KMutableProperty0<SoundEvent>, name: String) {
         val event = SoundEvent(reg.mod.resource(name))
+        event.registryName = reg.mod.resource(dest.name.snakeify())
         reg.soundEvents += event
         dest.set(event)
     }
