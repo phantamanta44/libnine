@@ -4,6 +4,7 @@ import net.minecraft.block.Block
 import net.minecraft.enchantment.Enchantment
 import net.minecraft.item.Item
 import net.minecraft.tileentity.TileEntityType
+import net.minecraft.util.SoundEvent
 import net.minecraft.world.gen.GenerationStage
 import net.minecraft.world.gen.feature.CompositeFeature
 import net.minecraftforge.eventbus.api.IEventBus
@@ -18,11 +19,11 @@ class Registrar internal constructor(internal val mod: Virtue, internal val bus:
     internal val blocks: MutableList<Block> = newQueue()
     internal val items: MutableList<Item> = newQueue()
     internal val tileEntities: MutableList<TileEntityType<*>> = newQueue()
+    internal val soundEvents: MutableList<SoundEvent> = newQueue()
     internal val features: MutableList<Triple<CompositeFeature<*, *>, GenerationStage.Decoration, BiomeSet>> = mutableListOf()
 
     // TODO potions
     // TODO biomes
-    // TODO soundevents
     // TODO potiontypes
     // TODO enchantments
     // TODO professions

@@ -9,6 +9,7 @@ import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemGroup
 import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntityType
+import net.minecraft.util.SoundEvent
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.gen.GenerationStage
 import net.minecraft.world.gen.feature.CompositeFeature
@@ -165,6 +166,12 @@ class DefinitionDefContext(private val reg: Registrar) {
             ByteReader::blockPos,
             guiFactory
     )
+
+    fun soundEvent(dest: KMutableProperty0<SoundEvent>, name: String) {
+        val event = SoundEvent(reg.mod.resource(name))
+        reg.soundEvents += event
+        dest.set(event)
+    }
 
     fun <I, O, R : Recipe<I, O>> recipeType(
             dest: KMutableProperty0<in RecipeType<I, O, R>>,
