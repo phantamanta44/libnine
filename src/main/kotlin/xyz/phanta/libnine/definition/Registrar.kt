@@ -14,7 +14,7 @@ import xyz.phanta.libnine.RegistryHandler
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.worldgen.BiomeSet
 
-class Registrar internal constructor(internal val mod: Virtue, internal val bus: IEventBus, private val regHandler: RegistryHandler) {
+open class Registrar internal constructor(internal val mod: Virtue, internal val bus: IEventBus, private val regHandler: RegistryHandler) {
 
     internal val blocks: MutableList<Block> = newQueue()
     internal val items: MutableList<Item> = newQueue()

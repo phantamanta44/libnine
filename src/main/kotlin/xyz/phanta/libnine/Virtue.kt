@@ -2,9 +2,13 @@ package xyz.phanta.libnine
 
 import net.minecraft.client.renderer.model.ModelResourceLocation
 import net.minecraft.util.ResourceLocation
+import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.eventbus.api.IEventBus
+import net.minecraftforge.fml.loading.FMLEnvironment
 import xyz.phanta.libnine.container.ContainerHandler
+import xyz.phanta.libnine.definition.CommonInitContext
 import xyz.phanta.libnine.definition.InitializationContext
+import xyz.phanta.libnine.definition.ServerInitContext
 import xyz.phanta.libnine.network.NetworkHandler
 import xyz.phanta.libnine.network.PacketClientContainerInteraction
 import xyz.phanta.libnine.network.PacketServerSyncRecipeSet
@@ -50,7 +54,11 @@ abstract class Virtue {
 
     internal fun initialize(eventBus: IEventBus, regHandler: RegistryHandler) {
         virtueMap[modId] = this
-        init(InitializationContext(this, eventBus, regHandler))
+        init(if (FMLEnvironment.dist == Dist.CLIENT) {
+            CommonInitContext(this, eventBus, regHandler)
+        } else {
+            ServerInitContext(this, eventBus, regHandler)
+        })
     }
 
     protected abstract fun init(context: InitializationContext)
