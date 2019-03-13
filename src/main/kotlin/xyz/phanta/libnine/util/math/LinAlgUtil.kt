@@ -35,15 +35,7 @@ fun Vec3d.castOntoPlane(dir: Vec3d, planarPoint: Vec3d, planeNormal: Vec3d): Vec
 }
 
 fun Vec3d.findOrthogonal(): Vec3d = if (z == 0.0) {
-    if (y == 0.0) {
-        if (x == 0.0) {
-            this
-        } else {
-            Vec3d((z * z - y * y) / x, y, -z)
-        }
-    } else {
-        Vec3d(x, (z * z - x * x) / y, -z)
-    }
+    StdBasis.Z_POS
 } else {
     Vec3d(x, -y, (y * y - x * x) / z)
 }
