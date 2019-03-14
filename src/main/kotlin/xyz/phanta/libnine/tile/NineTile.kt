@@ -1,8 +1,6 @@
 package xyz.phanta.libnine.tile
 
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.network.NetworkManager
-import net.minecraft.network.play.server.SPacketUpdateTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.tileentity.TileEntityType
 import net.minecraft.util.EnumFacing
@@ -64,17 +62,12 @@ abstract class NineTile(
 
     override fun deserByteStream(stream: ByteReader) = serializer.deserByteStream(stream)
 
-    override fun getUpdatePacket(): SPacketUpdateTileEntity? {
-        return SPacketUpdateTileEntity(pos, 0, createSerializedNbt())
+    override fun read(compound: NBTTagCompound) {
+        super.read(compound)
+        deserNbt(compound)
     }
 
-    override fun getUpdateTag(): NBTTagCompound = createSerializedNbt()
-
-    override fun onDataPacket(net: NetworkManager, pkt: SPacketUpdateTileEntity) = deserNbt(pkt.nbtCompound)
-
-    override fun read(compound: NBTTagCompound) = deserNbt(compound)
-
-    override fun write(compound: NBTTagCompound): NBTTagCompound = compound.also { serNbt(it) }
+    override fun write(compound: NBTTagCompound): NBTTagCompound = super.write(compound).also { serNbt(it) }
 
 }
 
