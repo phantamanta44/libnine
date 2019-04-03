@@ -83,6 +83,11 @@ open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null) : IIte
 
     override fun getSlotLimit(slot: Int): Int = slotLimit
 
+    override fun isItemValid(slot: Int, stack: ItemStack): Boolean {
+        if (slot != 0) throw IndexOutOfBoundsException("Not in bounds of single-slot inventory: $slot")
+        return pred?.invoke(stack) ?: true
+    }
+
     override fun serByteStream(stream: ByteWriter) {
         stream.itemStack(stored)
     }

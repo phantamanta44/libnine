@@ -69,6 +69,8 @@ open class AspectInventory(size: Int) : IItemHandlerModifiable, Serializable {
 
     override fun getSlotLimit(slot: Int): Int = 64
 
+    override fun isItemValid(slot: Int, stack: ItemStack): Boolean = preds[slot]?.invoke(stack) ?: true
+
     override fun serNbt(tag: NBTTagCompound) =
             tag.setTag("Items", slots.asNbtList {
                 NBTTagCompound().also { tag ->
