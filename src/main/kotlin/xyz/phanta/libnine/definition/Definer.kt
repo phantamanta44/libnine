@@ -49,31 +49,31 @@ interface Definer {
 
 class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, BlockDefContext {
 
-    override fun <I : Item> item(dest: KMutableProperty0<in I>, factory: (Item.Properties) -> I, body: (ItemDefBuilder<I>) -> I) {
-        val item = body(createItemBuilder(registrar.mod.resource(dest.name.snakeify()), factory))
+    override fun <I : Item> item(name: String, factory: (Item.Properties) -> I, body: (ItemDefBuilder<I>) -> I): I {
+        val item = body(createItemBuilder(registrar.mod.resource(name), factory))
         registrar.items += item
-        dest.set(item)
+        return item
     }
 
     override fun <I : Item> createItemBuilder(name: ResourceLocation, factory: (Item.Properties) -> I): ItemDefBuilder<I> =
             ItemDefBuilderImpl(name, factory)
 
     override fun <B : Block> block(
-            dest: KMutableProperty0<in B>,
+            name: String,
             blockFactory: (Block.Properties) -> B,
             propsFactory: () -> Block.Properties,
             itemBlockFactory: (B, Item.Properties) -> ItemBlock,
             body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock>
-    ) {
+    ): B {
         val (block, itemBlock) = body(createBlockBuilder(
-                registrar.mod.resource(dest.name.snakeify()),
+                registrar.mod.resource(name),
                 propsFactory(),
                 blockFactory,
                 itemBlockFactory
         ))
         registrar.blocks += block
         registrar.items += itemBlock
-        dest.set(block)
+        return block
     }
 
     override fun <B : Block> createBlockBuilder(
@@ -89,17 +89,20 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
         })
     }
 
-    fun <T : NineTile> tileEntity(dest: KMutableProperty0<() -> T>, factory: (Virtue, TileEntityType<T>) -> T) {
+    fun <T : NineTile> tileEntity(name: String, factory: (Virtue, TileEntityType<T>) -> T): () -> T {
         val type = MutableObject<TileEntityType<T>>()
         val creator = { factory(registrar.mod, type.value) }
         type.value = TileEntityType.register(
-                registrar.mod.prefix(dest.name.snakeify()),
+                registrar.mod.prefix(name),
                 TileEntityType.Builder.create(creator)
         )
         registrar.tileEntities += type.value
-        dest.set(creator)
         registrar.mod.markUsesTileEntities()
+        return creator
     }
+
+    fun <T : NineTile> tileEntity(dest: KMutableProperty0<() -> T>, factory: (Virtue, TileEntityType<T>) -> T) =
+        dest.set(tileEntity(dest.name.snakeify(), factory))
 
     @Suppress("UNCHECKED_CAST")
     fun <C : NineContainer, G : NineGuiContainer, X> container(
@@ -135,12 +138,15 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
             guiFactory
     )
 
-    fun soundEvent(dest: KMutableProperty0<SoundEvent>, name: String) {
-        val event = SoundEvent(registrar.mod.resource(name))
-        event.registryName = registrar.mod.resource(dest.name.snakeify())
+    fun soundEvent(name: String, soundPath: String): SoundEvent {
+        val event = SoundEvent(registrar.mod.resource(soundPath))
+        event.registryName = registrar.mod.resource(name)
         registrar.soundEvents += event
-        dest.set(event)
+        return event
     }
+
+    fun soundEvent(dest: KMutableProperty0<SoundEvent>, soundPath: String) =
+            dest.set(soundEvent(dest.name.snakeify(), soundPath))
 
     fun <I, O, R : Recipe<I, O>> recipeType(
             dest: KMutableProperty0<in RecipeType<I, O, R>>,

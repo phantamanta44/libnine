@@ -17,12 +17,28 @@ interface BlockDefContextBase {
     val registrar: Registrar
 
     fun <B : Block> block(
+            name: String,
+            blockFactory: (Block.Properties) -> B,
+            propsFactory: () -> Block.Properties,
+            itemBlockFactory: (B, Item.Properties) -> ItemBlock = ::ItemBlock,
+            body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock> = { it.build() }
+    ): B
+
+    fun <B : Block> block(
             dest: KMutableProperty0<in B>,
             blockFactory: (Block.Properties) -> B,
             propsFactory: () -> Block.Properties,
             itemBlockFactory: (B, Item.Properties) -> ItemBlock = ::ItemBlock,
             body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock> = { it.build() }
-    )
+    ) = dest.set(block(dest.name.snakeify(), blockFactory, propsFactory, itemBlockFactory, body))
+
+    fun <B : Block> block(
+            name: String,
+            blockFactory: (Block.Properties) -> B,
+            material: Material,
+            itemBlockFactory: (B, Item.Properties) -> ItemBlock = ::ItemBlock,
+            body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock> = { it.build() }
+    ): B = block(name, blockFactory, { Block.Properties.create(material) }, itemBlockFactory, body)
 
     fun <B : Block> block(
             dest: KMutableProperty0<in B>,
@@ -66,7 +82,10 @@ interface BlockDefContext : BlockDefContextBase {
 
 interface BlockDefContextAugmented<A : Block> : BlockDefContextBase {
 
-    fun block(dest: KMutableProperty0<in A>, body: (BlockDefBuilder<A>) -> Pair<A, ItemBlock> = { it.build() })
+    fun block(name: String, body: (BlockDefBuilder<A>) -> Pair<A, ItemBlock> = { it.build() }): A
+
+    fun block(dest: KMutableProperty0<in A>, body: (BlockDefBuilder<A>) -> Pair<A, ItemBlock> = { it.build() }) =
+            dest.set(block(dest.name.snakeify(), body))
 
     fun blocksBy(primer: BlockPrimer, body: DefBody<BlockDefContextAugmented<A>>)
 
@@ -75,21 +94,21 @@ interface BlockDefContextAugmented<A : Block> : BlockDefContextBase {
 internal open class BlockDefContextBaseImpl(override val registrar: Registrar) : BlockDefContextBase {
 
     override fun <B : Block> block(
-            dest: KMutableProperty0<in B>,
+            name: String,
             blockFactory: (Block.Properties) -> B,
             propsFactory: () -> Block.Properties,
             itemBlockFactory: (B, Item.Properties) -> ItemBlock,
             body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock>
-    ) {
+    ): B {
         val (block, itemBlock) = body(createBlockBuilder(
-                registrar.mod.resource(dest.name.snakeify()),
+                registrar.mod.resource(name),
                 propsFactory(),
                 blockFactory,
                 itemBlockFactory
         ))
         registrar.blocks += block
         registrar.items += itemBlock
-        dest.set(block)
+        return block
     }
 
     override fun <B : Block> createBlockBuilder(
@@ -133,16 +152,16 @@ private class MappingBlockDefContextAugmented<A : Block>(
         primer: BlockPrimer
 ) : MappingBlockDefContextBase(registrar, parent, primer), BlockDefContextAugmented<A> {
 
-    override fun block(dest: KMutableProperty0<in A>, body: (BlockDefBuilder<A>) -> Pair<A, ItemBlock>) {
+    override fun block(name: String, body: (BlockDefBuilder<A>) -> Pair<A, ItemBlock>): A {
         val (block, itemBlock) = body(createBlockBuilder(
-                registrar.mod.resource(dest.name.snakeify()),
+                registrar.mod.resource(name),
                 propsFactory(),
                 blockFactory,
                 itemBlockFactory
         ))
         registrar.blocks += block
         registrar.items += itemBlock
-        dest.set(block)
+        return block
     }
 
     override fun blocksBy(primer: BlockPrimer, body: DefBody<BlockDefContextAugmented<A>>) =
