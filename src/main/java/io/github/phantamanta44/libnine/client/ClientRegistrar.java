@@ -37,8 +37,13 @@ public class ClientRegistrar extends Registrar {
     private final List<IPair<Block, IStateMapper>> rqBlockStateMappers = new LinkedList<>();
 
     @Override
+    public void queueItemModelReg(L9Item item, int meta, String model, String variant) {
+        rqItemModels.add(ITriple.of(item, meta, getBound().newModelResourceLocation(model, variant)));
+    }
+
+    @Override
     public void queueItemModelReg(L9Item item, int meta, String model) {
-        rqItemModels.add(ITriple.of(item, meta, getBound().newModelResourceLocation(model, "inventory")));
+        queueItemModelReg(item, meta, model, "inventory");
     }
 
     @Override
@@ -47,8 +52,13 @@ public class ClientRegistrar extends Registrar {
     }
 
     @Override
+    public void queueItemBlockModelReg(L9Block block, int meta, String model, String variant) {
+        rqItemModels.add(ITriple.of(block.getItemBlock(), meta, getBound().newModelResourceLocation(model, variant)));
+    }
+
+    @Override
     public void queueItemBlockModelReg(L9Block block, int meta, String model) {
-        rqItemModels.add(ITriple.of(block.getItemBlock(), meta, getBound().newModelResourceLocation(model, "inventory")));
+        queueItemBlockModelReg(block, meta, model, "inventory");
     }
 
     @Override

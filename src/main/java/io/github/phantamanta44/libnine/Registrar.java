@@ -105,12 +105,20 @@ public class Registrar {
             tileVirtueTable.put(t.clazz.get(), t.virtue.get());
         });
     }
-    
+
+    public void queueItemModelReg(L9Item item, int meta, String model, String variant) {
+        // NO-OP
+    }
+
     public void queueItemModelReg(L9Item item, int meta, String model) {
         // NO-OP
     }
 
     public void queueItemModelReg(L9Item item, String model) {
+        // NO-OP
+    }
+
+    public void queueItemBlockModelReg(L9Block block, int meta, String model, String variant) {
         // NO-OP
     }
 
