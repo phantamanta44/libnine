@@ -1,23 +1,26 @@
 package io.github.phantamanta44.libnine.recipe.input;
 
+import io.github.phantamanta44.libnine.util.IDisplayableMatcher;
 import io.github.phantamanta44.libnine.util.helper.ItemUtils;
 import net.minecraft.item.ItemStack;
 
-import java.util.function.Predicate;
-
 public class ItemStackInput implements IRcpIn<ItemStack> {
 
-    private final Predicate<ItemStack> matcher;
+    private final IDisplayableMatcher<ItemStack> matcher;
     private final int amount;
 
     public ItemStackInput(ItemStack stack) {
-        this.matcher = s -> ItemUtils.matchesWithWildcard(stack, s);
+        this.matcher = ItemUtils.matchesWithWildcard(stack);
         this.amount = stack.getCount();
     }
 
-    public ItemStackInput(Predicate<ItemStack> matcher, int amount) {
+    public ItemStackInput(IDisplayableMatcher<ItemStack> matcher, int amount) {
         this.matcher = matcher;
         this.amount = amount;
+    }
+
+    public IDisplayableMatcher<ItemStack> getMatcher() {
+        return matcher;
     }
 
     @Override

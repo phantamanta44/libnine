@@ -1,11 +1,11 @@
 package io.github.phantamanta44.libnine.util.helper;
 
+import io.github.phantamanta44.libnine.util.IDisplayableMatcher;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class OreDictUtils {
 
@@ -31,8 +31,8 @@ public class OreDictUtils {
         return false;
     }
 
-    public static Predicate<ItemStack> matchesOredict(String ore) {
-        return s -> matchesOredict(s, ore);
+    public static IDisplayableMatcher<ItemStack> matchesOredict(String ore) {
+        return IDisplayableMatcher.ofMany(() -> OreDictionary.getOres(ore), s -> matchesOredict(s, ore));
     }
 
 }

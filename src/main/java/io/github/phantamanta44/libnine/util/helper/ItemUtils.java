@@ -1,13 +1,12 @@
 package io.github.phantamanta44.libnine.util.helper;
 
 import io.github.phantamanta44.libnine.item.L9ItemSubs;
+import io.github.phantamanta44.libnine.util.IDisplayableMatcher;
 import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.translation.I18n;
-
-import java.util.function.Predicate;
 
 public class ItemUtils {
 
@@ -20,8 +19,10 @@ public class ItemUtils {
                 && (a.hasTagCompound() ? (b.hasTagCompound() && b.getTagCompound().equals(a.getTagCompound())) : !b.hasTagCompound());
     }
 
-    public static Predicate<ItemStack> matchesWithWildcard(ItemStack stack) {
-        return s -> matchesWithWildcard(stack, s);
+    public static IDisplayableMatcher<ItemStack> matchesWithWildcard(ItemStack stack) {
+        return IDisplayableMatcher.of(() -> stack.getMetadata() == WILDCARD_META
+                        ? new ItemStack(stack.getItem(), stack.getCount(), 0) : stack,
+                s -> matchesWithWildcard(stack, s));
     }
 
     public static String getColouredName(ItemStack stack) {
