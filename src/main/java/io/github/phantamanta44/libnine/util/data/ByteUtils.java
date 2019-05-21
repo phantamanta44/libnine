@@ -253,7 +253,7 @@ public class ByteUtils {
                 int length = readVarPrecision();
                 return CompressedStreamTools.read(
                         ByteStreams.newDataInput(readBytes(length)),
-                        new NBTSizeTracker(length));
+                        NBTSizeTracker.INFINITE);
             } catch (Exception e) {
                 throw new ImpossibilityRealizedException(e);
             }
