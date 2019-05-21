@@ -79,4 +79,9 @@ public class WorldBlockPos {
         return world.hashCode() ^ pos.hashCode();
     }
 
+    @Override
+    public String toString() {
+        return String.format("(%d, %d, %d) @ %s", getX(), getY(), getZ(), world.getProviderName());
+    }
+
 }
