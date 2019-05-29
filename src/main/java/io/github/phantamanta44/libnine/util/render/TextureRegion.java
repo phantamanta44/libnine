@@ -74,40 +74,88 @@ public class TextureRegion {
         return dv;
     }
 
-    public void draw(int x, int y, int width, int height) {
+    public void draw(double x, double y, double zIndex, double width, double height) {
         texture.bind();
         Tessellator tess = Tessellator.getInstance();
         BufferBuilder buf = tess.getBuffer();
         buf.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        buf.pos(x, y + height, 0D).tex(u1, v2).endVertex();
-        buf.pos(x + width, y + height, 0D).tex(u2, v2).endVertex();
-        buf.pos(x + width, y, 0D).tex(u2, v1).endVertex();
-        buf.pos(x, y, 0D).tex(u1, v1).endVertex();
+        buf.pos(x, y + height, zIndex).tex(u1, v2).endVertex();
+        buf.pos(x + width, y + height, zIndex).tex(u2, v2).endVertex();
+        buf.pos(x + width, y, zIndex).tex(u2, v1).endVertex();
+        buf.pos(x, y, zIndex).tex(u1, v1).endVertex();
         tess.draw();
     }
 
-    public void draw(int x, int y) {
-        draw(x, y, width, height);
+    public void draw(int x, int y, double zIndex, int width, int height) {
+        draw((double)x, (double)y, zIndex, (double)width, (double)height);
     }
 
-    public void drawPartial(int x, int y, int width, int height, float x1, float y1, float x2, float y2) {
-        float xStart = x + width * x1, xEnd = x + width * x2;
-        float yStart = y + height * y1, yEnd = y + height * y2;
+    public void draw(double x, double y, double width, double height) {
+        draw(x, y, 0D, width, height);
+    }
+
+    public void draw(int x, int y, int width, int height) {
+        draw(x, y, 0D, width, height);
+    }
+
+    public void draw(double x, double y, double zIndex) {
+        draw(x, y, zIndex, width, height);
+    }
+
+    public void draw(int x, int y, double zIndex) {
+        draw(x, y, zIndex, width, height);
+    }
+
+    public void draw(double x, double y) {
+        draw(x, y, 0D);
+    }
+
+    public void draw(int x, int y) {
+        draw(x, y, 0D);
+    }
+
+    public void drawPartial(double x, double y, double zIndex, double width, double height, float x1, float y1, float x2, float y2) {
+        double xStart = x + width * x1, xEnd = x + width * x2;
+        double yStart = y + height * y1, yEnd = y + height * y2;
         float uStart = u1 + du * x1, uEnd = u1 + du * x2;
         float vStart = v1 + dv * y1, vEnd = v1 + dv * y2;
         texture.bind();
         Tessellator tess = Tessellator.getInstance();
         BufferBuilder buf = tess.getBuffer();
         buf.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        buf.pos(xStart, yEnd, 0D).tex(uStart, vEnd).endVertex();
-        buf.pos(xEnd, yEnd, 0D).tex(uEnd, vEnd).endVertex();
-        buf.pos(xEnd, yStart, 0D).tex(uEnd, vStart).endVertex();
-        buf.pos(xStart, yStart, 0D).tex(uStart, vStart).endVertex();
+        buf.pos(xStart, yEnd, zIndex).tex(uStart, vEnd).endVertex();
+        buf.pos(xEnd, yEnd, zIndex).tex(uEnd, vEnd).endVertex();
+        buf.pos(xEnd, yStart, zIndex).tex(uEnd, vStart).endVertex();
+        buf.pos(xStart, yStart, zIndex).tex(uStart, vStart).endVertex();
         tess.draw();
     }
 
+    public void drawPartial(int x, int y, double zIndex, int width, int height, float x1, float y1, float x2, float y2) {
+        drawPartial((double)x, (double)y, zIndex, (double)width, (double)height, x1, y1, x2, y2);
+    }
+
+    public void drawPartial(double x, double y, double width, double height, float x1, float y1, float x2, float y2) {
+        drawPartial(x, y, 0D, width, height, x1, y1, x2, y2);
+    }
+
+    public void drawPartial(int x, int y, int width, int height, float x1, float y1, float x2, float y2) {
+        drawPartial(x, y, 0D, width, height, x1, y1, x2, y2);
+    }
+
+    public void drawPartial(double x, double y, double zIndex, float x1, float y1, float x2, float y2) {
+        drawPartial(x, y, zIndex, width, height, x1, y1, x2, y2);
+    }
+
+    public void drawPartial(int x, int y, double zIndex, float x1, float y1, float x2, float y2) {
+        drawPartial(x, y, zIndex, width, height, x1, y1, x2, y2);
+    }
+
+    public void drawPartial(double x, double y, float x1, float y1, float x2, float y2) {
+        drawPartial(x, y, 0D, x1, y1, x2, y2);
+    }
+
     public void drawPartial(int x, int y, float x1, float y1, float x2, float y2) {
-        drawPartial(x, y, width, height, x1, y1, x2, y2);
+        drawPartial(x, y, 0D, x1, y1, x2, y2);
     }
 
 }
