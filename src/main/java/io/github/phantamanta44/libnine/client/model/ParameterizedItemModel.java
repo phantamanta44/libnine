@@ -132,7 +132,7 @@ public class ParameterizedItemModel implements IModel {
             @Override
             public IBakedModel handleItemState(IBakedModel originalModel, ItemStack stack, @Nullable World world, @Nullable EntityLivingBase entity) {
                 Mutation mutation = new Mutation(container.model);
-                ((IParamaterized)stack.getItem()).getModelMutations(stack, mutation);
+                ((IContextSensitive)stack.getItem()).getModelMutations(stack, world, entity, mutation);
                 if (!container.children.containsKey(mutation)) {
                     throw new NoSuchElementException("Invalid PI mutation: " + mutation);
                 }
@@ -143,9 +143,20 @@ public class ParameterizedItemModel implements IModel {
 
     }
 
-    public interface IParamaterized {
+    public interface IParamaterized extends IContextSensitive {
 
         void getModelMutations(ItemStack stack, Mutation m);
+
+        @Override
+        default void getModelMutations(ItemStack stack, @Nullable World world, @Nullable EntityLivingBase holder, Mutation m) {
+            getModelMutations(stack, m);
+        }
+
+    }
+
+    public interface IContextSensitive {
+
+        void getModelMutations(ItemStack stack, @Nullable World world, @Nullable EntityLivingBase holder, Mutation m);
 
     }
 
