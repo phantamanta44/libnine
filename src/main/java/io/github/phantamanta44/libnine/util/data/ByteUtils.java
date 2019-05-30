@@ -183,6 +183,11 @@ public class ByteUtils {
             return this;
         }
 
+        public Reader advance(int bytes) {
+            pointer += bytes;
+            return this;
+        }
+
         public byte[] readBytes(int length) {
             pointer += length;
             return Arrays.copyOfRange(data, pointer - length, pointer);
