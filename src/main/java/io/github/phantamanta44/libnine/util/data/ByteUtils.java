@@ -3,7 +3,6 @@ package io.github.phantamanta44.libnine.util.data;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import io.github.phantamanta44.libnine.util.ImpossibilityRealizedException;
-import io.github.phantamanta44.libnine.util.helper.ResourceUtils;
 import io.github.phantamanta44.libnine.util.math.Vec2i;
 import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.item.Item;
@@ -18,6 +17,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.UUID;
@@ -99,7 +99,7 @@ public class ByteUtils {
         }
 
         public Writer writeString(String s) {
-            byte[] bytes = s.getBytes(ResourceUtils.UTF_8);
+            byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
             return writeVarPrecision(bytes.length).writeBytes(bytes);
         }
 
@@ -245,7 +245,7 @@ public class ByteUtils {
         public String readString() {
             int length = readVarPrecision();
             pointer += length;
-            return new String(data, pointer - length, length, ResourceUtils.UTF_8);
+            return new String(data, pointer - length, length, StandardCharsets.UTF_8);
         }
 
         public NBTTagCompound readTagCompound() {

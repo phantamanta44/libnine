@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -84,7 +85,7 @@ public class ParameterizedItemModelLoader implements ICustomModelLoader {
             if (resource == null) {
                 throw new FileNotFoundException("Unknown PI resource: " + location.getResourcePath());
             }
-            return new ByteArrayInputStream(resource.getBytes(ResourceUtils.UTF_8));
+            return new ByteArrayInputStream(resource.getBytes(StandardCharsets.UTF_8));
         }
 
         @Override
