@@ -1,7 +1,9 @@
 package io.github.phantamanta44.libnine.client.model;
 
 import com.google.common.collect.Table;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import io.github.phantamanta44.libnine.util.helper.JsonUtils9;
@@ -32,7 +34,7 @@ public class ParameterizedItemModel implements IModel {
     private final Map<Mutation, IModel> children;
 
     ParameterizedItemModel(ParameterizedItemModelLoader.ResourceInjector resourceInjector,
-                           JsonObject archetype, @Nullable Table<String, String, JsonObject> mutations) {
+                           JsonObject archetype, @Nullable Table<String, String, JsonElement> mutations) {
         this.indexMap = new TObjectIntHashMap<>();
         if (mutations != null) {
             String[] keys = new String[mutations.rowKeySet().size()];
@@ -43,39 +45,97 @@ public class ParameterizedItemModel implements IModel {
                 index++;
             }
             this.children = calculateCartesianProduct(keys, mutations, 0)
-                    .collect(Collectors.toMap(m -> m, m -> compileChildModel(resourceInjector, mutateModel(archetype, mutations, m))));
+                    .collect(Collectors.toMap(m -> m, m -> mutateModel(archetype, mutations, m).compile(resourceInjector)));
         } else {
-            this.children = Collections.singletonMap(new Mutation(this), compileChildModel(resourceInjector, archetype));
+            this.children = Collections.singletonMap(new Mutation(this), new IChildModel.JsonModel(archetype).compile(resourceInjector));
         }
     }
 
-    private Stream<Mutation> calculateCartesianProduct(String[] keys, Table<String, String, JsonObject> mutations, int index) {
+    private Stream<Mutation> calculateCartesianProduct(String[] keys, Table<String, String, JsonElement> mutations, int index) {
         Stream<Mutation> prev = index == keys.length - 1
                 ? Stream.of(new Mutation(this)) : calculateCartesianProduct(keys, mutations, index + 1);
         return prev.flatMap(m -> mutations.row(keys[index]).keySet().stream().map(v -> m.mutateCloning(keys[index], v)));
     }
 
-    private JsonObject mutateModel(JsonObject model, Table<String, String, JsonObject> mutations, Mutation mutation) {
+    private IChildModel mutateModel(JsonObject model, Table<String, String, JsonElement> mutations, Mutation mutation) {
         JsonObject result = JsonUtils9.copy(model);
         for (String key : indexMap.keySet()) {
-            JsonUtils9.merge(result, mutations.get(key, mutation.values[indexMap.get(key)]));
+            JsonElement mutator = mutations.get(key, mutation.values[indexMap.get(key)]);
+            if (mutator.isJsonObject()) {
+                JsonUtils9.merge(result, mutator.getAsJsonObject());
+            } else if (mutator.isJsonPrimitive()) {
+                JsonPrimitive mutatorPrim = mutator.getAsJsonPrimitive();
+                if (mutatorPrim.isString()) {
+                    String mutatorStr = mutatorPrim.getAsString();
+                    int spaceIndex = mutatorStr.indexOf(' ');
+                    if (spaceIndex != -1) {
+                        String arg = mutatorStr.substring(spaceIndex + 1);
+                        if (mutatorStr.substring(0, spaceIndex).equals("supplant")) {
+                            return new IChildModel.Supplant(new ResourceLocation(arg));
+                        }
+                        throw new IllegalArgumentException("Unknown parametric mutator directive: " + mutatorStr);
+                    } else {
+                        throw new IllegalArgumentException("Unknown zero-arg mutator directive: " + mutatorStr);
+                    }
+                } else {
+                    throw new IllegalArgumentException("Cannot parse mutator: " + mutator);
+                }
+            } else {
+                throw new IllegalArgumentException("Cannot parse mutator: " + mutator);
+            }
         }
-        return result;
-    }
-
-    private IModel compileChildModel(ParameterizedItemModelLoader.ResourceInjector resourceInjector, JsonObject src) {
-        ResourceLocation injected = resourceInjector.injectResource(JsonUtils9.GSON.toJson(src));
-        try {
-            return ModelLoaderRegistry.getModel(injected);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return new IChildModel.JsonModel(result);
     }
 
     @Override
     public IBakedModel bake(IModelState state, VertexFormat format, Function<ResourceLocation, TextureAtlasSprite> textureBaker) {
         return new ParameterizedItemModelBakedModelDelegator(this, children.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().bake(state, format, textureBaker))));
+    }
+
+    private interface IChildModel {
+
+        IModel compile(ParameterizedItemModelLoader.ResourceInjector resourceInjector);
+
+        class JsonModel implements IChildModel {
+
+            private final JsonObject src;
+
+            JsonModel(JsonObject src) {
+                this.src = src;
+            }
+
+            @Override
+            public IModel compile(ParameterizedItemModelLoader.ResourceInjector resourceInjector) {
+                ResourceLocation injected = resourceInjector.injectResource(JsonUtils9.GSON.toJson(src));
+                try {
+                    return ModelLoaderRegistry.getModel(injected);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+        }
+
+        class Supplant implements IChildModel {
+
+            private final ResourceLocation suppletion;
+
+            Supplant(ResourceLocation suppletion) {
+                this.suppletion = suppletion;
+            }
+
+            @Override
+            public IModel compile(ParameterizedItemModelLoader.ResourceInjector resourceInjector) {
+                try {
+                    return ModelLoaderRegistry.getModel(suppletion);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+        }
+
     }
 
     private static class ParameterizedItemModelBakedModelDelegator implements IBakedModel {
@@ -136,7 +196,8 @@ public class ParameterizedItemModel implements IModel {
                 if (!container.children.containsKey(mutation)) {
                     throw new NoSuchElementException("Invalid PI mutation: " + mutation);
                 }
-                return container.children.get(mutation);
+                IBakedModel delegate = container.children.get(mutation);
+                return delegate.getOverrides().handleItemState(delegate, stack, world, entity);
             }
 
         }

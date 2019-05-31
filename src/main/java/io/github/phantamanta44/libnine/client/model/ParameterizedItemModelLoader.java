@@ -48,12 +48,12 @@ public class ParameterizedItemModelLoader implements ICustomModelLoader {
         JsonObject archetype = model.getAsJsonObject("archetype");
         if (archetype == null) throw new NoSuchElementException("No archetype for PI model: " + resource);
         JsonObject mutations = model.getAsJsonObject("mutations");
-        Table<String, String, JsonObject> mutationTable = null;
+        Table<String, String, JsonElement> mutationTable = null;
         if (mutations != null) {
             mutationTable = Tables.newCustomTable(new HashMap<>(), HashMap::new);
             for (Map.Entry<String, JsonElement> mKey : mutations.entrySet()) {
                 for (Map.Entry<String, JsonElement> mValue : mKey.getValue().getAsJsonObject().entrySet()) {
-                    mutationTable.put(mKey.getKey(), mValue.getKey(), mValue.getValue().getAsJsonObject());
+                    mutationTable.put(mKey.getKey(), mValue.getKey(), mValue.getValue());
                 }
             }
         }
