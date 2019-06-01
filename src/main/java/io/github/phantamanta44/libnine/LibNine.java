@@ -16,7 +16,7 @@ public class LibNine {
     public static LibNine INSTANCE;
 
     @SidedProxy(
-            serverSide = "io.github.phantamanta44.libnine.client.L9ServerProxy",
+            serverSide = "io.github.phantamanta44.libnine.L9CommonProxy",
             clientSide = "io.github.phantamanta44.libnine.client.L9ClientProxy"
     )
     @SuppressWarnings("NullableProblems")
