@@ -1,11 +1,11 @@
 package io.github.phantamanta44.libnine.util.world;
 
+import io.github.phantamanta44.libnine.LibNine;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
 
 import javax.annotation.Nullable;
 
@@ -20,7 +20,7 @@ public class WorldBlockPos {
     }
 
     public WorldBlockPos(int dim, int x, int y, int z) {
-        this(DimensionManager.getWorld(dim), x, y, z);
+        this(LibNine.PROXY.getDimensionWorldStrict(dim), x, y, z);
     }
 
     public WorldBlockPos(World world, BlockPos pos) {

@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
@@ -24,6 +25,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class L9CommonProxy {
@@ -71,6 +73,19 @@ public class L9CommonProxy {
 
     public World getAnySidedWorld() {
         return FMLCommonHandler.instance().getMinecraftServerInstance().getEntityWorld();
+    }
+
+    @Nullable
+    public World getDimensionWorld(int dim) {
+        return DimensionManager.getWorld(dim);
+    }
+
+    public World getDimensionWorldStrict(int dim) {
+        World world = getDimensionWorld(dim);
+        if (world == null) {
+            throw new IllegalStateException("Nonexistent dimension: " + dim);
+        }
+        return world;
     }
 
     /*

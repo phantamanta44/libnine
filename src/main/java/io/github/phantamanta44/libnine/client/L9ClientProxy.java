@@ -51,6 +51,17 @@ public class L9ClientProxy extends L9CommonProxy {
                 ? Minecraft.getMinecraft().world : super.getAnySidedWorld();
     }
 
+    @Nullable
+    @Override
+    public World getDimensionWorld(int dim) {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+            World world = Minecraft.getMinecraft().world;
+            return world.provider.getDimension() == dim ? world : null;
+        } else {
+            return super.getDimensionWorld(dim);
+        }
+    }
+
     /*
      * Callbacks
      */
