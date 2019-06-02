@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
@@ -79,11 +80,6 @@ public class Registrar {
         if (item instanceof L9Item) virtueItems.add((L9Item)item);
     }
 
-    @SubscribeEvent
-    public void onRegisterItems(RegistryEvent.Register<Item> event) {
-        rqItems.forEach(event.getRegistry()::register);
-    }
-
     private final List<L9Block> rqBlocks = new LinkedList<>();
     private final List<TileRegistration> rqTileEntities = new LinkedList<>();
 
@@ -94,16 +90,6 @@ public class Registrar {
 
     void queueTileEntityReg(String modId, String className) {
         rqTileEntities.add(new TileRegistration(modId, className));
-    }
-
-    @SubscribeEvent
-    @SuppressWarnings("unchecked")
-    public void onRegisterBlocks(RegistryEvent.Register<Block> event) {
-        rqBlocks.forEach(event.getRegistry()::register);
-        rqTileEntities.forEach(t -> {
-            t.register();
-            tileVirtueTable.put(t.clazz.get(), t.virtue.get());
-        });
     }
 
     public void queueItemModelReg(L9Item item, int meta, String model, String variant) {
@@ -158,6 +144,29 @@ public class Registrar {
 
     public <S extends Container, C> void queueGuiClientReg(GuiIdentity<S, C> identity, L9GuiHandler.IGuiFactory<S, C> factory) {
         // NO-OP
+    }
+
+    protected void hookEvents() {
+        MinecraftForge.EVENT_BUS.register(new RegistrarHook());
+    }
+
+    private class RegistrarHook {
+
+        @SubscribeEvent
+        public void onRegisterItems(RegistryEvent.Register<Item> event) {
+            rqItems.forEach(event.getRegistry()::register);
+        }
+
+        @SubscribeEvent
+        @SuppressWarnings("unchecked")
+        public void onRegisterBlocks(RegistryEvent.Register<Block> event) {
+            rqBlocks.forEach(event.getRegistry()::register);
+            rqTileEntities.forEach(t -> {
+                t.register();
+                tileVirtueTable.put(t.clazz.get(), t.virtue.get());
+            });
+        }
+
     }
 
     private static class TileRegistration {

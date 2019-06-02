@@ -78,7 +78,7 @@ public class L9CommonProxy {
      */
 
     protected void onPreInit(FMLPreInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(registrar);
+        registrar.hookEvents();
         for (ASMDataTable.ASMData target : event.getAsmData().getAll(RegisterTile.class.getName())) {
             getRegistrar().queueTileEntityReg((String)target.getAnnotationInfo().get("value"), target.getClassName());
         }

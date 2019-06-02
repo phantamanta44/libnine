@@ -24,6 +24,7 @@ import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -71,12 +72,6 @@ public class ClientRegistrar extends Registrar {
         rqBlockStateMappers.add(IPair.of(block, new StateMapperAdapter(mapper, getBound())));
     }
 
-    @SubscribeEvent
-    public void onRegisterModels(ModelRegistryEvent event) {
-        rqItemModels.forEach(m -> m.sprexec(ModelLoader::setCustomModelResourceLocation));
-        rqBlockStateMappers.forEach(m -> m.sprexec(ModelLoader::setCustomStateMapper));
-    }
-
     private final List<IPair<IItemColor, Item[]>> rqItemColourHandlers = new LinkedList<>();
     private final List<IPair<IBlockColor, L9Block[]>> rqBlockColourHandlers = new LinkedList<>();
 
@@ -106,6 +101,22 @@ public class ClientRegistrar extends Registrar {
     @Override
     public <S extends Container, C> void queueGuiClientReg(GuiIdentity<S, C> identity, L9GuiHandler.IGuiFactory<S, C> factory) {
         getBound().getGuiHandler().registerClientGui(identity, factory);
+    }
+
+    @Override
+    protected void hookEvents() {
+        super.hookEvents();
+        MinecraftForge.EVENT_BUS.register(new ClientRegistrarHook());
+    }
+
+    private class ClientRegistrarHook {
+
+        @SubscribeEvent
+        public void onRegisterModels(ModelRegistryEvent event) {
+            rqItemModels.forEach(m -> m.sprexec(ModelLoader::setCustomModelResourceLocation));
+            rqBlockStateMappers.forEach(m -> m.sprexec(ModelLoader::setCustomStateMapper));
+        }
+
     }
 
     private static class StateMapperAdapter extends StateMapperBase {
