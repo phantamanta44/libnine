@@ -13,7 +13,6 @@ import org.apache.commons.io.IOUtils
 import java.io.InputStreamReader
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
-import java.util.function.Predicate
 
 private val JSON_PARSER: JsonParser = JsonParser()
 
@@ -24,6 +23,8 @@ fun ResourceLocation.getResource(): IResource = if (EffectiveSide.get() == Logic
 }.getResource(this)
 
 fun IResource.asString(encoding: Charset = StandardCharsets.UTF_8): String = inputStream.use { IOUtils.toString(it, encoding) }
+
+fun IResource.asBytes(): ByteArray = inputStream.use { IOUtils.toByteArray(it) }
 
 fun IResource.asJson(): JsonElement = InputStreamReader(inputStream).use { JSON_PARSER.parse(it) }
 

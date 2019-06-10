@@ -114,8 +114,15 @@ class ByteReader(private val buffer: ByteArray) {
 
     fun rewind(bytes: Int): ByteReader {
         if (bytes < 0) throw IllegalArgumentException("Negative rewind!")
-        if (pointer > bytes) throw IndexOutOfBoundsException("Cannot rewind $bytes bytes from pointer $pointer!")
+        if (bytes > pointer) throw IndexOutOfBoundsException("Cannot rewind $bytes bytes from pointer $pointer!")
         pointer -= bytes
+        return this
+    }
+
+    fun advance(bytes: Int): ByteReader {
+        if (bytes < 0) throw IllegalArgumentException("Negative advance!")
+        if (bytes > buffer.size - pointer) throw IndexOutOfBoundsException("Cannot advance $bytes bytes from pointer $pointer!")
+        pointer += bytes
         return this
     }
 
