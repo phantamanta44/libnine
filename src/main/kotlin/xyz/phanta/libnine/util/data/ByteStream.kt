@@ -190,7 +190,7 @@ class ByteReader(private val buffer: ByteArray) {
 
     fun tagCompound(): CompoundNBT {
         val length = varPrecision()
-        return CompressedStreamTools.read(ByteStreams.newDataInput(bytes(length)), NBTSizeTracker(length.toLong()))
+        return CompressedStreamTools.read(ByteStreams.newDataInput(bytes(length)), NBTSizeTracker.INFINITE)
     }
 
     fun itemStack(): ItemStack = ItemStack.read(tagCompound())
