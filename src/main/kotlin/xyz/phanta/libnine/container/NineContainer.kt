@@ -1,9 +1,9 @@
 package xyz.phanta.libnine.container
 
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.InventoryPlayer
-import net.minecraft.inventory.Container
-import net.minecraft.inventory.Slot
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.entity.player.PlayerInventory
+import net.minecraft.inventory.container.Container
+import net.minecraft.inventory.container.Slot
 import net.minecraft.item.ItemStack
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.network.PacketClientContainerInteraction
@@ -15,12 +15,12 @@ abstract class NineContainer : Container {
     private val hasInvPlayer: Boolean
     private var hasInvOther: Boolean = false
 
-    constructor() {
+    constructor(windowId: Int) : super(null, windowId) {
         hasInvPlayer = false
     }
 
     @Suppress("LeakingThis")
-    constructor(ipl: InventoryPlayer) {
+    constructor(windowId: Int, ipl: PlayerInventory) : super(null, windowId) {
         hasInvPlayer = true
         initPlayerInventory { slot, x, y -> super.addSlot(Slot(ipl, slot, x, y)) }
     }
@@ -32,9 +32,9 @@ abstract class NineContainer : Container {
         for (i in 0..8) addSlot(i, 8 + i * 18, 142)
     }
 
-    override fun canInteractWith(player: EntityPlayer): Boolean = true
+    override fun canInteractWith(player: PlayerEntity): Boolean = true
 
-    override fun transferStackInSlot(player: EntityPlayer, index: Int): ItemStack {
+    override fun transferStackInSlot(player: PlayerEntity, index: Int): ItemStack {
         if (hasInvPlayer) {
             val slot = inventorySlots[index]
             if (slot != null && slot.hasStack) {

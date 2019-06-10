@@ -1,7 +1,7 @@
 package xyz.phanta.libnine.util.world
 
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.EnumFacing
+import net.minecraft.nbt.CompoundNBT
+import net.minecraft.util.Direction
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import xyz.phanta.libnine.util.data.ByteReader
@@ -9,7 +9,7 @@ import xyz.phanta.libnine.util.data.ByteWriter
 import xyz.phanta.libnine.util.data.Serializable
 import java.util.*
 
-class SideAllocator<E : Enum<E>>(defaultState: E, private val getFront: () -> EnumFacing) : Serializable {
+class SideAllocator<E : Enum<E>>(defaultState: E, private val getFront: () -> Direction) : Serializable {
 
     private val enumType: Class<E> = defaultState.declaringClass
     private val faces: EnumMap<BlockSide, E> =
@@ -21,11 +21,11 @@ class SideAllocator<E : Enum<E>>(defaultState: E, private val getFront: () -> En
         faces[face] = state
     }
 
-    fun getPredicate(state: E): (EnumFacing) -> Boolean = { faces[BlockSide.fromDirection(getFront(), it)] === state }
+    fun getPredicate(state: E): (Direction) -> Boolean = { faces[BlockSide.fromDirection(getFront(), it)] === state }
 
-    override fun serNbt(tag: NBTTagCompound) = faces.forEach { side, state -> tag.setString(side.name, state.name) }
+    override fun serNbt(tag: CompoundNBT) = faces.forEach { side, state -> tag.putString(side.name, state.name) }
 
-    override fun deserNbt(tag: NBTTagCompound) =
+    override fun deserNbt(tag: CompoundNBT) =
             BlockSide.VALUES.forEach { faces[it] = java.lang.Enum.valueOf(enumType, tag.getString(it.name)) }
 
     override fun serByteStream(stream: ByteWriter) = BlockSide.VALUES.forEach { stream.enum(faces[it]!!) }

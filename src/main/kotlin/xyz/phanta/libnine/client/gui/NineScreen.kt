@@ -1,12 +1,14 @@
 package xyz.phanta.libnine.client.gui
 
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.client.gui.inventory.GuiContainer
-import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.screen.inventory.ContainerScreen
+import com.mojang.blaze3d.platform.GlStateManager
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.resources.I18n
+import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.util.ResourceLocation
-import xyz.phanta.libnine.client.gui.component.GuiComponent
+import net.minecraft.util.text.ITextComponent
+import xyz.phanta.libnine.client.gui.component.ScreenComponent
 import xyz.phanta.libnine.client.gui.component.GuiComponentManager
 import xyz.phanta.libnine.container.NineContainer
 import xyz.phanta.libnine.util.DEF_TEXT_COL
@@ -14,9 +16,9 @@ import xyz.phanta.libnine.util.bindTexture
 import xyz.phanta.libnine.util.math.MutablePlanarVec
 import xyz.phanta.libnine.util.math.PlanarVec
 
-interface DrawableScreen {
+interface ComponentScreen {
 
-    fun addComponent(comp: GuiComponent)
+    fun addComponent(comp: ScreenComponent)
 
     fun drawBackground(partialTicks: Float, mousePos: PlanarVec)
 
@@ -26,8 +28,12 @@ interface DrawableScreen {
 
 }
 
-abstract class NineGui(private val bg: ResourceLocation? = null, private val sizeX: Int = 176, private val sizeY: Int = 166)
-    : GuiScreen(), DrawableScreen {
+abstract class NineScreen(
+        title: ITextComponent,
+        private val bg: ResourceLocation? = null,
+        private val sizeX: Int = 176,
+        private val sizeY: Int = 166
+) : Screen(title), ComponentScreen {
 
     @Suppress("LeakingThis")
     private val components: GuiComponentManager = GuiComponentManager(this)
@@ -35,13 +41,13 @@ abstract class NineGui(private val bg: ResourceLocation? = null, private val siz
     private val pos: MutablePlanarVec = MutablePlanarVec(0, 0)
     private val cachedMousePos: MutablePlanarVec = MutablePlanarVec(0, 0)
 
-    override fun initGui() {
-        super.initGui()
+    override fun init() {
+        super.init()
         pos.x = (this.width - this.sizeX) / 2
         pos.y = (this.height - this.sizeY) / 2
     }
 
-    override fun addComponent(comp: GuiComponent) = components.register(comp)
+    override fun addComponent(comp: ScreenComponent) = components.register(comp)
 
     override fun render(mouseX: Int, mouseY: Int, partialTicks: Float) {
         drawBackground(partialTicks, cachedMousePos.assignFrom(mouseX - pos.x, mouseY - pos.y))
@@ -69,21 +75,23 @@ abstract class NineGui(private val bg: ResourceLocation? = null, private val siz
     }
 
     override fun drawBackground(partialTicks: Float, mousePos: PlanarVec) {
-        drawDefaultBackground()
+        renderBackground()
         bg?.let {
             it.bindTexture()
-            drawTexturedModalRect(pos.x, pos.y, 0, 0, sizeX, sizeY)
+            blit(pos.x, pos.y, 0, 0, sizeX, sizeY)
         }
     }
 
 }
 
-abstract class NineGuiContainer(
-        container: NineContainer,
+abstract class NineGuiContainer<C : NineContainer>(
+        container: C,
+        playerInv: PlayerInventory,
+        title: ITextComponent,
         private val bg: ResourceLocation? = null,
         private val sizeX: Int = 176,
         private val sizeY: Int = 166
-) : GuiContainer(container), DrawableScreen {
+) : ContainerScreen<C>(container, playerInv, title), ComponentScreen {
 
     @Suppress("LeakingThis")
     private val components: GuiComponentManager = GuiComponentManager(this)
@@ -92,12 +100,12 @@ abstract class NineGuiContainer(
     private val cachedMousePos: MutablePlanarVec = MutablePlanarVec(0, 0)
     private var partialTicks: Float = 0F
 
-    public override fun initGui() {
-        super.initGui()
+    override fun init() {
+        super.init()
         pos.assignFrom((this.width - this.sizeX) / 2, (this.height - this.sizeY) / 2)
     }
 
-    override fun addComponent(comp: GuiComponent) = components.register(comp)
+    override fun addComponent(comp: ScreenComponent) = components.register(comp)
 
     override fun render(mouseX: Int, mouseY: Int, partialTicks: Float) {
         super.render(mouseX, mouseY, partialTicks)
@@ -115,22 +123,22 @@ abstract class NineGuiContainer(
     }
 
     override fun drawBackground(partialTicks: Float, mousePos: PlanarVec) {
-        drawDefaultBackground()
+        renderBackground()
         if (bg != null) {
             bg.bindTexture()
-            drawTexturedModalRect(pos.x, pos.y, 0, 0, sizeX, sizeY)
+            blit(pos.x, pos.y, 0, 0, sizeX, sizeY)
         }
     }
 
     override fun drawForeground(partialTicks: Float, mousePos: PlanarVec) = drawPlayerInventoryName()
 
     protected fun drawContainerName(name: String) {
-        fontRenderer.drawString(name, 8F, 6F, DEF_TEXT_COL)
+        font.drawString(name, 8F, 6F, DEF_TEXT_COL)
         GlStateManager.color3f(1F, 1F, 1F)
     }
 
     protected fun drawPlayerInventoryName() {
-        fontRenderer.drawString(I18n.format("container.inventory"), 8f, (this.ySize - 96 + 2).toFloat(), DEF_TEXT_COL)
+        font.drawString(I18n.format("container.inventory"), 8f, (this.ySize - 96 + 2).toFloat(), DEF_TEXT_COL)
         GlStateManager.color3f(1F, 1F, 1F)
     }
 

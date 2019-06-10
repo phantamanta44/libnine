@@ -1,11 +1,11 @@
 package xyz.phanta.libnine.worldgen
 
-import net.minecraft.block.state.IBlockState
+import net.minecraft.block.BlockState
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.IWorld
-import net.minecraft.world.gen.IChunkGenSettings
-import net.minecraft.world.gen.IChunkGenerator
+import net.minecraft.world.gen.ChunkGenerator
+import net.minecraft.world.gen.GenerationSettings
 import xyz.phanta.libnine.util.math.*
 import java.util.*
 
@@ -14,11 +14,11 @@ class SubterraneanFeatureClump(
         private val lengthVariation: Int,
         private val radiusMin: Int,
         private val radiusVariation: Int,
-        private val blockProvider: () -> IBlockState,
-        private val replacementTest: (IBlockState) -> Boolean
+        private val blockProvider: () -> BlockState,
+        private val replacementTest: (BlockState) -> Boolean
 ) : NineFeature() {
 
-    override fun generate(world: IWorld, chunkGen: IChunkGenerator<out IChunkGenSettings>, origin: BlockPos, rand: Random): Boolean {
+    override fun generate(world: IWorld, chunkGen: ChunkGenerator<out GenerationSettings>, origin: BlockPos, rand: Random): Boolean {
         val length = lengthMin + rand.nextInt(lengthVariation + 1)
         val radius = radiusMin + rand.nextInt(radiusVariation + 1)
         val dir = Vec3d(rand.nextDouble(), rand.nextDouble().randomNonZero(), rand.nextDouble()).normalize()
@@ -47,11 +47,11 @@ class SubterraneanFeaturePath(
         private val lengthMin: Int,
         private val lengthVariation: Int,
         private val deviance: Double,
-        private val blockProvider: () -> IBlockState,
-        private val replacementTest: (IBlockState) -> Boolean
+        private val blockProvider: () -> BlockState,
+        private val replacementTest: (BlockState) -> Boolean
 ) : NineFeature() {
 
-    override fun generate(world: IWorld, chunkGen: IChunkGenerator<out IChunkGenSettings>, origin: BlockPos, rand: Random): Boolean {
+    override fun generate(world: IWorld, chunkGen: ChunkGenerator<out GenerationSettings>, origin: BlockPos, rand: Random): Boolean {
         var pos = Vec3d(origin)
         var dir = Vec3d(rand.nextDouble(), rand.nextDouble().randomNonZero(), rand.nextDouble()).normalize()
         var success = false
@@ -73,11 +73,11 @@ class SubterraneanFeaturePath(
 class SubterraneanFeatureRadiate(
         private val radiusMin: Int,
         private val radiusVariation: Int,
-        private val blockProvider: () -> IBlockState,
-        private val replacementTest: (IBlockState) -> Boolean
+        private val blockProvider: () -> BlockState,
+        private val replacementTest: (BlockState) -> Boolean
 ) : NineFeature() {
 
-    override fun generate(world: IWorld, chunkGen: IChunkGenerator<out IChunkGenSettings>, origin: BlockPos, rand: Random): Boolean {
+    override fun generate(world: IWorld, chunkGen: ChunkGenerator<out GenerationSettings>, origin: BlockPos, rand: Random): Boolean {
         val radius = radiusMin + rand.nextInt(radiusVariation + 1)
         val radiusSq = radius * radius
         var success = false

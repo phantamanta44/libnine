@@ -1,6 +1,6 @@
 package xyz.phanta.libnine.util.math
 
-import net.minecraft.util.EnumFacing
+import net.minecraft.util.Direction
 import net.minecraft.util.math.Vec3d
 import kotlin.math.cos
 import kotlin.math.sin
@@ -61,11 +61,11 @@ fun Vec3d.rotateOrthogonal(axis: Vec3d, radians: Double): Vec3d {
     )
 }
 
-fun EnumFacing.asVector(): Vec3d = when (this) {
-    EnumFacing.DOWN -> StdBasis.Y_NEG
-    EnumFacing.UP -> StdBasis.Y_POS
-    EnumFacing.NORTH -> StdBasis.Z_NEG
-    EnumFacing.SOUTH -> StdBasis.Z_POS
-    EnumFacing.WEST -> StdBasis.X_NEG
-    EnumFacing.EAST -> StdBasis.X_POS
+fun Direction.asVector(): Vec3d = when (this) {
+    Direction.DOWN -> StdBasis.Y_NEG
+    Direction.UP -> StdBasis.Y_POS
+    Direction.NORTH -> StdBasis.Z_NEG
+    Direction.SOUTH -> StdBasis.Z_POS
+    Direction.WEST -> StdBasis.X_NEG
+    Direction.EAST -> StdBasis.X_POS
 }

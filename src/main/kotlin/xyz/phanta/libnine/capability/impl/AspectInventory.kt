@@ -1,7 +1,7 @@
 package xyz.phanta.libnine.capability.impl
 
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundNBT
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.items.IItemHandlerModifiable
 import net.minecraftforge.items.ItemHandlerHelper
@@ -71,21 +71,22 @@ open class AspectInventory(size: Int) : IItemHandlerModifiable, Serializable {
 
     override fun isItemValid(slot: Int, stack: ItemStack): Boolean = preds[slot]?.invoke(stack) ?: true
 
-    override fun serNbt(tag: NBTTagCompound) =
-            tag.setTag("Items", slots.asNbtList {
-                NBTTagCompound().also { tag ->
-                    if (it.isEmpty) {
-                        tag.setBoolean("Empty", true)
-                    } else {
-                        it.write(tag)
-                    }
+    override fun serNbt(tag: CompoundNBT) {
+        tag.put("Items", slots.asNbtList {
+            CompoundNBT().also { tag ->
+                if (it.isEmpty) {
+                    tag.putBoolean("Empty", true)
+                } else {
+                    it.write(tag)
                 }
-            })
+            }
+        })
+    }
 
-    override fun deserNbt(tag: NBTTagCompound) {
+    override fun deserNbt(tag: CompoundNBT) {
         val list = tag.getList("Items", Constants.NBT.TAG_COMPOUND)
         for (i in slots.indices) {
-            setStackInSlot(i, list.getCompound(i).let { if (it.hasKey("Empty")) ItemStack.EMPTY else ItemStack.read(it) })
+            setStackInSlot(i, list.getCompound(i).let { if (it.contains("Empty")) ItemStack.EMPTY else ItemStack.read(it) })
         }
     }
 

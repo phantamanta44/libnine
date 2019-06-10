@@ -2,8 +2,8 @@ package xyz.phanta.libnine.worldgen
 
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IWorld
-import net.minecraft.world.gen.IChunkGenSettings
-import net.minecraft.world.gen.IChunkGenerator
+import net.minecraft.world.gen.GenerationSettings
+import net.minecraft.world.gen.ChunkGenerator
 import xyz.phanta.libnine.util.math.clamp
 import java.util.*
 import kotlin.math.floor
@@ -13,7 +13,7 @@ class FeatureDistributionUniform(private val count: Int, private val minHeight: 
 
     override fun computeDistribution(
             world: IWorld,
-            chunkGen: IChunkGenerator<out IChunkGenSettings>,
+            chunkGen: ChunkGenerator<out GenerationSettings>,
             origin: BlockPos,
             rand: Random
     ): List<BlockPos> = (1..count).map {
@@ -27,7 +27,7 @@ class FeatureDistributionNormal(private val count: Int, private val mean: Double
 
     override fun computeDistribution(
             world: IWorld,
-            chunkGen: IChunkGenerator<out IChunkGenSettings>,
+            chunkGen: ChunkGenerator<out GenerationSettings>,
             origin: BlockPos,
             rand: Random
     ): List<BlockPos> = (1..count).map {
@@ -45,7 +45,7 @@ class FeatureDistributionSparse(private val probability: Double, private val del
 
     override fun computeDistribution(
             world: IWorld,
-            chunkGen: IChunkGenerator<out IChunkGenSettings>,
+            chunkGen: ChunkGenerator<out GenerationSettings>,
             origin: BlockPos,
             rand: Random
     ): List<BlockPos> = if (rand.nextDouble() < probability) {

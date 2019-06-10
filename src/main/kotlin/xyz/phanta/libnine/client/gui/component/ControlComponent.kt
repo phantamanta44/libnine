@@ -1,6 +1,6 @@
 package xyz.phanta.libnine.client.gui.component
 
-import net.minecraft.init.SoundEvents
+import net.minecraft.util.SoundEvents
 import org.lwjgl.glfw.GLFW
 import xyz.phanta.libnine.util.*
 import xyz.phanta.libnine.util.math.PlanarVec
@@ -8,7 +8,7 @@ import xyz.phanta.libnine.util.render.TextureRegion
 import xyz.phanta.libnine.util.world.RedstoneBehaviour
 import xyz.phanta.libnine.util.world.RedstoneControllable
 
-class GuiComponentTextInput(
+class ScreenComponentTextInput(
         pos: PlanarVec,
         private val boxLength: Int,
         private val textLength: Int,
@@ -20,7 +20,7 @@ class GuiComponentTextInput(
         private val validator: (String) -> Boolean,
         private val callback: (String) -> Unit,
         value: String = ""
-) : GuiComponent(pos, boxLength + 9 + FONT_HEIGHT, FONT_HEIGHT + 4) {
+) : ScreenComponent(pos, boxLength + 9 + FONT_HEIGHT, FONT_HEIGHT + 4) {
 
     private val buttonOrigin: PlanarVec = pos.add(boxLength + 5, 0)
     private var value: String = value
@@ -122,16 +122,14 @@ class GuiComponentTextInput(
         return false
     }
 
-    override val canFocus: Boolean
-        get() = true
-
-    override fun onFocusChange(newState: Boolean) {
+    override fun onFocusChange(newState: Boolean): Boolean {
         focused = newState
+        return true
     }
 
 }
 
-class GuiComponentRedstoneControl(
+class ScreenComponentRedstoneControl(
         pos: PlanarVec,
         private val bg: TextureRegion,
         private val bgHover: TextureRegion,
@@ -144,7 +142,7 @@ class GuiComponentRedstoneControl(
         private val descDirect: String,
         private val descInverted: String,
         private val target: RedstoneControllable
-) : GuiComponent(pos, bg.width, bg.height) {
+) : ScreenComponent(pos, bg.width, bg.height) {
 
     private val innerPos: PlanarVec = pos.add(offsetX, offsetY)
 

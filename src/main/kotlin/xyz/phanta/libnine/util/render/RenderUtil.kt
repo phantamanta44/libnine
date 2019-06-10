@@ -1,7 +1,7 @@
 package xyz.phanta.libnine.util.render
 
-import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.client.renderer.OpenGlHelper
+import com.mojang.blaze3d.platform.GLX
+import com.mojang.blaze3d.platform.GlStateManager
 import net.minecraftforge.fml.ModList
 import xyz.phanta.libnine.Nine
 
@@ -22,8 +22,8 @@ object Lightmap {
 
     fun setCoords(x: Float, y: Float) {
         if (optifined) return
-        if (!cached) cacheCoords(OpenGlHelper.lastBrightnessX, OpenGlHelper.lastBrightnessY)
-        OpenGlHelper.glMultiTexCoord2f(OpenGlHelper.GL_TEXTURE1, x, y)
+        if (!cached) cacheCoords(GLX.lastBrightnessX, GLX.lastBrightnessY)
+        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, x, y)
     }
 
     private fun cacheCoords(x: Float, y: Float) {
@@ -35,7 +35,7 @@ object Lightmap {
 
     fun restore() {
         if (optifined) return
-        OpenGlHelper.glMultiTexCoord2f(OpenGlHelper.GL_TEXTURE1, cachedX, cachedY)
+        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, cachedX, cachedY)
         GlStateManager.enableLighting()
         cached = false
     }

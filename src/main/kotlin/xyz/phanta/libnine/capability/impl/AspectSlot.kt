@@ -1,7 +1,7 @@
 package xyz.phanta.libnine.capability.impl
 
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundNBT
 import net.minecraftforge.items.IItemHandlerModifiable
 import net.minecraftforge.items.ItemHandlerHelper
 import xyz.phanta.libnine.util.data.ByteReader
@@ -96,17 +96,18 @@ open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null) : IIte
         stored = stream.itemStack()
     }
 
-    override fun serNbt(tag: NBTTagCompound) =
-            tag.setTag("Item", NBTTagCompound().also {
-                if (stored.isEmpty) {
-                    it.setBoolean("Empty", true)
-                } else {
-                    stored.write(it)
-                }
-            })
+    override fun serNbt(tag: CompoundNBT) {
+        tag.put("Item", CompoundNBT().also {
+            if (stored.isEmpty) {
+                it.putBoolean("Empty", true)
+            } else {
+                stored.write(it)
+            }
+        })
+    }
 
-    override fun deserNbt(tag: NBTTagCompound) {
-        stored = tag.getCompound("Item").let { if (it.hasKey("Empty")) ItemStack.EMPTY else ItemStack.read(it) }
+    override fun deserNbt(tag: CompoundNBT) {
+        stored = tag.getCompound("Item").let { if (it.contains("Empty")) ItemStack.EMPTY else ItemStack.read(it) }
     }
 
     class Observable(pred: ((ItemStack) -> Boolean)?, private val observer: (Int, ItemStack) -> Unit) : AspectSlot(pred) {

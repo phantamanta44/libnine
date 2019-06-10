@@ -1,14 +1,14 @@
 package xyz.phanta.libnine.util.data
 
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundNBT
 
 interface NbtSerializable {
 
-    fun serNbt(tag: NBTTagCompound)
+    fun serNbt(tag: CompoundNBT)
 
-    fun deserNbt(tag: NBTTagCompound)
+    fun deserNbt(tag: CompoundNBT)
 
-    fun createSerializedNbt(): NBTTagCompound = NBTTagCompound().also { serNbt(it) }
+    fun createSerializedNbt(): CompoundNBT = CompoundNBT().also { serNbt(it) }
 
 }
 

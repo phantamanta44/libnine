@@ -1,43 +1,36 @@
 package xyz.phanta.libnine.definition
 
 import net.minecraft.block.Block
-import net.minecraft.entity.player.EntityPlayer
-import net.minecraft.entity.player.InventoryPlayer
+import net.minecraft.inventory.IInventory
+import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
-import net.minecraft.item.ItemBlock
 import net.minecraft.item.ItemGroup
 import net.minecraft.item.ItemStack
+import net.minecraft.item.crafting.IRecipe
+import net.minecraft.particles.IParticleData
 import net.minecraft.tileentity.TileEntityType
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.SoundEvent
-import net.minecraft.util.math.BlockPos
+import net.minecraft.world.biome.Biome
 import net.minecraft.world.gen.GenerationStage
-import net.minecraft.world.gen.feature.CompositeFeature
 import net.minecraft.world.gen.feature.IFeatureConfig
 import net.minecraft.world.gen.placement.IPlacementConfig
+import net.minecraftforge.common.crafting.RecipeType
 import org.apache.commons.lang3.mutable.MutableObject
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.block.BlockDefBuilder
 import xyz.phanta.libnine.block.BlockDefContext
-import xyz.phanta.libnine.client.gui.NineGuiContainer
-import xyz.phanta.libnine.container.ContainerType
-import xyz.phanta.libnine.container.NineContainer
+import xyz.phanta.libnine.client.fx.NineParticleType
 import xyz.phanta.libnine.item.ItemDefBuilder
 import xyz.phanta.libnine.item.ItemDefBuilderImpl
 import xyz.phanta.libnine.item.ItemDefContext
-import xyz.phanta.libnine.recipe.Recipe
-import xyz.phanta.libnine.recipe.RecipeParser
-import xyz.phanta.libnine.recipe.RecipeSet
-import xyz.phanta.libnine.recipe.RecipeType
+import xyz.phanta.libnine.recipe.RecipeSchema
 import xyz.phanta.libnine.tile.NineTile
-import xyz.phanta.libnine.util.data.ByteReader
-import xyz.phanta.libnine.util.data.ByteWriter
 import xyz.phanta.libnine.util.snakeify
 import xyz.phanta.libnine.worldgen.BiomeSet
 import xyz.phanta.libnine.worldgen.NineFeature
 import xyz.phanta.libnine.worldgen.NineFeatureDistribution
 import kotlin.reflect.KMutableProperty0
-import kotlin.reflect.jvm.jvmErasure
 
 typealias DefBody<T> = T.() -> Unit
 
@@ -62,17 +55,17 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
             name: String,
             blockFactory: (Block.Properties) -> B,
             propsFactory: () -> Block.Properties,
-            itemBlockFactory: (B, Item.Properties) -> ItemBlock,
-            body: (BlockDefBuilder<B>) -> Pair<B, ItemBlock>
+            itemBlockFactory: (B, Item.Properties) -> BlockItem,
+            body: (BlockDefBuilder<B>) -> Pair<B, BlockItem>
     ): B {
-        val (block, itemBlock) = body(createBlockBuilder(
+        val (block, BlockItem) = body(createBlockBuilder(
                 registrar.mod.resource(name),
                 propsFactory(),
                 blockFactory,
                 itemBlockFactory
         ))
         registrar.blocks += block
-        registrar.items += itemBlock
+        registrar.items += BlockItem
         return block
     }
 
@@ -80,7 +73,7 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
             name: ResourceLocation,
             properties: Block.Properties,
             blockFactory: (Block.Properties) -> B,
-            itemBlockFactory: (B, Item.Properties) -> ItemBlock
+            itemBlockFactory: (B, Item.Properties) -> BlockItem
     ): BlockDefBuilder<B> = BlockDefBuilder(name, properties, blockFactory, itemBlockFactory)
 
     fun itemGroup(dest: KMutableProperty0<ItemGroup>, icon: () -> ItemStack) {
@@ -89,54 +82,44 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
         })
     }
 
-    fun <T : NineTile> tileEntity(name: String, factory: (Virtue, TileEntityType<T>) -> T): () -> T {
+    fun <T : NineTile> tileEntity(name: String, factory: (Virtue, TileEntityType<T>) -> T, vararg blocks: Block): () -> T {
         val type = MutableObject<TileEntityType<T>>()
         val creator = { factory(registrar.mod, type.value) }
-        type.value = TileEntityType.register(
-                registrar.mod.prefix(name),
-                TileEntityType.Builder.create(creator)
-        )
+        @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+        type.value = TileEntityType.Builder.create(creator, blocks).build(null)
+        type.value.registryName = registrar.mod.resource(name)
         registrar.tileEntities += type.value
         registrar.mod.markUsesTileEntities()
         return creator
     }
 
     fun <T : NineTile> tileEntity(dest: KMutableProperty0<() -> T>, factory: (Virtue, TileEntityType<T>) -> T) =
-        dest.set(tileEntity(dest.name.snakeify(), factory))
+            dest.set(tileEntity(dest.name.snakeify(), factory))
 
-    @Suppress("UNCHECKED_CAST")
-    fun <C : NineContainer, G : NineGuiContainer, X> container(
-            dest: KMutableProperty0<in ContainerType<C, G, X>>,
-            containerFactory: (X, InventoryPlayer, EntityPlayer) -> C,
-            contextSerializer: (ByteWriter, X) -> Unit,
-            contextDeserializer: (ByteReader) -> X,
-            guiFactory: (C) -> G
+    // TODO containers
+    /*@Suppress("UNCHECKED_CAST")
+    fun <C : NineContainer, G : NineGuiContainer<C>> container(
+            dest: KMutableProperty0<in ContainerType<C>>,
+            containerFactory: (Int, PlayerInventory) -> C,
+            guiFactory: (C, ITextComponent) -> G
     ) {
-        val type = ContainerType(
-                registrar.mod.resource(dest.name.snakeify()),
-                dest.returnType.jvmErasure.java as Class<C>,
-                containerFactory,
-                contextSerializer,
-                contextDeserializer,
-                guiFactory
-        )
-        registrar.mod.containerHandler.register(type)
+        val type = ContainerType(containerFactory)
+        registrar.containerTypes += type
+        ScreenManager.registerFactory(type) { container, _, title -> guiFactory(container, title) }
         dest.set(type)
         registrar.mod.markUsesContainers()
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <C : NineContainer, G : NineGuiContainer, T : NineTile> containerTileEntity(
-            dest: KMutableProperty0<in ContainerType<C, G, BlockPos>>,
+    fun <C : NineContainer, G : NineGuiContainer<C>, T : NineTile> containerTileEntity(
+            dest: KMutableProperty0<in ContainerType<C>>,
             containerFactory: (T) -> C,
-            guiFactory: (C) -> G
+            guiFactory: (C, ITextComponent) -> G
     ) = container(
             dest,
-            { pos, _, player -> containerFactory(player.world.getTileEntity(pos) as T) },
-            { stream, pos -> stream.blockPos(pos) },
-            ByteReader::blockPos,
+            { windowId, playerInv -> containerFactory(foobar) },
             guiFactory
-    )
+    )*/
 
     fun soundEvent(name: String, soundPath: String): SoundEvent {
         val event = SoundEvent(registrar.mod.resource(soundPath))
@@ -148,14 +131,13 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
     fun soundEvent(dest: KMutableProperty0<SoundEvent>, soundPath: String) =
             dest.set(soundEvent(dest.name.snakeify(), soundPath))
 
-    fun <I, O, R : Recipe<I, O>> recipeType(
-            dest: KMutableProperty0<in RecipeType<I, O, R>>,
-            parser: RecipeParser<I, O, R>,
-            serializer: (ByteWriter, R) -> Unit,
-            deserializer: (ByteReader) -> R
+    @Suppress("UNCHECKED_CAST")
+    fun <I : IInventory, R : IRecipe<I>> recipeType(
+            dest: KMutableProperty0<in RecipeType<R>>,
+            schema: RecipeSchema<I, R>
     ) {
-        val type = RecipeType(registrar.mod.resource(dest.name.snakeify()), parser, serializer, deserializer)
-        RecipeSet.registerType(type, registrar)
+        val type = RecipeType.get(registrar.mod.resource(dest.name.snakeify()), schema.recipeType)!!
+        registrar.recipeSerializers += schema
         dest.set(type)
     }
 
@@ -165,12 +147,24 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
             stage: GenerationStage.Decoration,
             target: BiomeSet
     ) {
-        registrar.features += Triple(CompositeFeature(
+        registrar.features += Triple(Biome.createDecoratedFeature(
                 feature.buildFeature(),
                 IFeatureConfig.NO_FEATURE_CONFIG,
                 distribution.buildDistribution(),
                 IPlacementConfig.NO_PLACEMENT_CONFIG
         ), stage, target)
+    }
+
+    fun <X> particleCtx(dest: KMutableProperty0<(X) -> IParticleData>, typeFactory: (ResourceLocation) -> NineParticleType<X>) {
+        val type = typeFactory(registrar.mod.resource(dest.name.snakeify()))
+        registrar.particles += type
+        dest.set { NineParticleType.Data(type, it) }
+    }
+
+    fun particle(dest: KMutableProperty0<() -> IParticleData>, typeFactory: (ResourceLocation) -> NineParticleType<Unit>) {
+        val type = typeFactory(registrar.mod.resource(dest.name.snakeify()))
+        registrar.particles += type
+        dest.set { NineParticleType.Data(type, Unit) }
     }
 
 }

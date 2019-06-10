@@ -1,10 +1,10 @@
 package xyz.phanta.libnine.tile
 
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundNBT
+import net.minecraft.tileentity.ITickableTileEntity
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.tileentity.TileEntityType
-import net.minecraft.util.EnumFacing
-import net.minecraft.util.ITickable
+import net.minecraft.util.Direction
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.common.capabilities.ICapabilityProvider
 import net.minecraftforge.common.util.LazyOptional
@@ -41,7 +41,7 @@ abstract class NineTile(
     protected fun dispatchTileUpdate() {
         if (requiresSync) {
             mod.netHandler.postToClient(
-                    PacketDistributor.NEAR.with { world.getPacketRange(pos, 64.0) },
+                    PacketDistributor.NEAR.with { world!!.getPacketRange(pos, 64.0) },
                     PacketServerSyncTileEntity.Packet(pos, ByteWriter().also { serByteStream(it) }.toArray())
             )
         }
@@ -49,30 +49,30 @@ abstract class NineTile(
 
     // behaviour
 
-    override fun <T> getCapability(cap: Capability<T>, side: EnumFacing?): LazyOptional<T> =
+    override fun <T> getCapability(cap: Capability<T>, side: Direction?): LazyOptional<T> =
             capabilities?.getCapability(cap, side) ?: LazyOptional.empty()
 
     // serialization
 
-    override fun serNbt(tag: NBTTagCompound) = serializer.serNbt(tag)
+    override fun serNbt(tag: CompoundNBT) = serializer.serNbt(tag)
 
-    override fun deserNbt(tag: NBTTagCompound) = serializer.deserNbt(tag)
+    override fun deserNbt(tag: CompoundNBT) = serializer.deserNbt(tag)
 
     override fun serByteStream(stream: ByteWriter) = serializer.serByteStream(stream)
 
     override fun deserByteStream(stream: ByteReader) = serializer.deserByteStream(stream)
 
-    override fun read(compound: NBTTagCompound) {
+    override fun read(compound: CompoundNBT) {
         super.read(compound)
         deserNbt(compound)
     }
 
-    override fun write(compound: NBTTagCompound): NBTTagCompound = super.write(compound).also { serNbt(it) }
+    override fun write(compound: CompoundNBT): CompoundNBT = super.write(compound).also { serNbt(it) }
 
 }
 
 abstract class NineTileTicking(mod: Virtue, type: TileEntityType<*>, requiresSync: Boolean)
-    : NineTile(mod, type, requiresSync), ITickable {
+    : NineTile(mod, type, requiresSync), ITickableTileEntity {
 
     private var dirty: Boolean = false
 

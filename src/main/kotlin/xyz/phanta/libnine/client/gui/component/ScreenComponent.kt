@@ -1,13 +1,13 @@
 package xyz.phanta.libnine.client.gui.component
 
-import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.IGuiEventListener
+import net.minecraft.client.gui.screen.Screen
 import xyz.phanta.libnine.util.math.MutablePlanarVec
 import xyz.phanta.libnine.util.math.PlanarVec
 
-abstract class GuiComponent(val pos: PlanarVec, val width: Int, val height: Int) {
+abstract class ScreenComponent(val pos: PlanarVec, val width: Int, val height: Int) {
 
-    lateinit var gui: GuiScreen
+    lateinit var gui: Screen
         internal set
 
     abstract fun render(partialTicks: Float, mousePos: PlanarVec, mouseOver: Boolean)
@@ -30,24 +30,20 @@ abstract class GuiComponent(val pos: PlanarVec, val width: Int, val height: Int)
 
     open fun onKeyType(keyCode: Int, typed: Char): Boolean = false
 
-    open val canFocus: Boolean = false
-
-    open fun onFocusChange(newState: Boolean) {
-        // NO-OP
-    }
+    open fun onFocusChange(newState: Boolean): Boolean = false
 
 }
 
-class GuiComponentManager(private val gui: GuiScreen) : IGuiEventListener {
+class GuiComponentManager(private val gui: Screen) : IGuiEventListener {
 
     private val comps: MutableList<ComponentState> = mutableListOf()
 
     @Suppress("UNCHECKED_CAST")
-    fun register(comp: GuiComponent) {
+    fun register(comp: ScreenComponent) {
         comp.gui = gui
         ComponentState(comp).let {
             comps += it
-            (gui.children as MutableList<IGuiEventListener>).add(it)
+            (gui.children() as MutableList<IGuiEventListener>).add(it)
         }
     }
 
@@ -56,7 +52,7 @@ class GuiComponentManager(private val gui: GuiScreen) : IGuiEventListener {
         comps.forEach { it.drawTooltip(partialTicks, mousePos) }
     }
 
-    private class ComponentState internal constructor(private val comp: GuiComponent) : IGuiEventListener {
+    private class ComponentState internal constructor(private val comp: ScreenComponent) : IGuiEventListener {
 
         private val cachedMousePos: MutablePlanarVec = MutablePlanarVec(0, 0)
         private var mouseOver: Boolean = false
@@ -77,7 +73,8 @@ class GuiComponentManager(private val gui: GuiScreen) : IGuiEventListener {
         override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean =
                 comp.onMouseUp(cachedMousePos.assignFrom(mouseX.toInt(), mouseY.toInt()), button, mouseOver)
 
-        override fun mouseScrolled(amount: Double): Boolean = comp.onMouseScroll(cachedMousePos, amount)
+        override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean =
+                comp.onMouseScroll(cachedMousePos.assignFrom(mouseX.toInt(), mouseY.toInt()), amount)
 
         override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, diffX: Double, diffY: Double): Boolean =
                 comp.onMouseDrag(cachedMousePos.assignFrom(mouseX.toInt(), mouseY.toInt()), button, diffX, diffY, mouseOver)
@@ -90,9 +87,9 @@ class GuiComponentManager(private val gui: GuiScreen) : IGuiEventListener {
 
         override fun charTyped(typed: Char, keyCode: Int): Boolean = comp.onKeyType(keyCode, typed)
 
-        override fun canFocus(): Boolean = comp.canFocus
+        override fun changeFocus(focused: Boolean): Boolean = comp.onFocusChange(focused)
 
-        override fun focusChanged(focused: Boolean) = comp.onFocusChange(focused)
+        override fun isMouseOver(p_isMouseOver_1_: Double, p_isMouseOver_3_: Double): Boolean = mouseOver
 
     }
 

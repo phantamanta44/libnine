@@ -5,13 +5,11 @@ import net.minecraft.util.ResourceLocation
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.eventbus.api.IEventBus
 import net.minecraftforge.fml.loading.FMLEnvironment
-import xyz.phanta.libnine.container.ContainerHandler
 import xyz.phanta.libnine.definition.CommonInitContext
 import xyz.phanta.libnine.definition.InitializationContext
 import xyz.phanta.libnine.definition.ServerInitContext
 import xyz.phanta.libnine.network.NetworkHandler
 import xyz.phanta.libnine.network.PacketClientContainerInteraction
-import xyz.phanta.libnine.network.PacketServerSyncRecipeSet
 import xyz.phanta.libnine.network.PacketServerSyncTileEntity
 import xyz.phanta.libnine.util.render.TextureResource
 import java.util.concurrent.ConcurrentHashMap
@@ -41,7 +39,6 @@ abstract class Virtue {
     // handlers
 
     val netHandler: NetworkHandler by lazy { NetworkHandler(resource("main")) }
-    val containerHandler: ContainerHandler by lazy { ContainerHandler(this) }
     val wsdHandler: Unit by lazy { TODO("wsd impl") }
 
     // internal state
@@ -76,13 +73,6 @@ abstract class Virtue {
         if (!usesContainers) {
             usesContainers = true
             netHandler.registerType(254, PacketClientContainerInteraction)
-        }
-    }
-
-    internal fun markUsesRecipes() {
-        if (!usesRecipes) {
-            usesRecipes = true
-            netHandler.registerType(253, PacketServerSyncRecipeSet)
         }
     }
 

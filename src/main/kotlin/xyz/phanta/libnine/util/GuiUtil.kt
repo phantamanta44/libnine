@@ -1,9 +1,9 @@
 package xyz.phanta.libnine.util
 
+import com.mojang.blaze3d.platform.GlStateManager
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.Gui
-import net.minecraft.client.gui.GuiScreen
-import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.gui.AbstractGui
+import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.util.ResourceLocation
 import xyz.phanta.libnine.util.math.PlanarVec
@@ -16,7 +16,7 @@ val FONT_HEIGHT: Int
 object DrawUtil {
 
     fun rect(pos: PlanarVec, width: Int, height: Int, colour: Int) {
-        Gui.drawRect(pos.x, pos.y, pos.x + width, pos.y + height, colour)
+        AbstractGui.fill(pos.x, pos.y, pos.x + width, pos.y + height, colour)
         GlStateManager.color4f(1f, 1f, 1f, 1f)
     }
 
@@ -32,13 +32,13 @@ object DrawUtil {
 
 fun String.getMcWidth(): Int = Minecraft.getInstance().fontRenderer.getStringWidth(this)
 
-fun GuiScreen.drawTooltip(pos: PlanarVec, vararg lines: String) {
-    this.drawHoveringText(lines.asList(), pos.x, pos.y)
+fun Screen.drawTooltip(pos: PlanarVec, vararg lines: String) {
+    this.renderTooltip(lines.asList(), pos.x, pos.y)
     RenderHelper.enableGUIStandardItemLighting()
 }
 
-fun GuiScreen.drawTooltip(pos: PlanarVec, lines: List<String>) {
-    this.drawHoveringText(lines, pos.x, pos.y)
+fun Screen.drawTooltip(pos: PlanarVec, lines: List<String>) {
+    this.renderTooltip(lines, pos.x, pos.y)
     RenderHelper.enableGUIStandardItemLighting()
 }
 

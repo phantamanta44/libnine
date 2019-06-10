@@ -1,6 +1,6 @@
 package xyz.phanta.libnine.util.data.daedalus
 
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundNBT
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
 import xyz.phanta.libnine.util.data.Serializable
@@ -50,9 +50,9 @@ class Daedalus<T : Any>(private val target: T) : Serializable {
 
     private val mapping: TypeMapping<T> = calculateMappings(target::class)
 
-    override fun serNbt(tag: NBTTagCompound) = mapping.forEach { it.extractNbt(tag, target) }
+    override fun serNbt(tag: CompoundNBT) = mapping.forEach { it.extractNbt(tag, target) }
 
-    override fun deserNbt(tag: NBTTagCompound) = mapping.forEach { it.injectNbt(tag, target) }
+    override fun deserNbt(tag: CompoundNBT) = mapping.forEach { it.injectNbt(tag, target) }
 
     override fun serByteStream(stream: ByteWriter) = mapping.forEach { it.extractByteStream(stream, target) }
 
@@ -66,9 +66,9 @@ private interface PersistentProperty<T : Any> {
 
     val name: String
 
-    fun extractNbt(tag: NBTTagCompound, target: T)
+    fun extractNbt(tag: CompoundNBT, target: T)
 
-    fun injectNbt(tag: NBTTagCompound, target: T)
+    fun injectNbt(tag: CompoundNBT, target: T)
 
     fun extractByteStream(stream: ByteWriter, target: T)
 
@@ -79,9 +79,11 @@ private interface PersistentProperty<T : Any> {
 private class SerializableProperty<T : Any>(override val name: String, private val property: KProperty1<T, Serializable>)
     : PersistentProperty<T> {
 
-    override fun extractNbt(tag: NBTTagCompound, target: T) = tag.setTag(name, property.get(target).createSerializedNbt())
+    override fun extractNbt(tag: CompoundNBT, target: T) {
+        tag.put(name, property.get(target).createSerializedNbt())
+    }
 
-    override fun injectNbt(tag: NBTTagCompound, target: T) = property.get(target).deserNbt(tag.getCompound(name))
+    override fun injectNbt(tag: CompoundNBT, target: T) = property.get(target).deserNbt(tag.getCompound(name))
 
     override fun extractByteStream(stream: ByteWriter, target: T) = property.get(target).serByteStream(stream)
 
@@ -95,9 +97,9 @@ private class SerializerBackedProperty<T : Any, U : Any>(override val name: Stri
     @Suppress("UNCHECKED_CAST")
     private val serializer: DataSerializer<U> = DataSerializers.getSerializer(property.returnType.jvmErasure as KClass<U>)
 
-    override fun extractNbt(tag: NBTTagCompound, target: T) = serializer.serializeNbt(tag, name, property.get(target))
+    override fun extractNbt(tag: CompoundNBT, target: T) = serializer.serializeNbt(tag, name, property.get(target))
 
-    override fun injectNbt(tag: NBTTagCompound, target: T) = property.set(target, serializer.deserializeNbt(tag, name))
+    override fun injectNbt(tag: CompoundNBT, target: T) = property.set(target, serializer.deserializeNbt(tag, name))
 
     override fun extractByteStream(stream: ByteWriter, target: T) = serializer.serializeByteStream(stream, property.get(target))
 

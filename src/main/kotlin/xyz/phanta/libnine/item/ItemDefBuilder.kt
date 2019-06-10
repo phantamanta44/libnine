@@ -1,9 +1,9 @@
 package xyz.phanta.libnine.item
 
-import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer
-import net.minecraft.item.EnumRarity
+import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
+import net.minecraft.item.Rarity
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.ToolType
 import java.util.concurrent.Callable
@@ -20,7 +20,7 @@ abstract class ItemDefBuilder<I : Item> {
 
     fun withGroup(group: ItemGroup): ItemDefBuilder<I> = also { properties.group(group) }
 
-    fun withRarity(rarity: EnumRarity): ItemDefBuilder<I> = also { properties.rarity(rarity) }
+    fun withRarity(rarity: Rarity): ItemDefBuilder<I> = also { properties.rarity(rarity) }
 
     fun markUnrepairable(): ItemDefBuilder<I> = also { properties.setNoRepair() }
 
@@ -28,7 +28,7 @@ abstract class ItemDefBuilder<I : Item> {
         properties.addToolType(toolClass, harvestLevel)
     }
 
-    fun withRenderer(rendererFactory: () -> TileEntityItemStackRenderer): ItemDefBuilder<I> = also {
+    fun withRenderer(rendererFactory: () -> ItemStackTileEntityRenderer): ItemDefBuilder<I> = also {
         properties.setTEISR { Callable { rendererFactory() } }
     }
 

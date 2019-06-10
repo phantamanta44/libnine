@@ -3,15 +3,15 @@ package xyz.phanta.libnine.worldgen
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.IWorld
 import net.minecraft.world.biome.Biome
-import net.minecraft.world.gen.IChunkGenSettings
-import net.minecraft.world.gen.IChunkGenerator
+import net.minecraft.world.gen.ChunkGenerator
+import net.minecraft.world.gen.GenerationSettings
 import net.minecraft.world.gen.feature.Feature
-import net.minecraft.world.gen.feature.IFeatureConfig
 import net.minecraft.world.gen.feature.NoFeatureConfig
-import net.minecraft.world.gen.placement.BasePlacement
 import net.minecraft.world.gen.placement.NoPlacementConfig
+import net.minecraft.world.gen.placement.Placement
 import net.minecraftforge.registries.ForgeRegistries
 import java.util.*
+import java.util.stream.Stream
 
 abstract class BiomeSet {
 
@@ -108,16 +108,17 @@ abstract class NineFeature {
 
     abstract fun generate(
             world: IWorld,
-            chunkGen: IChunkGenerator<out IChunkGenSettings>,
+            chunkGen: ChunkGenerator<out GenerationSettings>,
             origin: BlockPos,
             rand: Random
     ): Boolean
 
-    private class FeatureImpl(private val parent: NineFeature) : Feature<NoFeatureConfig>() {
+    private class FeatureImpl(private val parent: NineFeature, notifyBlocks: Boolean = false)
+        : Feature<NoFeatureConfig>({ NoFeatureConfig() }, notifyBlocks) {
 
-        override fun func_212245_a(
+        override fun place(
                 world: IWorld,
-                chunkGen: IChunkGenerator<out IChunkGenSettings>,
+                chunkGen: ChunkGenerator<out GenerationSettings>,
                 rand: Random,
                 pos: BlockPos,
                 config: NoFeatureConfig
@@ -129,28 +130,24 @@ abstract class NineFeature {
 
 abstract class NineFeatureDistribution {
 
-    internal fun buildDistribution(): BasePlacement<NoPlacementConfig> = PlacementImpl(this)
+    internal fun buildDistribution(): Placement<NoPlacementConfig> = PlacementImpl(this)
 
     abstract fun computeDistribution(
             world: IWorld,
-            chunkGen: IChunkGenerator<out IChunkGenSettings>,
+            chunkGen: ChunkGenerator<out GenerationSettings>,
             origin: BlockPos,
             rand: Random
     ): List<BlockPos>
 
-    private class PlacementImpl(private val parent: NineFeatureDistribution) : BasePlacement<NoPlacementConfig>() {
+    private class PlacementImpl(private val parent: NineFeatureDistribution) : Placement<NoPlacementConfig>({ NoPlacementConfig() }) {
 
-        override fun <C : IFeatureConfig?> generate(
+        override fun getPositions(
                 world: IWorld,
-                chunkGen: IChunkGenerator<out IChunkGenSettings>,
+                chunkGen: ChunkGenerator<out GenerationSettings>,
                 rand: Random,
-                pos: BlockPos,
                 config: NoPlacementConfig,
-                feature: Feature<C>,
-                featureConfig: C
-        ): Boolean = parent.computeDistribution(world, chunkGen, pos, rand).map {
-            feature.func_212245_a(world, chunkGen, rand, it, featureConfig)
-        }.any()
+                pos: BlockPos
+        ): Stream<BlockPos> = parent.computeDistribution(world, chunkGen, pos, rand).stream()
 
     }
 

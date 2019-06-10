@@ -4,7 +4,7 @@ import xyz.phanta.libnine.util.drawTooltip
 import xyz.phanta.libnine.util.math.PlanarVec
 import xyz.phanta.libnine.util.render.TextureRegion
 
-class GuiComponentVerticalBar(
+class ScreenComponentVerticalBar(
         pos: PlanarVec,
         private val bg: TextureRegion,
         private val fg: TextureRegion,
@@ -12,7 +12,7 @@ class GuiComponentVerticalBar(
         offsetY: Int,
         private val dataSrc: () -> Float,
         private val ttSrc: () -> String
-) : GuiComponent(pos, bg.width, bg.height) {
+) : ScreenComponent(pos, bg.width, bg.height) {
 
     private val innerPos: PlanarVec = pos.add(offsetX, offsetY)
     private val innerWidth: Int = width - 2 * offsetX
@@ -27,8 +27,8 @@ class GuiComponentVerticalBar(
 
 }
 
-class GuiComponentTooltip(pos: PlanarVec, private val texture: TextureRegion, private val src: () -> String)
-    : GuiComponent(pos, texture.width, texture.height) {
+class ScreenComponentTooltip(pos: PlanarVec, private val texture: TextureRegion, private val src: () -> String)
+    : ScreenComponent(pos, texture.width, texture.height) {
 
     override fun render(partialTicks: Float, mousePos: PlanarVec, mouseOver: Boolean) = texture.draw(pos, width, height)
 

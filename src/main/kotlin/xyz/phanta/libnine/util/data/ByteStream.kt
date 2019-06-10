@@ -4,7 +4,7 @@ import com.google.common.io.ByteStreams
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompressedStreamTools
 import net.minecraft.nbt.NBTSizeTracker
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundNBT
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
@@ -74,14 +74,14 @@ class ByteWriter {
 
     fun resourceLocation(loc: ResourceLocation): ByteWriter = string(loc.namespace).string(loc.path)
 
-    fun tagCompound(tag: NBTTagCompound): ByteWriter {
+    fun tagCompound(tag: CompoundNBT): ByteWriter {
         val buf = ByteStreams.newDataOutput()
         CompressedStreamTools.write(tag, buf)
         val bytes = buf.toByteArray()
         return varPrecision(bytes.size).bytes(bytes)
     }
 
-    fun itemStack(stack: ItemStack): ByteWriter = tagCompound(NBTTagCompound().also { stack.write(it) })
+    fun itemStack(stack: ItemStack): ByteWriter = tagCompound(CompoundNBT().also { stack.write(it) })
 
     fun fluid(fluid: Fluid): ByteWriter = TODO("forge doesn't have a fluid impl yet")
 
@@ -188,7 +188,7 @@ class ByteReader(private val buffer: ByteArray) {
 
     fun resourceLocation(): ResourceLocation = ResourceLocation(string(), string())
 
-    fun tagCompound(): NBTTagCompound {
+    fun tagCompound(): CompoundNBT {
         val length = varPrecision()
         return CompressedStreamTools.read(ByteStreams.newDataInput(bytes(length)), NBTSizeTracker(length.toLong()))
     }

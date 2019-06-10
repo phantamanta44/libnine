@@ -1,6 +1,6 @@
 package xyz.phanta.libnine.util.component.reservoir
 
-import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.CompoundNBT
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
 import xyz.phanta.libnine.util.data.Serializable
@@ -45,9 +45,9 @@ class SimpleIntReservoir(override var capacity: Int, quantity: Int = 0) : IntRes
         return toTransfer
     }
 
-    override fun serNbt(tag: NBTTagCompound) = tag.setInt("Quantity", quantity)
+    override fun serNbt(tag: CompoundNBT) = tag.putInt("Quantity", quantity)
 
-    override fun deserNbt(tag: NBTTagCompound) {
+    override fun deserNbt(tag: CompoundNBT) {
         quantity = tag.getInt("Quantity")
     }
 

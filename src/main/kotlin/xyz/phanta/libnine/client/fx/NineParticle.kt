@@ -1,9 +1,9 @@
 package xyz.phanta.libnine.client.fx
 
+import com.mojang.blaze3d.platform.GlStateManager
 import net.minecraft.client.Minecraft
 import net.minecraft.client.particle.Particle
-import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.world.World
 
 abstract class NineParticle : Particle {
@@ -13,7 +13,7 @@ abstract class NineParticle : Particle {
 
     constructor(world: World, x: Double, y: Double, z: Double) : super(world, x, y, z)
 
-    protected fun fixPosition(partialTicks: Float, player: EntityPlayer = Minecraft.getInstance().player) {
+    protected fun fixPosition(partialTicks: Float, player: PlayerEntity = Minecraft.getInstance().player) {
         GlStateManager.translatef(
                 (prevPosX + (posX - prevPosX) * partialTicks.toDouble()
                         - player.lastTickPosX

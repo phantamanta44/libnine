@@ -1,26 +1,26 @@
 package xyz.phanta.libnine.util.world
 
-import net.minecraft.util.EnumFacing
+import net.minecraft.util.Direction
 
-fun EnumFacing.isVertical(): Boolean = this == EnumFacing.UP || this == EnumFacing.DOWN
-fun EnumFacing.isHorizontal(): Boolean = !this.isVertical()
+fun Direction.isVertical(): Boolean = this == Direction.UP || this == Direction.DOWN
+fun Direction.isHorizontal(): Boolean = !this.isVertical()
 
-enum class BlockSide(private val transform: (EnumFacing) -> EnumFacing) {
+enum class BlockSide(private val transform: (Direction) -> Direction) {
 
     FRONT({ it }),
     BACK({ it.opposite }),
-    UP({ EnumFacing.UP }),
+    UP({ Direction.UP }),
     LEFT({ it.rotateY() }),
-    DOWN({ EnumFacing.DOWN }),
+    DOWN({ Direction.DOWN }),
     RIGHT({ it.rotateYCCW() });
 
-    fun getDirection(front: EnumFacing): EnumFacing = transform(front)
+    fun getDirection(front: Direction): Direction = transform(front)
 
     companion object {
 
         val VALUES: Array<BlockSide> = values()
 
-        fun fromDirection(front: EnumFacing, face: EnumFacing): BlockSide = VALUES.first { it.getDirection(front) == face }
+        fun fromDirection(front: Direction, face: Direction): BlockSide = VALUES.first { it.getDirection(front) == face }
 
     }
 

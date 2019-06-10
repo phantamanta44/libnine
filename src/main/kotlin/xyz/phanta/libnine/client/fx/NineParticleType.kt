@@ -8,17 +8,18 @@ import net.minecraft.network.PacketBuffer
 import net.minecraft.particles.IParticleData
 import net.minecraft.particles.ParticleType
 import net.minecraft.util.ResourceLocation
-import net.minecraft.util.registry.IRegistry
 import net.minecraft.world.World
+import net.minecraftforge.api.distmarker.Dist
+import net.minecraftforge.api.distmarker.OnlyIn
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
 
-abstract class NineParticleType<X>(private val name: ResourceLocation, private val force: Boolean) {
+abstract class NineParticleType<X>(private val name: ResourceLocation, force: Boolean) {
 
     @Suppress("LeakingThis")
-    internal val type: ParticleType<Data<X>> = object : ParticleType<Data<X>>(name, force, Deserializer(this)) {}
+    internal val type: ParticleType<Data<X>> = object : ParticleType<Data<X>>(force, Deserializer(this)) {}
 
-    internal val factory: IParticleFactory<Data<X>> = IParticleFactory { context, world, x, y, z, velX, velY, velZ ->
+    private val factory: IParticleFactory<Data<X>> = IParticleFactory { context, world, x, y, z, velX, velY, velZ ->
         createParticle(context.data, world, x, y, z, velX, velY, velZ)
     }
 
@@ -45,10 +46,8 @@ abstract class NineParticleType<X>(private val name: ResourceLocation, private v
 
     }
 
-    internal fun register() {
-        IRegistry.field_212632_u.put(name, type)
-        Minecraft.getInstance().particles.registerFactory(type, factory)
-    }
+    @OnlyIn(Dist.CLIENT)
+    internal fun registerFactory() = Minecraft.getInstance().particles.registerFactory(type, factory)
 
     abstract fun serialize(stream: ByteWriter, data: X)
 
