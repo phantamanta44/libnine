@@ -21,7 +21,7 @@ object PacketServerSyncTileEntity : PacketType<PacketServerSyncTileEntity.Packet
     override fun deserialize(stream: ByteReader): Packet = Packet(stream.blockPos(), stream.bytes(stream.varPrecision()))
 
     override fun handle(packet: Packet, context: NetworkEvent.Context) {
-        context.enqueueWork<Nothing?> {
+        context.enqueueWork {
             ((Minecraft.getInstance().world.getTileEntity(packet.pos)
                     ?: throw IllegalStateException("Expected tile entity at ${packet.pos}!"))
                     as? NineTile ?: throw IllegalStateException("Expected libnine tile entity at ${packet.pos}!"))

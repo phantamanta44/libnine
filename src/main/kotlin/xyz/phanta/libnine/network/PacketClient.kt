@@ -19,7 +19,7 @@ object PacketClientContainerInteraction : PacketType<PacketClientContainerIntera
     override fun deserialize(stream: ByteReader): Packet = Packet(stream.bytes(stream.varPrecision()))
 
     override fun handle(packet: Packet, context: NetworkEvent.Context) {
-        context.enqueueWork<Nothing?> {
+        context.enqueueWork {
             context.sender!!.openContainer?.let { (it as NineContainer).onClientInteraction(ByteReader(packet.data)) }
         }
     }
