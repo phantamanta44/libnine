@@ -6,10 +6,10 @@ import net.minecraftforge.items.IItemHandlerModifiable
 import net.minecraftforge.items.ItemHandlerHelper
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
-import xyz.phanta.libnine.util.data.Serializable
+import xyz.phanta.libnine.util.data.daedalus.IncrementalSerializable
 import kotlin.math.min
 
-open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null) : IItemHandlerModifiable, Serializable {
+open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null) : IncrementalSerializable(), IItemHandlerModifiable {
 
     protected open var stored: ItemStack = ItemStack.EMPTY
         set(stack) {
@@ -108,33 +108,6 @@ open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null) : IIte
 
     override fun deserNbt(tag: CompoundNBT) {
         stored = tag.getCompound("Item").let { if (it.contains("Empty")) ItemStack.EMPTY else ItemStack.read(it) }
-    }
-
-    class Observable(pred: ((ItemStack) -> Boolean)?, private val observer: (Int, ItemStack) -> Unit) : AspectSlot(pred) {
-
-        override var stored: ItemStack
-            get() = super.stored
-            set(stack) {
-                super.stored = stack
-                observer(0, stored)
-            }
-
-        constructor(observer: (Int, ItemStack) -> Unit) : this(null, observer)
-
-        override fun insertItem(stack: ItemStack, simulate: Boolean): ItemStack {
-            if (simulate) return super.insertItem(stack, true)
-            val result = super.insertItem(stack, false)
-            observer(0, stored)
-            return result
-        }
-
-        override fun extractItem(amount: Int, simulate: Boolean): ItemStack {
-            if (simulate) return super.extractItem(amount, true)
-            val result = super.extractItem(amount, false)
-            observer(0, stored)
-            return result
-        }
-
     }
 
 }

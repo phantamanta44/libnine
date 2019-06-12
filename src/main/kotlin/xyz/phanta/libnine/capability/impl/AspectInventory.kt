@@ -2,19 +2,23 @@ package xyz.phanta.libnine.capability.impl
 
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundNBT
+import net.minecraft.nbt.ListNBT
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.items.IItemHandlerModifiable
 import net.minecraftforge.items.ItemHandlerHelper
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
-import xyz.phanta.libnine.util.data.Serializable
+import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalData
+import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalDataListener
+import xyz.phanta.libnine.util.data.daedalus.ByteStreamDeltaMarker
 import xyz.phanta.libnine.util.data.nbt.asNbtList
 import kotlin.math.min
 
-open class AspectInventory(size: Int) : IItemHandlerModifiable, Serializable {
+open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.Listener>(), IItemHandlerModifiable {
 
     private val slots: Array<ItemStack> = Array(size) { ItemStack.EMPTY }
     private val preds: Array<((ItemStack) -> Boolean)?> = arrayOfNulls(size)
+    private val deltaMarker: ByteStreamDeltaMarker = ByteStreamDeltaMarker { size }
 
     fun withCondition(slot: Int, pred: (ItemStack) -> Boolean): AspectInventory = also { preds[slot] = pred }
 
@@ -86,37 +90,71 @@ open class AspectInventory(size: Int) : IItemHandlerModifiable, Serializable {
     override fun deserNbt(tag: CompoundNBT) {
         val list = tag.getList("Items", Constants.NBT.TAG_COMPOUND)
         for (i in slots.indices) {
-            setStackInSlot(i, list.getCompound(i).let { if (it.contains("Empty")) ItemStack.EMPTY else ItemStack.read(it) })
+            val itemTag = list.getCompound(i)
+            if (!itemTag.isEmpty) {
+                setStackInSlot(i, if (itemTag.contains("Empty")) ItemStack.EMPTY else ItemStack.read(itemTag))
+            }
         }
     }
 
-    override fun serByteStream(stream: ByteWriter) = slots.forEach { stream.itemStack(it) }
+    override fun serByteStream(stream: ByteWriter) {
+        deltaMarker.writeFullField(stream)
+        slots.forEach { stream.itemStack(it) }
+    }
 
     override fun deserByteStream(stream: ByteReader) {
+        val field = deltaMarker.readField(stream)
         for (i in slots.indices) {
-            setStackInSlot(i, stream.itemStack())
+            if (field[i]) {
+                setStackInSlot(i, stream.itemStack())
+            }
         }
     }
 
-    class Observable(size: Int, private val observer: (Int, ItemStack) -> Unit) : AspectInventory(size) {
+    override fun createListener(): Listener = Listener()
 
-        override fun setStackInSlot(slot: Int, stack: ItemStack) {
-            super.setStackInSlot(slot, stack)
-            observer(slot, getStackInSlot(slot))
+    override fun markListenerDirty(listener: Listener) {
+        listener.dirty = true
+    }
+
+    inner class Listener internal constructor() : AbstractIncrementalDataListener() {
+
+        private val lastKnownState: Array<ItemStack> = Array(slots.size) { slots[it].copy() }
+
+        override fun clearDirtyState() {
+            for (i in lastKnownState.indices) {
+                lastKnownState[i] = slots[i]
+            }
+            super.clearDirtyState()
         }
 
-        override fun insertItem(slot: Int, stack: ItemStack, simulate: Boolean): ItemStack {
-            if (simulate) return super.insertItem(slot, stack, true)
-            val result = super.insertItem(slot, stack, false)
-            observer(slot, getStackInSlot(slot))
-            return result
+        override fun serDeltaNbt(tag: CompoundNBT) {
+            val listTag = ListNBT()
+            for (i in lastKnownState.indices) {
+                val itemTag = CompoundNBT()
+                if (!ItemStack.areItemStacksEqual(lastKnownState[i], slots[i])) {
+                    if (slots[i].isEmpty) {
+                        itemTag.putBoolean("Empty", true)
+                    } else {
+                        slots[i].write(itemTag)
+                    }
+                }
+                listTag.add(itemTag)
+            }
+            tag.put("Items", listTag)
         }
 
-        override fun extractItem(slot: Int, amount: Int, simulate: Boolean): ItemStack {
-            if (simulate) return super.extractItem(slot, amount, true)
-            val result = super.extractItem(slot, amount, false)
-            observer(slot, getStackInSlot(slot))
-            return result
+        override fun serDeltaByteStream(stream: ByteWriter) {
+            val field = deltaMarker.createField()
+            val subStream = ByteWriter()
+            for (i in lastKnownState.indices) {
+                if (!ItemStack.areItemStacksEqual(lastKnownState[i], slots[i])) {
+                    subStream.itemStack(slots[i])
+                    field.set(i)
+                }
+            }
+            field.write(stream)
+            stream.bytes(subStream.toArray())
         }
 
     }

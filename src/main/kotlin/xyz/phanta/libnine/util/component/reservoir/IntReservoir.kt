@@ -3,11 +3,12 @@ package xyz.phanta.libnine.util.component.reservoir
 import net.minecraft.nbt.CompoundNBT
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
-import xyz.phanta.libnine.util.data.Serializable
+import xyz.phanta.libnine.util.data.daedalus.IncrementalData
+import xyz.phanta.libnine.util.data.daedalus.IncrementalSerializable
 import xyz.phanta.libnine.util.math.clamp
 import kotlin.math.min
 
-interface IntReservoir : Serializable {
+interface IntReservoir : IncrementalData {
 
     var quantity: Int
 
@@ -22,7 +23,7 @@ interface IntReservoir : Serializable {
 
 }
 
-class SimpleIntReservoir(override var capacity: Int, quantity: Int = 0) : IntReservoir {
+class SimpleIntReservoir(override var capacity: Int, quantity: Int = 0) : IncrementalSerializable(), IntReservoir {
 
     override var quantity: Int = quantity.clamp(0, capacity)
         set(value) {
@@ -74,25 +75,6 @@ class RatedIntReservoir(private val backing: IntReservoir, private val rateInwar
         backing.offer(amount, commit)
     } else {
         backing.offer(min(amount, rateInwards), commit)
-    }
-
-}
-
-class ObservableIntReservoir(private val backing: IntReservoir) : IntReservoir by backing {
-
-    private val observers: MutableList<(Int, Int) -> Unit> = mutableListOf()
-
-    override var quantity: Int
-        get() = backing.quantity
-        set(value) {
-            backing.quantity.let { prevValue ->
-                backing.quantity = value
-                observers.forEach { it(prevValue, value) }
-            }
-        }
-
-    fun observe(observer: (Int, Int) -> Unit) {
-        observers += observer
     }
 
 }

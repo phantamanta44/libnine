@@ -23,8 +23,7 @@ abstract class NineTile(
         private val requiresSync: Boolean
 ) : TileEntity(type), Serializable {
 
-    @Suppress("LeakingThis")
-    protected val serializer: Daedalus<*> = Daedalus(this)
+    protected val daedalus: Daedalus = Daedalus()
     protected val capabilities: ICapabilityProvider? by lazy { initCapabilities() }
 
     // init
@@ -42,7 +41,7 @@ abstract class NineTile(
         if (requiresSync) {
             mod.netHandler.postToClient(
                     PacketDistributor.NEAR.with { world!!.getPacketRange(pos, 64.0) },
-                    PacketServerSyncTileEntity.Packet(pos, ByteWriter().also { serByteStream(it) }.toArray())
+                    PacketServerSyncTileEntity.Packet(pos, ByteWriter().also { daedalus.genDeltaByteStream(it) }.toArray())
             )
         }
     }
@@ -52,15 +51,22 @@ abstract class NineTile(
     override fun <T> getCapability(cap: Capability<T>, side: Direction?): LazyOptional<T> =
             capabilities?.getCapability(cap, side) ?: LazyOptional.empty()
 
+    override fun remove() {
+        super.remove()
+        daedalus.destroy()
+    }
+
     // serialization
 
-    override fun serNbt(tag: CompoundNBT) = serializer.serNbt(tag)
+    override fun serNbt(tag: CompoundNBT) {
+        tag.put("data", daedalus.genFullTag())
+    }
 
-    override fun deserNbt(tag: CompoundNBT) = serializer.deserNbt(tag)
+    override fun deserNbt(tag: CompoundNBT) = daedalus.readTag(tag.getCompound("data"))
 
-    override fun serByteStream(stream: ByteWriter) = serializer.serByteStream(stream)
+    override fun serByteStream(stream: ByteWriter) = daedalus.genFullByteStream(stream)
 
-    override fun deserByteStream(stream: ByteReader) = serializer.deserByteStream(stream)
+    override fun deserByteStream(stream: ByteReader) = daedalus.readByteStream(stream)
 
     override fun read(compound: CompoundNBT) {
         super.read(compound)

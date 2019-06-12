@@ -2,9 +2,9 @@ package xyz.phanta.libnine.capability.impl
 
 import net.minecraftforge.energy.IEnergyStorage
 import xyz.phanta.libnine.util.component.reservoir.IntReservoir
-import xyz.phanta.libnine.util.data.Serializable
+import xyz.phanta.libnine.util.data.daedalus.IncrementalData
 
-class AspectEnergy(private val reservoir: IntReservoir) : IEnergyStorage, Serializable by reservoir {
+class AspectEnergy(private val reservoir: IntReservoir) : IEnergyStorage, IncrementalData by reservoir {
 
     override fun getEnergyStored(): Int = reservoir.quantity
 

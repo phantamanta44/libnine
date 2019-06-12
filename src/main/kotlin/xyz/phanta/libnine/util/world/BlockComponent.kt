@@ -6,14 +6,18 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
-import xyz.phanta.libnine.util.data.Serializable
+import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalData
+import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalDataListener
+import xyz.phanta.libnine.util.data.daedalus.ByteStreamDeltaMarker
 import java.util.*
 
-class SideAllocator<E : Enum<E>>(defaultState: E, private val getFront: () -> Direction) : Serializable {
+class SideAllocator<E : Enum<E>>(defaultState: E, private val getFront: () -> Direction)
+    : AbstractIncrementalData<SideAllocator<E>.Listener>() {
 
     private val enumType: Class<E> = defaultState.declaringClass
     private val faces: EnumMap<BlockSide, E> =
             BlockSide.VALUES.associateTo(EnumMap(BlockSide::class.java)) { it to defaultState }
+    private val deltaMarker: ByteStreamDeltaMarker = ByteStreamDeltaMarker { BlockSide.VALUES.size }
 
     operator fun get(face: BlockSide): E = faces[face]!!
 
@@ -23,15 +27,60 @@ class SideAllocator<E : Enum<E>>(defaultState: E, private val getFront: () -> Di
 
     fun getPredicate(state: E): (Direction) -> Boolean = { faces[BlockSide.fromDirection(getFront(), it)] === state }
 
-    override fun serNbt(tag: CompoundNBT) = faces.forEach { side, state -> tag.putString(side.name, state.name) }
+    override fun serNbt(tag: CompoundNBT) = faces.forEach { (side, state) -> tag.putString(side.name, state.name) }
 
     override fun deserNbt(tag: CompoundNBT) =
-            BlockSide.VALUES.forEach { faces[it] = java.lang.Enum.valueOf(enumType, tag.getString(it.name)) }
+            tag.keySet().forEach { faces[enumValueOf<BlockSide>(it)] = java.lang.Enum.valueOf(enumType, tag.getString(it)) }
 
-    override fun serByteStream(stream: ByteWriter) = BlockSide.VALUES.forEach { stream.enum(faces[it]!!) }
+    override fun serByteStream(stream: ByteWriter) {
+        deltaMarker.writeFullField(stream)
+        BlockSide.VALUES.forEach { stream.enum(faces[it]!!) }
+    }
 
-    override fun deserByteStream(stream: ByteReader) =
-            BlockSide.VALUES.forEach { faces[it] = stream.enum(enumType) }
+    override fun deserByteStream(stream: ByteReader) {
+        val field = deltaMarker.readField(stream)
+        BlockSide.VALUES.withIndex()
+                .filter { (index, _) -> field[index] }
+                .forEach { (_, value) -> faces[value] = stream.enum(enumType) }
+    }
+
+    override fun createListener(): Listener = Listener()
+
+    override fun markListenerDirty(listener: Listener) {
+        listener.dirty = true
+    }
+
+    inner class Listener internal constructor() : AbstractIncrementalDataListener() {
+
+        private val lastKnownState: EnumMap<BlockSide, E> = faces.clone()
+
+        override fun clearDirtyState() {
+            faces.forEach { (k, v) -> lastKnownState[k] = v }
+            super.clearDirtyState()
+        }
+
+        override fun serDeltaNbt(tag: CompoundNBT) {
+            BlockSide.VALUES.forEach {
+                if (faces[it] != lastKnownState[it]) {
+                    tag.putString(it.name, faces[it]!!.name)
+                }
+            }
+        }
+
+        override fun serDeltaByteStream(stream: ByteWriter) {
+            val field = deltaMarker.createField()
+            val subStream = ByteWriter()
+            BlockSide.VALUES.withIndex()
+                    .filter { (_, value) -> faces[value] != lastKnownState[value] }
+                    .forEach { (index, value) ->
+                        field.set(index)
+                        subStream.enum(value)
+                    }
+            field.write(stream)
+            stream.bytes(subStream.toArray())
+        }
+
+    }
 
 }
 
