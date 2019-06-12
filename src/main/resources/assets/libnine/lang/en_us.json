@@ -1,0 +1,19 @@
+{
+  "libnine.misc.blockside.front": "Front",
+  "libnine.misc.blockside.back": "Back",
+  "libnine.misc.blockside.up": "Up",
+  "libnine.misc.blockside.left": "Left",
+  "libnine.misc.blockside.down": "Down",
+  "libnine.misc.blockside.right": "Right",
+  
+  "libnine.misc.redstonebehaviour.ignored": "Ignored",
+  "libnine.misc.redstonebehaviour.direct": "Direct",
+  "libnine.misc.redstonebehaviour.inverted": "Inverted",
+
+  "libnine.misc.direction.down": "Down",
+  "libnine.misc.direction.up": "Up",
+  "libnine.misc.direction.north": "North",
+  "libnine.misc.direction.south": "South",
+  "libnine.misc.direction.west": "West",
+  "libnine.misc.direction.east": "East"
+}
