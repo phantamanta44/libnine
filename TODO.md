@@ -8,3 +8,4 @@
 * interface for things with state that should be synced to clients
 * incremental collection types for daedalus
 * container registration once a better abstraction exists
+* recipe part impls
