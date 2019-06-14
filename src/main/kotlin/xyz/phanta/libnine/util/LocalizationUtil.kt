@@ -1,4 +1,4 @@
-package xyz.phanta.libnine
+package xyz.phanta.libnine.util
 
 import net.minecraft.util.Direction
 import net.minecraft.util.text.ITextComponent

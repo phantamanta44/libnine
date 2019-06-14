@@ -6,7 +6,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.TranslationTextComponent
 import net.minecraft.world.World
-import xyz.phanta.libnine.Localizable
+import xyz.phanta.libnine.util.Localizable
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
 import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalData
