@@ -4,6 +4,7 @@ import io.github.phantamanta44.libnine.client.gui.component.GuiComponent;
 import io.github.phantamanta44.libnine.util.helper.InputUtils;
 import io.github.phantamanta44.libnine.util.render.GuiUtils;
 import io.github.phantamanta44.libnine.util.render.TextureRegion;
+import net.minecraft.client.renderer.GlStateManager;
 import org.lwjgl.input.Keyboard;
 
 import java.util.function.Consumer;
@@ -67,6 +68,7 @@ public class GuiComponentTextInput extends GuiComponent {
         if (focused && (System.currentTimeMillis() % 1000) < 500) {
             GuiUtils.drawRect(x + GuiUtils.getStringWidth(value) + 2, y + 2, 1, GuiUtils.getFontHeight(), colour | 0xFF000000);
         }
+        GlStateManager.color(1F, 1F, 1F, 1F);
     }
 
     @Override
