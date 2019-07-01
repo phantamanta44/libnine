@@ -30,8 +30,8 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
     public L9GuiContainer(L9Container container, @Nullable ResourceLocation bg, int sizeX, int sizeY) {
         super(container);
         this.bg = bg;
-        this.sizeX = sizeX;
-        this.sizeY = sizeY;
+        this.sizeX = this.xSize = sizeX;
+        this.sizeY = this.ySize = sizeY;
         this.components = new GuiComponentManager(this);
     }
 
@@ -132,5 +132,5 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
     protected void keyTyped(char typed, int keyCode) throws IOException {
         if (components.handleKeyTyped(typed, keyCode)) super.keyTyped(typed, keyCode);
     }
-    
+
 }

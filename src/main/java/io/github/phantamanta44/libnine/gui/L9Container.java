@@ -14,10 +14,14 @@ public class L9Container extends Container {
     private final boolean hasInvPlayer;
     private boolean hasInvOther;
 
-    public L9Container(InventoryPlayer ipl) {
+    public L9Container(InventoryPlayer ipl, int height) {
         this.hasInvPlayer = true;
         this.hasInvOther = false;
-        initPlayerInventory(ipl);
+        initPlayerInventory(ipl, height);
+    }
+
+    public L9Container(InventoryPlayer ipl) {
+        this(ipl, 166);
     }
 
     public L9Container() {
@@ -25,14 +29,15 @@ public class L9Container extends Container {
         this.hasInvOther = false;
     }
 
-    protected void initPlayerInventory(InventoryPlayer ipl) {
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 9; ++j) {
-                super.addSlotToContainer(new Slot(ipl, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+    protected void initPlayerInventory(InventoryPlayer ipl, int height) {
+        int offset = height - 82;
+        for (int row = 0; row < 3; ++row) {
+            for (int col = 0; col < 9; ++col) {
+                super.addSlotToContainer(new Slot(ipl, col + row * 9 + 9, 8 + col * 18, offset + row * 18));
             }
         }
-        for (int i = 0; i < 9; ++i) {
-            super.addSlotToContainer(new Slot(ipl, i, 8 + i * 18, 142));
+        for (int col = 0; col < 9; ++col) {
+            super.addSlotToContainer(new Slot(ipl, col, 8 + col * 18, offset + 58));
         }
     }
 
