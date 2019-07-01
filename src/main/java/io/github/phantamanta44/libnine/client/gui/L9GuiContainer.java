@@ -77,6 +77,7 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
     public void drawBackground(float partialTicks, int mX, int mY) {
         drawDefaultBackground();
         if (bg != null) {
+            GlStateManager.color(1F, 1F, 1F, 1F);
             mc.renderEngine.bindTexture(bg);
             drawTexturedModalRect(posX, posY, 0, 0, sizeX, sizeY);
         }
