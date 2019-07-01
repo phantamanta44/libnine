@@ -60,6 +60,10 @@ public class GuiComponentTextInput extends GuiComponent {
         return GuiUtils.isMouseOver(x + boxLength + 5, y, GuiUtils.getFontHeight() + 4, GuiUtils.getFontHeight() + 4, mX, mY);
     }
 
+    public boolean isFocused() {
+        return focused;
+    }
+
     @Override
     public void render(float partialTicks, int mX, int mY, boolean mouseOver) {
         (valid ? (isMouseOverButton(mX, mY) ? btnTexHover : btnTex) : btnTextDisabled).draw(x + boxLength + 5, y, 13, 13);
