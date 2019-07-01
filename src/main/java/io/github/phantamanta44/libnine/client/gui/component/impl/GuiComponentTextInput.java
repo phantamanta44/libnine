@@ -5,8 +5,10 @@ import io.github.phantamanta44.libnine.util.helper.InputUtils;
 import io.github.phantamanta44.libnine.util.render.GuiUtils;
 import io.github.phantamanta44.libnine.util.render.TextureRegion;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import org.lwjgl.input.Keyboard;
 
+import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -19,12 +21,14 @@ public class GuiComponentTextInput extends GuiComponent {
     private final Consumer<String> callback;
     private boolean focused, valid;
     private String value;
+    @Nullable
+    private final String tooltipKey;
 
     public GuiComponentTextInput(int x, int y, int boxLength, int textLength,
                                  TextureRegion btnTex, TextureRegion btnTexHover, TextureRegion btnTexDisabled,
                                  int validColour, int invalidColour,
                                  Predicate<String> validator, Consumer<String> callback,
-                                 String initialValue) {
+                                 String initialValue, @Nullable String tooltipKey) {
         super(x, y, boxLength + 9 + GuiUtils.getFontHeight(), GuiUtils.getFontHeight() + 4);
         this.boxLength = boxLength;
         this.textLength = textLength;
@@ -37,14 +41,24 @@ public class GuiComponentTextInput extends GuiComponent {
         this.callback = callback;
         this.focused = false;
         this.value = initialValue;
+        this.tooltipKey = tooltipKey;
         updateValidity();
     }
 
-    public GuiComponentTextInput(int x, int y, int length, int textLength,
+    public GuiComponentTextInput(int x, int y, int boxLength, int textLength,
+                                 TextureRegion btnTex, TextureRegion btnTexHover, TextureRegion btnTexDisabled,
+                                 int validColour, int invalidColour,
+                                 Predicate<String> validator, Consumer<String> callback, String initial) {
+        this(x, y, boxLength, textLength,
+                btnTex, btnTexHover, btnTexDisabled, validColour, invalidColour, validator, callback, initial, null);
+    }
+
+    public GuiComponentTextInput(int x, int y, int boxLength, int textLength,
                                  TextureRegion btnTex, TextureRegion btnTexHover, TextureRegion btnTexDisabled,
                                  int validColour, int invalidColour,
                                  Predicate<String> validator, Consumer<String> callback) {
-        this(x, y, length, textLength, btnTex, btnTexHover, btnTexDisabled, validColour, invalidColour, validator, callback, "");
+        this(x, y, boxLength, textLength,
+                btnTex, btnTexHover, btnTexDisabled, validColour, invalidColour, validator, callback, "");
     }
 
     public void setValue(String value) {
@@ -58,6 +72,10 @@ public class GuiComponentTextInput extends GuiComponent {
 
     private boolean isMouseOverButton(int mX, int mY) {
         return GuiUtils.isMouseOver(x + boxLength + 5, y, GuiUtils.getFontHeight() + 4, GuiUtils.getFontHeight() + 4, mX, mY);
+    }
+
+    private boolean isMouseOverBox(int mX, int mY) {
+        return GuiUtils.isMouseOver(x, y, boxLength + 4, GuiUtils.getFontHeight() + 4, mX, mY);
     }
 
     public boolean isFocused() {
@@ -76,9 +94,16 @@ public class GuiComponentTextInput extends GuiComponent {
     }
 
     @Override
+    public void renderTooltip(float partialTicks, int mX, int mY) {
+        if (tooltipKey != null && isMouseOverBox(mX, mY)) {
+            drawTooltip(I18n.format(tooltipKey), mX, mY);
+        }
+    }
+
+    @Override
     public boolean onClick(int mX, int mY, int button, boolean mouseOver) {
         if (mouseOver) {
-            if (GuiUtils.isMouseOver(x, y, boxLength + 4, GuiUtils.getFontHeight() + 4, mX, mY)) {
+            if (isMouseOverBox(mX, mY)) {
                 if (button == 1) value = "";
                 focused = true;
             } else {
