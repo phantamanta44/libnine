@@ -126,6 +126,10 @@ public class L9TileEntity extends TileEntity implements ISerializable {
         serializer.deserializeBytes(data);
     }
 
+    public void onTileSyncPacket(ByteUtils.Reader data) {
+        deserBytes(data);
+    }
+
     @Nullable
     @Override
     public SPacketUpdateTileEntity getUpdatePacket() {

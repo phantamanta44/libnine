@@ -63,7 +63,7 @@ public class PacketServerSyncTileEntity implements IMessage {
                 Minecraft.getMinecraft().addScheduledTask(() -> {
                     TileEntity tile = world.getTileEntity(message.pos);
                     if (tile instanceof L9TileEntity) {
-                        ((L9TileEntity)tile).deserBytes(ByteUtils.reader(message.data));
+                        ((L9TileEntity)tile).onTileSyncPacket(ByteUtils.reader(message.data));
                     } else {
                         LibNine.LOGGER.warn("No tile exists for sync packet at pos {}", message.pos);
                     }
