@@ -25,15 +25,33 @@ public class GuiComponentManager {
     }
 
     public boolean handleMouseClick(int mX, int mY, int button) {
-        return comps.stream().noneMatch(c -> c.handleMouseClick(mX, mY, button));
+        boolean passThrough = true;
+        for (ComponentState comp : comps) {
+            if (comp.handleMouseClick(mX, mY, button)) {
+                passThrough = false;
+            }
+        }
+        return passThrough;
     }
 
     public boolean handleMouseDrag(int mX, int mY, int button, long dragTime) {
-        return comps.stream().noneMatch(c -> c.handleMouseDrag(mX, mY, button, dragTime));
+        boolean passThrough = true;
+        for (ComponentState comp : comps) {
+            if (comp.handleMouseDrag(mX, mY, button, dragTime)) {
+                passThrough = false;
+            }
+        }
+        return passThrough;
     }
 
     public boolean handleKeyTyped(char typed, int keyCode) {
-        return comps.stream().noneMatch(c -> c.handleKeyTyped(typed, keyCode));
+        boolean passThrough = true;
+        for (ComponentState comp : comps) {
+            if (comp.handleKeyTyped(typed, keyCode)) {
+                passThrough = false;
+            }
+        }
+        return passThrough;
     }
 
     private static class ComponentState {
@@ -50,7 +68,7 @@ public class GuiComponentManager {
             mouseOver = comp.isMouseOver(mX, mY);
             comp.render(partialTicks, mX, mY, mouseOver);
         }
-        
+
         void drawTooltip(float partialTicks, int mX, int mY) {
             if (mouseOver) comp.renderTooltip(partialTicks, mX, mY);
         }
@@ -66,7 +84,7 @@ public class GuiComponentManager {
         boolean handleKeyTyped(char typed, int keyCode) {
             return comp.onKeyPress(keyCode, typed);
         }
-        
+
     }
 
 }
