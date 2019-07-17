@@ -2,15 +2,16 @@ package io.github.phantamanta44.libnine.client.model;
 
 import com.google.gson.JsonObject;
 import io.github.phantamanta44.libnine.util.helper.ResourceUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.client.resource.VanillaResourceType;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 public class L9Models {
 
     public static void registerModels() {
         ModelLoaderRegistry.registerLoader(new ParameterizedItemModelLoader());
-        Minecraft.getMinecraft().refreshResources();
+        FMLClientHandler.instance().refreshResources(VanillaResourceType.MODELS);
     }
 
     static boolean isOfType(ResourceLocation resource, String type) {
@@ -24,8 +25,8 @@ public class L9Models {
 
     public static ResourceLocation getRealModelLocation(ResourceLocation resource) {
 
-        return new ResourceLocation(resource.getResourceDomain(), (resource.getResourcePath().startsWith("models/")
-                ? resource.getResourcePath() : ("models/" + resource.getResourcePath())) + ".json");
+        return new ResourceLocation(resource.getNamespace(), (resource.getPath().startsWith("models/")
+                ? resource.getPath() : ("models/" + resource.getPath())) + ".json");
     }
 
 }

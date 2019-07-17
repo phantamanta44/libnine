@@ -41,7 +41,7 @@ public class L9Block extends Block implements ITileEntityProvider {
      */
 
     protected void initName() {
-        setUnlocalizedName(LibNine.PROXY.getRegistrar().getBound().prefix(getInternalName()));
+        setTranslationKey(LibNine.PROXY.getRegistrar().getBound().prefix(getInternalName()));
     }
 
     protected L9ItemBlock initItemBlock() {

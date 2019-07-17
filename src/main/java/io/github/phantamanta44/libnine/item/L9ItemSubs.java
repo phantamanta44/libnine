@@ -57,8 +57,8 @@ public class L9ItemSubs extends L9Item {
     }
 
     @Override
-    public String getUnlocalizedName(ItemStack stack) {
-        return super.getUnlocalizedName(stack) + stack.getMetadata();
+    public String getTranslationKey(ItemStack stack) {
+        return super.getTranslationKey(stack) + stack.getMetadata();
     }
 
 }

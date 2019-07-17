@@ -5,8 +5,8 @@ import java.util.function.Predicate;
 public enum RedstoneBehaviour {
 
     IGNORED(p -> true),
-    DIRECT(p -> p.getWorld().isBlockIndirectlyGettingPowered(p.getPos()) > 0),
-    INVERTED(p -> p.getWorld().isBlockIndirectlyGettingPowered(p.getPos()) == 0);
+    DIRECT(p -> p.getWorld().isBlockPowered(p.getPos())),
+    INVERTED(p -> !p.getWorld().isBlockPowered(p.getPos()));
 
     private final Predicate<WorldBlockPos> pred;
 

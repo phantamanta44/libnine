@@ -15,7 +15,7 @@ public class L9CreativeTab extends CreativeTabs {
     }
 
     @Override
-    public ItemStack getTabIconItem() {
+    public ItemStack createIcon() {
         return icon.get();
     }
 

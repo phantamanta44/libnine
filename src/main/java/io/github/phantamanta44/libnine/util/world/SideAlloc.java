@@ -33,7 +33,7 @@ public class SideAlloc<E extends Enum<E>> implements IAllocableSides<E>, ISerial
     }
 
     public <T> BiPredicate<T, EnumFacing> getPredicate(E state) {
-        return (t, f) -> faces.get(BlockSide.fromDirection(frontGetter.get(), f)) == state;
+        return (t, f) -> f != null && faces.get(BlockSide.fromDirection(frontGetter.get(), f)) == state;
     }
 
     @Override

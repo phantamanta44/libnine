@@ -26,13 +26,13 @@ public class ItemUtils {
     }
 
     public static String getColouredName(ItemStack stack) {
-        return stack.getRarity().rarityColor + stack.getDisplayName();
+        return stack.getItem().getForgeRarity(stack).getColor() + stack.getDisplayName();
     }
 
     public static String getUnlocalizedBlockName(WorldBlockPos pos) {
         Block block = pos.getBlock();
         return Item.getItemFromBlock(block)
-                .getUnlocalizedName(block.getPickBlock(pos.getBlockState(), null, pos.getWorld(), pos.getPos(), null));
+                .getTranslationKey(block.getPickBlock(pos.getBlockState(), null, pos.getWorld(), pos.getPos(), null));
     }
 
     public static String getLocalizedBlockName(WorldBlockPos pos) {
@@ -45,7 +45,7 @@ public class ItemUtils {
         Block block = pos.getBlock();
         Item item = Item.getItemFromBlock(block);
         ItemStack stack = block.getPickBlock(pos.getBlockState(), null, pos.getWorld(), pos.getPos(), null);
-        return item.getRarity(stack).rarityColor + item.getItemStackDisplayName(stack);
+        return item.getForgeRarity(stack).getColor() + item.getItemStackDisplayName(stack);
     }
 
     @SuppressWarnings("deprecation")

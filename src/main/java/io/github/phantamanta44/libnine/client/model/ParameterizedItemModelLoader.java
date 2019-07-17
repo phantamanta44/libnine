@@ -81,16 +81,16 @@ public class ParameterizedItemModelLoader implements ICustomModelLoader {
 
         @Override
         public InputStream getInputStream(ResourceLocation location) throws IOException {
-            String resource = resources.get(location.getResourcePath());
+            String resource = resources.get(location.getPath());
             if (resource == null) {
-                throw new FileNotFoundException("Unknown PI resource: " + location.getResourcePath());
+                throw new FileNotFoundException("Unknown PI resource: " + location.getPath());
             }
             return new ByteArrayInputStream(resource.getBytes(StandardCharsets.UTF_8));
         }
 
         @Override
         public boolean resourceExists(ResourceLocation location) {
-            return resources.containsKey(location.getResourcePath());
+            return resources.containsKey(location.getPath());
         }
 
         @Override

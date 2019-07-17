@@ -23,7 +23,7 @@ public class L9Item extends Item {
      */
 
     protected void initName() {
-        setUnlocalizedName(LibNine.PROXY.getRegistrar().getBound().prefix(getInternalName()));
+        setTranslationKey(LibNine.PROXY.getRegistrar().getBound().prefix(getInternalName()));
     }
 
     protected void initRegistration() {
