@@ -3,7 +3,7 @@ package io.github.phantamanta44.libnine.util.data.serialization;
 import io.github.phantamanta44.libnine.LibNine;
 import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
-import io.github.phantamanta44.libnine.util.helper.FormatUtils;
+import io.github.phantamanta44.libnine.util.format.FormatUtils;
 import io.github.phantamanta44.libnine.util.helper.MirrorUtils;
 import io.github.phantamanta44.libnine.util.math.Vec2i;
 import io.github.phantamanta44.libnine.util.nbt.NBTUtils;

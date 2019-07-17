@@ -9,7 +9,7 @@ import io.github.phantamanta44.libnine.gui.L9GuiHandler;
 import io.github.phantamanta44.libnine.item.L9Item;
 import io.github.phantamanta44.libnine.tile.L9TileEntity;
 import io.github.phantamanta44.libnine.util.LazyConstant;
-import io.github.phantamanta44.libnine.util.helper.FormatUtils;
+import io.github.phantamanta44.libnine.util.format.FormatUtils;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.client.renderer.color.IItemColor;
