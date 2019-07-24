@@ -5,7 +5,7 @@ import io.github.phantamanta44.libnine.Registrar;
 import io.github.phantamanta44.libnine.client.event.ClientTickHandler;
 import io.github.phantamanta44.libnine.client.model.L9Models;
 import io.github.phantamanta44.libnine.tile.L9TileEntity;
-import io.github.phantamanta44.libnine.util.render.RenderUtils;
+import io.github.phantamanta44.libnine.util.render.shader.ShaderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
@@ -68,7 +68,7 @@ public class L9ClientProxy extends L9CommonProxy {
 
     @Override
     protected void onPreInit(FMLPreInitializationEvent event) {
-        RenderUtils.registerReloadHook();
+        ShaderUtils.registerReloadHook();
         L9Models.registerModels();
         super.onPreInit(event);
         MinecraftForge.EVENT_BUS.register(new ClientTickHandler());
@@ -106,7 +106,7 @@ public class L9ClientProxy extends L9CommonProxy {
         @Override
         public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
             if (args.length == 1 && args[0].equals("rs")) {
-                RenderUtils.reloadShaders();
+                ShaderUtils.reloadShaders();
                 sender.sendMessage(new TextComponentString("ok"));
             } else {
                 throw new CommandException("invalid");

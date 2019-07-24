@@ -2,10 +2,18 @@ package io.github.phantamanta44.libnine.util.render.shader;
 
 public interface IShaderProgram {
 
-    IShaderProgram withShader(IShader shader);
+    IShaderProgram use();
 
-    IShaderProgram compile();
+    <T> IShaderProgram setUniform(Uniform<T, ?> uniform, T value);
 
-    void use();
+    interface Source {
+
+        Source withShader(IShader shader);
+
+        <T> Uniform<T, ?> getUniform(UniformType<T, ?> type, String name);
+
+        IShaderProgram compile();
+
+    }
 
 }
