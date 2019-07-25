@@ -19,8 +19,12 @@ public class TextFormatUtils {
     }
 
     public static void setGlColour(TextFormatting colour, float alpha) {
-        int n = getTextColour(colour);
-        GlStateManager.color(getComponent(n, 2), getComponent(n, 1), getComponent(n, 0), alpha);
+        setGlColour(getTextColour(colour), alpha);
+
+    }
+
+    public static void setGlColour(int colour, float alpha) {
+        GlStateManager.color(getComponent(colour, 2), getComponent(colour, 1), getComponent(colour, 0), alpha);
     }
 
     public static void setGlColour(TextFormatting colour) {
