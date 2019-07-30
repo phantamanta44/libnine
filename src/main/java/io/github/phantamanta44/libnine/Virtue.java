@@ -11,6 +11,7 @@ import io.github.phantamanta44.libnine.wsd.WSDManager;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -109,6 +110,14 @@ public class Virtue {
 
     public TextureResource newTextureResource(String resource, int width, int height) {
         return new TextureResource(newResourceLocation(resource), width, height);
+    }
+
+    public SoundEvent newSoundEvent(String key) {
+        ResourceLocation id = newResourceLocation(key);
+        SoundEvent sound = new SoundEvent(id);
+        sound.setRegistryName(id);
+        LibNine.PROXY.getRegistrar().queueSoundEventReg(sound);
+        return sound;
     }
 
     public void setCreativeTabFor(L9Item item) {

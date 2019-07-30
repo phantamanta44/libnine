@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -50,11 +51,11 @@ public class Registrar {
     private Virtue bound;
     private final List<L9Block> virtueBlocks = new LinkedList<>();
     private final List<L9Item> virtueItems = new LinkedList<>();
-    
+
     public void begin(Virtue virtue) {
         if (bound != null) {
             throw new IllegalStateException(String.format("Could not bind virtue %s because %s was already bound!",
-                            virtue.getModId(), getBound().getModId()));
+                    virtue.getModId(), getBound().getModId()));
         }
         this.bound = virtue;
     }
@@ -115,7 +116,7 @@ public class Registrar {
     public void queueItemBlockModelReg(L9Block block, String model) {
         // NO-OP
     }
-    
+
     public void queueBlockStateMapperReg(L9BlockStated block, IBlockModelMapper mapper) {
         // NO-OP
     }
@@ -130,6 +131,12 @@ public class Registrar {
 
     public void onRegisterColourHandlers() {
         // NO-OP
+    }
+
+    private final List<SoundEvent> rqSounds = new LinkedList<>();
+
+    public void queueSoundEventReg(SoundEvent sound) {
+        rqSounds.add(sound);
     }
 
     public <T extends TileEntity> void queueTESRReg(Class<T> clazz, TileEntitySpecialRenderer<T> renderer) {
@@ -165,6 +172,11 @@ public class Registrar {
                 t.register();
                 tileVirtueTable.put(t.clazz.get(), t.virtue.get());
             });
+        }
+
+        @SubscribeEvent
+        public void onRegisterSounds(RegistryEvent.Register<SoundEvent> event) {
+            rqSounds.forEach(event.getRegistry()::register);
         }
 
     }
