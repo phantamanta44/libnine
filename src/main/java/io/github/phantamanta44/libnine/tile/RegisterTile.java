@@ -11,4 +11,6 @@ public @interface RegisterTile {
 
     String value();
 
+    String[] deps = {};
+
 }

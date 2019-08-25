@@ -14,8 +14,8 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.discovery.asm.ModAnnotation;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -94,7 +94,13 @@ public class L9CommonProxy {
 
     protected void onPreInit(FMLPreInitializationEvent event) {
         registrar.hookEvents();
+        tileIter:
         for (ASMDataTable.ASMData target : event.getAsmData().getAll(RegisterTile.class.getName())) {
+            for (String dep : (String[])target.getAnnotationInfo().get("deps")) {
+                if (!Loader.isModLoaded(dep)) {
+                    continue tileIter;
+                }
+            }
             getRegistrar().queueTileEntityReg((String)target.getAnnotationInfo().get("value"), target.getClassName());
         }
         Side actualSide = FMLCommonHandler.instance().getSide();
