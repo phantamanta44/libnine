@@ -27,9 +27,9 @@ public class TextureRegion {
     }
 
     public TextureRegion(TextureResource texture) {
-        this(texture, 0, 0, 1, 1);
+        this(texture, 0, 0, texture.getWidth(), texture.getHeight());
     }
-    
+
     public TextureResource getTexture() {
         return texture;
     }
