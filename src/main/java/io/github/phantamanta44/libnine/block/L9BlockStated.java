@@ -1,5 +1,7 @@
 package io.github.phantamanta44.libnine.block;
 
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import io.github.phantamanta44.libnine.LibNine;
 import io.github.phantamanta44.libnine.block.state.VirtualState;
 import io.github.phantamanta44.libnine.item.L9ItemBlock;
@@ -23,6 +25,8 @@ public class L9BlockStated extends L9Block {
     private List<IProperty<?>> props;
     @SuppressWarnings("NullableProblems")
     private List<VirtualState> states;
+    @SuppressWarnings("NullableProblems")
+    private TObjectIntMap<VirtualState> statesInv;
 
     public L9BlockStated(String name, Material material) {
         super(name, material);
@@ -32,8 +36,7 @@ public class L9BlockStated extends L9Block {
     /*
      * Initializers
      */
-
-
+    
     @SuppressWarnings("WeakerAccess")
     protected void accrueProperties(Accrue<IProperty<?>> props) {
         // NO-OP
@@ -50,6 +53,10 @@ public class L9BlockStated extends L9Block {
         Accrue<IProperty<?>> accum = new Accrue<>(propList);
         accrueProperties(accum);
         states = Collections.unmodifiableList(VirtualState.cartesian(propList));
+        statesInv = new TObjectIntHashMap<>();
+        for (int i = 0; i < states.size(); i++) {
+            statesInv.put(states.get(i), i);
+        }
         accrueVolatileProperties(accum);
         props = Collections.unmodifiableList(propList);
         return new BlockStateContainer(this, props.toArray(new IProperty[0]));
@@ -108,16 +115,13 @@ public class L9BlockStated extends L9Block {
 
     @Override
     public int getMetaFromState(IBlockState state) {
-        for (int i = 0; i < states.size(); i++) {
-            if (states.get(i).matches(state)) return i;
-        }
-        throw new IllegalArgumentException("Invalid block state!");
+        return statesInv.get(state);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public IBlockState getStateFromMeta(int meta) {
-        return states.get(meta).synthesize(getBlockState());
+        return (meta >= 0 && meta < states.size()) ? states.get(meta).synthesize(getBlockState()) : getDefaultState();
     }
 
 }

@@ -5,6 +5,7 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import java.util.stream.Stream;
 public class VirtualState {
 
     private final Map<IProperty<?>, Comparable<?>> props;
+    @Nullable
+    private Integer hashCode = null;
 
     private VirtualState() {
         this.props = new HashMap<>();
@@ -39,7 +42,17 @@ public class VirtualState {
         return true;
     }
 
-    @SuppressWarnings({"unchecked", "RedundantCast"})
+    @Override
+    public int hashCode() {
+        return hashCode == null ? (hashCode = props.hashCode()) : hashCode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof VirtualState && props.equals(((VirtualState)obj).props);
+    }
+
+    @SuppressWarnings({ "unchecked", "RedundantCast" })
     public IBlockState synthesize(BlockStateContainer container) {
         IBlockState state = container.getBaseState();
         for (Map.Entry<IProperty<?>, Comparable<?>> prop : props.entrySet()) {
