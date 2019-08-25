@@ -2,9 +2,13 @@ package io.github.phantamanta44.libnine.util.nbt;
 
 import io.github.phantamanta44.libnine.util.math.Vec2i;
 import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+
+import java.util.stream.Collector;
 
 public class NBTUtils {
 
@@ -42,6 +46,22 @@ public class NBTUtils {
 
     public static Vec2i deserializeVec2i(NBTTagCompound tag) {
         return new Vec2i(tag.getInteger("x"), tag.getInteger("y"));
+    }
+
+    public static <T extends NBTBase> Collector<T, NBTTagList, NBTTagList> collectList() {
+        return Collector.of(NBTTagList::new, NBTTagList::appendTag, NBTUtils::mergeLists,
+                Collector.Characteristics.IDENTITY_FINISH);
+    }
+
+    public static NBTTagList mergeLists(NBTTagList a, NBTTagList b) {
+        NBTTagList result = new NBTTagList();
+        for (NBTBase tag : a) {
+            result.appendTag(tag);
+        }
+        for (NBTBase tag : b) {
+            result.appendTag(tag);
+        }
+        return result;
     }
 
 }
