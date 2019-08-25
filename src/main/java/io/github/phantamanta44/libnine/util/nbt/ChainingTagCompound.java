@@ -5,8 +5,9 @@ import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraftforge.fluids.FluidStack;
+import scala.actors.threadpool.Arrays;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class ChainingTagCompound extends NBTTagCompound {
@@ -55,9 +56,20 @@ public class ChainingTagCompound extends NBTTagCompound {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends NBTBase> NBTTagCompound withList(String key, T... tags) {
-        super.setTag(key, new NBTTagList());
-        Arrays.stream(tags).forEach(super.getTagList(key, tags[0].getId())::appendTag);
+    public <T extends NBTBase> ChainingTagCompound withList(String key, T... tags) {
+        return withList(key, Arrays.asList(tags));
+    }
+
+    public <T extends NBTBase> ChainingTagCompound withList(String key, List<T> tags) {
+        NBTTagList list = new NBTTagList();
+        for (T tag : tags) {
+            list.appendTag(tag);
+        }
+        return withList(key, list);
+    }
+
+    public ChainingTagCompound withList(String key, NBTTagList list) {
+        setTag(key, list);
         return this;
     }
 

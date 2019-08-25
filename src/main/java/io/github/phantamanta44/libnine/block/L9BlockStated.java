@@ -36,7 +36,7 @@ public class L9BlockStated extends L9Block {
     /*
      * Initializers
      */
-    
+
     @SuppressWarnings("WeakerAccess")
     protected void accrueProperties(Accrue<IProperty<?>> props) {
         // NO-OP
