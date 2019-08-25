@@ -96,9 +96,13 @@ public class L9CommonProxy {
         registrar.hookEvents();
         tileIter:
         for (ASMDataTable.ASMData target : event.getAsmData().getAll(RegisterTile.class.getName())) {
-            for (String dep : (String[])target.getAnnotationInfo().get("deps")) {
-                if (!Loader.isModLoaded(dep)) {
-                    continue tileIter;
+            //noinspection unchecked
+            List<String> deps = (List<String>)target.getAnnotationInfo().get("deps");
+            if (deps != null) {
+                for (String dep : deps){
+                    if (!Loader.isModLoaded(dep)) {
+                        continue tileIter;
+                    }
                 }
             }
             getRegistrar().queueTileEntityReg((String)target.getAnnotationInfo().get("value"), target.getClassName());
