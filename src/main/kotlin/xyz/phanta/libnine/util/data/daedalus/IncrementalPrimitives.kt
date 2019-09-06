@@ -140,25 +140,6 @@ fun DataManager.string(name: String, initial: String): IncrementalProperty<Strin
             }
         })
 
-fun DataManager.tagCompound(name: String, initial: CompoundNBT): IncrementalProperty<CompoundNBT> =
-        this.property(name, object : IncrementalProperty<CompoundNBT>(initial) {
-            override fun serNbt(tag: CompoundNBT) {
-                tag.put("value", value)
-            }
-
-            override fun deserNbt(tag: CompoundNBT) {
-                value = tag.getCompound("value")
-            }
-
-            override fun serByteStream(stream: ByteWriter) {
-                stream.tagCompound(value)
-            }
-
-            override fun deserByteStream(stream: ByteReader) {
-                value = stream.tagCompound()
-            }
-        })
-
 inline fun <reified T : Enum<T>> DataManager.enum(name: String, initial: T): IncrementalProperty<T> =
         this.property(name, object : IncrementalProperty<T>(initial) {
             override fun serNbt(tag: CompoundNBT) = tag.putString("value", value.name)

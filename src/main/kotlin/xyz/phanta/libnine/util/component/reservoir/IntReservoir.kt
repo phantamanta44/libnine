@@ -32,6 +32,7 @@ class SimpleIntReservoir(override var capacity: Int, quantity: Int = 0) : Increm
     override var quantity: Int = quantity.clamp(0, capacity)
         set(value) {
             field = value.clamp(0, capacity)
+            markDirty()
         }
 
     init {
