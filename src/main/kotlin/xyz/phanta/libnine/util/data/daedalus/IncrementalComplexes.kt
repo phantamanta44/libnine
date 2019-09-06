@@ -1,6 +1,5 @@
 package xyz.phanta.libnine.util.data.daedalus
 
-import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundNBT
 import net.minecraft.nbt.NBTUtil
 import net.minecraft.util.ResourceLocation
@@ -11,27 +10,6 @@ import xyz.phanta.libnine.util.data.ByteWriter
 import xyz.phanta.libnine.util.data.nbt.deserializeVec3d
 import xyz.phanta.libnine.util.data.nbt.serializeNbt
 import java.util.*
-
-fun DataManager.itemStack(name: String, initial: ItemStack = ItemStack.EMPTY): IncrementalProperty<ItemStack> =
-        this.property(name, object : IncrementalProperty<ItemStack>(initial) {
-            override fun serNbt(tag: CompoundNBT) {
-                value.write(tag)
-            }
-
-            override fun deserNbt(tag: CompoundNBT) {
-                value = ItemStack.read(tag)
-            }
-
-            override fun serByteStream(stream: ByteWriter) {
-                stream.itemStack(value)
-            }
-
-            override fun deserByteStream(stream: ByteReader) {
-                value = stream.itemStack()
-            }
-        })
-
-// TODO fluids
 
 fun DataManager.blockPos(name: String, initial: BlockPos = BlockPos.ZERO): IncrementalProperty<BlockPos> =
         this.property(name, object : IncrementalProperty<BlockPos>(initial) {
@@ -59,7 +37,7 @@ fun DataManager.vec3d(name: String, initial: Vec3d = Vec3d.ZERO): IncrementalPro
             }
 
             override fun deserNbt(tag: CompoundNBT) {
-                value = deserializeVec3d(tag.getCompound("value"))
+                value = tag.getCompound("value").deserializeVec3d()
             }
 
             override fun serByteStream(stream: ByteWriter) {

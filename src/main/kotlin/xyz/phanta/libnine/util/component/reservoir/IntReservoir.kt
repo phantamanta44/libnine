@@ -17,6 +17,10 @@ interface IntReservoir : IncrementalData {
     val remainingCapacity: Int
         get() = capacity - quantity
 
+    fun isEmpty(): Boolean = quantity == 0
+
+    fun isNotEmpty(): Boolean = quantity > 0
+
     fun draw(amount: Int, commit: Boolean): Int
 
     fun offer(amount: Int, commit: Boolean): Int

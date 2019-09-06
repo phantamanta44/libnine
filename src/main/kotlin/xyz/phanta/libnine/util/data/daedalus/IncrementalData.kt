@@ -11,25 +11,33 @@ interface IncrementalData : Serializable {
 
 }
 
-abstract class AbstractIncrementalData<T : IncrementalDataListener>() : IncrementalData {
+abstract class AbstractIncrementalData<T : IncrementalDataListener> : IncrementalData {
 
     private val listeners: MutableList<T> = mutableListOf()
 
-    protected fun markDirty() {
+    override fun extractListener(): IncrementalDataListener = createListener().also { listeners += it }
+
+    abstract fun createListener(): T
+
+    protected fun iterateListeners(action: (T) -> Unit) {
         val iter = listeners.iterator()
         while (iter.hasNext()) {
             val listener = iter.next()
             if (listener.valid) {
-                markListenerDirty(listener)
+                action(listener)
             } else {
                 iter.remove()
             }
         }
     }
 
-    override fun extractListener(): IncrementalDataListener = createListener().also { listeners += it }
+}
 
-    abstract fun createListener(): T
+abstract class UnitIncrementalData<T : IncrementalDataListener> : AbstractIncrementalData<T>() {
+
+    protected fun markDirty() {
+        iterateListeners { markListenerDirty(it) }
+    }
 
     abstract fun markListenerDirty(listener: T)
 
@@ -52,6 +60,11 @@ interface IncrementalDataListener {
 abstract class AbstractIncrementalDataListener : IncrementalDataListener {
 
     override var valid: Boolean = true
+
+}
+
+abstract class UnitIncrementalDataListener : AbstractIncrementalDataListener() {
+
     override var dirty: Boolean = false
 
     override fun clearDirtyState() {
@@ -60,7 +73,7 @@ abstract class AbstractIncrementalDataListener : IncrementalDataListener {
 
 }
 
-abstract class IncrementalSerializable : AbstractIncrementalData<IncrementalSerializable.Listener>() {
+abstract class IncrementalSerializable : UnitIncrementalData<IncrementalSerializable.Listener>() {
 
     override fun createListener(): Listener = Listener()
 
@@ -68,11 +81,41 @@ abstract class IncrementalSerializable : AbstractIncrementalData<IncrementalSeri
         listener.dirty = true
     }
 
-    inner class Listener internal constructor() : AbstractIncrementalDataListener() {
+    inner class Listener internal constructor() : UnitIncrementalDataListener() {
 
         override fun serDeltaNbt(tag: CompoundNBT) = serNbt(tag)
 
         override fun serDeltaByteStream(stream: ByteWriter) = serByteStream(stream)
+
+    }
+
+}
+
+abstract class IncrementalComposition<T : IncrementalComposition.Listener>(private vararg val children: IncrementalData)
+    : UnitIncrementalData<T>() {
+
+    override fun markListenerDirty(listener: T) {
+        listener.dirty = true
+    }
+
+    open class Listener internal constructor(protected val owner: IncrementalComposition<*>)
+        : UnitIncrementalDataListener() {
+
+        private val childListeners: List<IncrementalDataListener> = owner.children.map { it.extractListener() }
+
+        override var dirty: Boolean
+            get() = super.dirty || childListeners.any { it.dirty }
+            set(value) {
+                super.dirty = value
+            }
+
+        override fun serDeltaNbt(tag: CompoundNBT) {
+            childListeners.forEach { it.serDeltaNbt(tag) }
+        }
+
+        override fun serDeltaByteStream(stream: ByteWriter) {
+            childListeners.forEach { it.serDeltaByteStream(stream) }
+        }
 
     }
 

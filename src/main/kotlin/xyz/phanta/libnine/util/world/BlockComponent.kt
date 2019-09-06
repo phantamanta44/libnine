@@ -9,13 +9,13 @@ import net.minecraft.world.World
 import xyz.phanta.libnine.util.Localizable
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
-import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalData
-import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalDataListener
+import xyz.phanta.libnine.util.data.daedalus.UnitIncrementalData
+import xyz.phanta.libnine.util.data.daedalus.UnitIncrementalDataListener
 import xyz.phanta.libnine.util.data.daedalus.ByteStreamDeltaMarker
 import java.util.*
 
 class SideAllocator<E : Enum<E>>(defaultState: E, private val getFront: () -> Direction)
-    : AbstractIncrementalData<SideAllocator<E>.Listener>() {
+    : UnitIncrementalData<SideAllocator<E>.Listener>() {
 
     private val enumType: Class<E> = defaultState.declaringClass
     private val faces: EnumMap<BlockSide, E> =
@@ -53,7 +53,7 @@ class SideAllocator<E : Enum<E>>(defaultState: E, private val getFront: () -> Di
         listener.dirty = true
     }
 
-    inner class Listener internal constructor() : AbstractIncrementalDataListener() {
+    inner class Listener internal constructor() : UnitIncrementalDataListener() {
 
         private val lastKnownState: EnumMap<BlockSide, E> = faces.clone()
 

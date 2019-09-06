@@ -30,6 +30,12 @@ class ByteStreamDeltaMarker(private val bitCount: () -> Int) {
             bytes[byteIndex] = (bytes[byteIndex].toInt() or (1 shl residual)).toByte()
         }
 
+        fun clear() {
+            bytes.fill(0.toByte())
+        }
+
+        fun any(): Boolean = bytes.any { it != 0.toByte() }
+
         fun write(stream: ByteWriter) {
             stream.bytes(bytes)
         }

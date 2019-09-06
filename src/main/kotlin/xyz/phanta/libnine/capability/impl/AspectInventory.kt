@@ -12,6 +12,7 @@ import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalData
 import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalDataListener
 import xyz.phanta.libnine.util.data.daedalus.ByteStreamDeltaMarker
 import xyz.phanta.libnine.util.data.nbt.asNbtList
+import xyz.phanta.libnine.util.isCongruentWith
 import kotlin.math.min
 
 open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.Listener>(), IItemHandlerModifiable {
@@ -113,26 +114,22 @@ open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.
 
     override fun createListener(): Listener = Listener()
 
-    override fun markListenerDirty(listener: Listener) {
-        listener.dirty = true
-    }
-
     inner class Listener internal constructor() : AbstractIncrementalDataListener() {
 
-        private val lastKnownState: Array<ItemStack> = Array(slots.size) { slots[it].copy() }
+        private val lastKnownState: List<ItemStack> = slots.map { it.copy() }
+
+        override val dirty: Boolean // extremely inefficient but necessary because of itemstack mutability
+            get() = lastKnownState.indices.any { !lastKnownState[it].isCongruentWith(slots[it]) }
 
         override fun clearDirtyState() {
-            for (i in lastKnownState.indices) {
-                lastKnownState[i] = slots[i]
-            }
-            super.clearDirtyState()
+            System.arraycopy(slots, 0, lastKnownState, 0, lastKnownState.size)
         }
 
         override fun serDeltaNbt(tag: CompoundNBT) {
             val listTag = ListNBT()
-            for (i in lastKnownState.indices) {
+            for (i in slots.indices) {
                 val itemTag = CompoundNBT()
-                if (!ItemStack.areItemStacksEqual(lastKnownState[i], slots[i])) {
+                if (!lastKnownState[i].isCongruentWith(slots[i])) {
                     if (slots[i].isEmpty) {
                         itemTag.putBoolean("Empty", true)
                     } else {
@@ -147,8 +144,8 @@ open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.
         override fun serDeltaByteStream(stream: ByteWriter) {
             val field = deltaMarker.createField()
             val subStream = ByteWriter()
-            for (i in lastKnownState.indices) {
-                if (!ItemStack.areItemStacksEqual(lastKnownState[i], slots[i])) {
+            for (i in slots.indices) {
+                if (!lastKnownState[i].isCongruentWith(slots[i])) {
                     subStream.itemStack(slots[i])
                     field.set(i)
                 }

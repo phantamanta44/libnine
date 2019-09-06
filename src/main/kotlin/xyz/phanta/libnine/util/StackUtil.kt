@@ -13,5 +13,7 @@ fun ItemStack.copyOffset(offset: Int): ItemStack = copy(this.count + offset)
 
 infix fun ItemStack.matches(other: ItemStack): Boolean = ItemHandlerHelper.canItemStacksStack(this, other)
 
+fun ItemStack.isCongruentWith(other: ItemStack): Boolean = ItemStack.areItemStacksEqual(this, other)
+
 val ItemStack.countRemaining: Int
     get() = this.maxStackSize - this.count
