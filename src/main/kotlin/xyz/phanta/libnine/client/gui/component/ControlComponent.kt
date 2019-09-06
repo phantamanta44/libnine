@@ -2,11 +2,12 @@ package xyz.phanta.libnine.client.gui.component
 
 import net.minecraft.util.SoundEvents
 import org.lwjgl.glfw.GLFW
-import xyz.phanta.libnine.util.*
 import xyz.phanta.libnine.util.math.PlanarVec
-import xyz.phanta.libnine.util.render.*
-import xyz.phanta.libnine.util.component.redstone.RedstoneBehaviour
-import xyz.phanta.libnine.util.world.RedstoneControllable
+import xyz.phanta.libnine.util.play
+import xyz.phanta.libnine.util.render.DrawUtil
+import xyz.phanta.libnine.util.render.FONT_HEIGHT
+import xyz.phanta.libnine.util.render.TextureRegion
+import xyz.phanta.libnine.util.render.getMcWidth
 
 class ScreenComponentTextInput(
         pos: PlanarVec,
@@ -129,7 +130,8 @@ class ScreenComponentTextInput(
 
 }
 
-class ScreenComponentRedstoneControl(
+// TODO
+/*class ScreenComponentRedstoneControl(
         pos: PlanarVec,
         private val bg: TextureRegion,
         private val bgHover: TextureRegion,
@@ -180,4 +182,4 @@ class ScreenComponentRedstoneControl(
         return false
     }
 
-}
+}*/
