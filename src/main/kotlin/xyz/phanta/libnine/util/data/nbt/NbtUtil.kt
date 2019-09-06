@@ -6,13 +6,18 @@ import net.minecraft.nbt.ListNBT
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.Vec3d
 
-fun Vec3d.serializeNbt(): ChainingTagCompound =
-        ChainingTagCompound().withDouble("x", this.x).withDouble("y", this.y).withDouble("z", this.z)
+fun Vec3d.serializeNbt(): CompoundNBT = nbtCompound {
+    putDouble("x", x)
+    putDouble("y", y)
+    putDouble("z", z)
+}
 
 fun CompoundNBT.deserializeVec3d(): Vec3d = Vec3d(getDouble("x"), getDouble("y"), getDouble("z"))
 
-fun ResourceLocation.serializeNbt(): ChainingTagCompound =
-        ChainingTagCompound().withStr("ns", this.namespace).withStr("path", this.path)
+fun ResourceLocation.serializeNbt(): CompoundNBT = nbtCompound {
+    putString("ns", namespace)
+    putString("path", path)
+}
 
 fun CompoundNBT.deserializeResourceLocation() = ResourceLocation(getString("ns"), getString("path"))
 
