@@ -6,6 +6,8 @@ import kotlin.math.min
 
 fun Int.clamp(lower: Int, upper: Int): Int = max(min(this, upper), lower)
 
+fun Float.clamp(lower: Float, upper: Float): Float = max(min(this, upper), lower)
+
 fun Double.clamp(lower: Double, upper: Double): Double = max(min(this, upper), lower)
 
 fun Double.randomNonZero(): Double = (this - 1).absoluteValue
