@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundNBT
 import net.minecraft.nbt.ListNBT
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.items.IItemHandlerModifiable
-import net.minecraftforge.items.ItemHandlerHelper
+import xyz.phanta.libnine.util.copy
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
 import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalData
@@ -13,6 +13,7 @@ import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalDataListener
 import xyz.phanta.libnine.util.data.daedalus.ByteStreamDeltaMarker
 import xyz.phanta.libnine.util.data.nbt.asNbtList
 import xyz.phanta.libnine.util.isCongruentWith
+import xyz.phanta.libnine.util.matches
 import kotlin.math.min
 
 open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.Listener>(), IItemHandlerModifiable {
@@ -37,15 +38,15 @@ open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.
         preds[slot]?.let { if (!it(stack)) return stack }
         if (getStackInSlot(slot).isEmpty) {
             val toTransfer = min(stack.count, getSlotLimit(slot))
-            if (!simulate) setStackInSlot(slot, ItemHandlerHelper.copyStackWithSize(stack, toTransfer))
+            if (!simulate) setStackInSlot(slot, stack.copy(toTransfer))
             return if (toTransfer == stack.count) {
                 ItemStack.EMPTY
             } else {
-                ItemHandlerHelper.copyStackWithSize(stack, stack.count - toTransfer)
+                stack.copy(stack.count - toTransfer)
             }
         } else {
             val maxStackSize = min(getStackInSlot(slot).maxStackSize, getSlotLimit(slot))
-            if (getStackInSlot(slot).count >= maxStackSize || !ItemHandlerHelper.canItemStacksStack(getStackInSlot(slot), stack)) {
+            if (getStackInSlot(slot).count >= maxStackSize || !(getStackInSlot(slot) matches stack)) {
                 return stack
             }
             val toTransfer = min(stack.count, maxStackSize - getStackInSlot(slot).count)
@@ -53,7 +54,7 @@ open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.
             return if (toTransfer == stack.count) {
                 ItemStack.EMPTY
             } else {
-                ItemHandlerHelper.copyStackWithSize(stack, stack.count - toTransfer)
+                stack.copy(stack.count - toTransfer)
             }
         }
     }
@@ -61,7 +62,7 @@ open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.
     override fun extractItem(slot: Int, amount: Int, simulate: Boolean): ItemStack {
         if (amount == 0 || getStackInSlot(slot).isEmpty) return ItemStack.EMPTY
         val toTransfer = min(amount, getStackInSlot(slot).count)
-        val result = ItemHandlerHelper.copyStackWithSize(getStackInSlot(slot), toTransfer)
+        val result = getStackInSlot(slot).copy(toTransfer)
         if (!simulate) {
             if (getStackInSlot(slot).count == toTransfer) {
                 setStackInSlot(slot, ItemStack.EMPTY)
@@ -116,13 +117,15 @@ open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.
 
     inner class Listener internal constructor() : AbstractIncrementalDataListener() {
 
-        private val lastKnownState: List<ItemStack> = slots.map { it.copy() }
+        private val lastKnownState: MutableList<ItemStack> = slots.map { it.copy() }.toMutableList()
 
         override val dirty: Boolean // extremely inefficient but necessary because of itemstack mutability
             get() = lastKnownState.indices.any { !lastKnownState[it].isCongruentWith(slots[it]) }
 
         override fun clearDirtyState() {
-            System.arraycopy(slots, 0, lastKnownState, 0, lastKnownState.size)
+            for (i in lastKnownState.indices) {
+                lastKnownState[i] = slots[i].copy()
+            }
         }
 
         override fun serDeltaNbt(tag: CompoundNBT) {

@@ -3,13 +3,17 @@ package xyz.phanta.libnine.capability.impl
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundNBT
 import net.minecraftforge.items.IItemHandlerModifiable
-import net.minecraftforge.items.ItemHandlerHelper
+import xyz.phanta.libnine.util.copy
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
-import xyz.phanta.libnine.util.data.daedalus.IncrementalSerializable
+import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalData
+import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalDataListener
+import xyz.phanta.libnine.util.isCongruentWith
+import xyz.phanta.libnine.util.matches
 import kotlin.math.min
 
-open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null) : IncrementalSerializable(), IItemHandlerModifiable {
+open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null)
+    : AbstractIncrementalData<AspectSlot.Listener>(), IItemHandlerModifiable {
 
     protected open var stored: ItemStack = ItemStack.EMPTY
         set(stack) {
@@ -41,15 +45,15 @@ open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null) : Incr
         pred?.let { if (!it(stack)) return stack }
         if (stored.isEmpty) {
             val toTransfer = min(stack.count, slotLimit)
-            if (!simulate) stored = ItemHandlerHelper.copyStackWithSize(stack, toTransfer)
+            if (!simulate) stored = stack.copy(toTransfer)
             return if (toTransfer == stack.count) {
                 ItemStack.EMPTY
             } else {
-                ItemHandlerHelper.copyStackWithSize(stack, stack.count - toTransfer)
+                stack.copy(stack.count - toTransfer)
             }
         } else {
             val maxStackSize = min(stored.maxStackSize, slotLimit)
-            if (stored.count >= maxStackSize || !ItemHandlerHelper.canItemStacksStack(stored, stack)) {
+            if (stored.count >= maxStackSize || !(stored matches stack)) {
                 return stack
             }
             val toTransfer = min(stack.count, maxStackSize - stored.count)
@@ -57,7 +61,7 @@ open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null) : Incr
             return if (toTransfer == stack.count) {
                 ItemStack.EMPTY
             } else {
-                ItemHandlerHelper.copyStackWithSize(stack, stack.count - toTransfer)
+                stack.copy(stack.count - toTransfer)
             }
         }
     }
@@ -70,7 +74,7 @@ open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null) : Incr
     open fun extractItem(amount: Int, simulate: Boolean): ItemStack {
         if (amount == 0 || stored.isEmpty) return ItemStack.EMPTY
         val toTransfer = min(amount, stored.count)
-        val result = ItemHandlerHelper.copyStackWithSize(stored, toTransfer)
+        val result = stored.copy(toTransfer)
         if (!simulate) {
             if (stored.count == toTransfer) {
                 stored = ItemStack.EMPTY
@@ -108,6 +112,25 @@ open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null) : Incr
 
     override fun deserNbt(tag: CompoundNBT) {
         stored = tag.getCompound("Item").let { if (it.contains("Empty")) ItemStack.EMPTY else ItemStack.read(it) }
+    }
+
+    override fun createListener(): Listener = Listener()
+
+    inner class Listener : AbstractIncrementalDataListener() {
+
+        private var lastKnownState: ItemStack = stored
+
+        override val dirty: Boolean
+            get() = !lastKnownState.isCongruentWith(stored)
+
+        override fun clearDirtyState() {
+            lastKnownState = stored.copy()
+        }
+
+        override fun serDeltaNbt(tag: CompoundNBT) = serNbt(tag)
+
+        override fun serDeltaByteStream(stream: ByteWriter) = serByteStream(stream)
+
     }
 
 }
