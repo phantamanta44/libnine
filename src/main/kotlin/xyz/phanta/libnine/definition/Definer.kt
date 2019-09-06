@@ -7,6 +7,7 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.IRecipe
+import net.minecraft.item.crafting.IRecipeType
 import net.minecraft.particles.IParticleData
 import net.minecraft.tileentity.TileEntityType
 import net.minecraft.util.ResourceLocation
@@ -15,7 +16,6 @@ import net.minecraft.world.biome.Biome
 import net.minecraft.world.gen.GenerationStage
 import net.minecraft.world.gen.feature.IFeatureConfig
 import net.minecraft.world.gen.placement.IPlacementConfig
-import net.minecraftforge.common.crafting.RecipeType
 import org.apache.commons.lang3.mutable.MutableObject
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.block.BlockDefBuilder
@@ -30,6 +30,7 @@ import xyz.phanta.libnine.util.snakeify
 import xyz.phanta.libnine.worldgen.BiomeSet
 import xyz.phanta.libnine.worldgen.NineFeature
 import xyz.phanta.libnine.worldgen.NineFeatureDistribution
+import java.util.function.Supplier
 import kotlin.reflect.KMutableProperty0
 
 typealias DefBody<T> = T.() -> Unit
@@ -86,7 +87,7 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
         val type = MutableObject<TileEntityType<T>>()
         val creator = { factory(registrar.mod, type.value) }
         @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-        type.value = TileEntityType.Builder.create(creator, blocks).build(null)
+        type.value = TileEntityType.Builder.create(Supplier(creator), *blocks).build(null)
         type.value.registryName = registrar.mod.resource(name)
         registrar.tileEntities += type.value
         registrar.mod.markUsesTileEntities()
@@ -133,10 +134,10 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
 
     @Suppress("UNCHECKED_CAST")
     fun <I : IInventory, R : IRecipe<I>> recipeType(
-            dest: KMutableProperty0<in RecipeType<R>>,
+            dest: KMutableProperty0<in IRecipeType<R>>,
             schema: RecipeSchema<I, R>
     ) {
-        val type = RecipeType.get(registrar.mod.resource(dest.name.snakeify()), schema.recipeType)!!
+        val type = IRecipeType.register<R>(dest.name.snakeify())
         registrar.recipeSerializers += schema
         dest.set(type)
     }

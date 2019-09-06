@@ -28,7 +28,7 @@ sourceCompatibility = targetCompatibility = compileKotlin.kotlinOptions.jvmTarge
         compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    mappings channel: 'snapshot', version: '20190609-1.14.2'
+    mappings channel: 'snapshot', version: '20190906-1.14.3'
 
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -54,6 +54,18 @@ minecraft {
                 }
             }
         }
+
+        data {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', 'libnine', '--all', '--output', file('src/generated/resources/')
+            mods {
+                libnine {
+                    source sourceSets.main
+                }
+            }
+        }
     }
 }
 
@@ -62,7 +74,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.14.2-26.0.16'
+    minecraft 'net.minecraftforge:forge:1.14.4-28.0.93'
     api "org.jetbrains.kotlin:kotlin-stdlib:$ktVersion"
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$ktVersion"
     api "org.jetbrains.kotlin:kotlin-reflect:$ktVersion"

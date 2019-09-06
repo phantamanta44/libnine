@@ -1,14 +1,14 @@
 package xyz.phanta.libnine.util.data
 
 import com.google.common.io.ByteStreams
+import net.minecraft.fluid.Fluid
 import net.minecraft.item.ItemStack
+import net.minecraft.nbt.CompoundNBT
 import net.minecraft.nbt.CompressedStreamTools
 import net.minecraft.nbt.NBTSizeTracker
-import net.minecraft.nbt.CompoundNBT
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
-import net.minecraftforge.fluids.Fluid
 import net.minecraftforge.fluids.FluidStack
 import java.nio.charset.StandardCharsets
 import java.util.*
