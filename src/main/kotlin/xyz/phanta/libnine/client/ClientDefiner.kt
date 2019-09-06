@@ -1,6 +1,6 @@
 package xyz.phanta.libnine.client
 
-import net.minecraft.particles.ParticleType
+import net.minecraftforge.client.event.ParticleFactoryRegisterEvent
 import net.minecraftforge.eventbus.api.IEventBus
 import xyz.phanta.libnine.RegistryHandler
 import xyz.phanta.libnine.Virtue
@@ -21,7 +21,7 @@ class ClientRegistrar internal constructor(mod: Virtue, bus: IEventBus, regHandl
     : Registrar(mod, bus, regHandler) {
 
     init {
-        regHandler.registerProvider<ParticleType<*>> { particles.forEach { it.registerFactory() } }
+        bus.addListener<ParticleFactoryRegisterEvent> { particles.forEach { it.registerFactory() } }
     }
 
 }
