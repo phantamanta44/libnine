@@ -1,4 +1,4 @@
-package xyz.phanta.libnine.util
+package xyz.phanta.libnine.util.item
 
 import net.minecraft.item.ItemStack
 import net.minecraftforge.items.ItemHandlerHelper

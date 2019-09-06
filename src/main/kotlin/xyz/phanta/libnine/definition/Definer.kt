@@ -26,7 +26,7 @@ import xyz.phanta.libnine.item.ItemDefBuilderImpl
 import xyz.phanta.libnine.item.ItemDefContext
 import xyz.phanta.libnine.recipe.RecipeSchema
 import xyz.phanta.libnine.tile.NineTile
-import xyz.phanta.libnine.util.snakeify
+import xyz.phanta.libnine.util.format.snakeify
 import xyz.phanta.libnine.worldgen.BiomeSet
 import xyz.phanta.libnine.worldgen.NineFeature
 import xyz.phanta.libnine.worldgen.NineFeatureDistribution

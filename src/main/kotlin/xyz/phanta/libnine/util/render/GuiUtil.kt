@@ -1,4 +1,4 @@
-package xyz.phanta.libnine.util
+package xyz.phanta.libnine.util.render
 
 import com.mojang.blaze3d.platform.GlStateManager
 import net.minecraft.client.Minecraft

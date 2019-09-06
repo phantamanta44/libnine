@@ -3,13 +3,13 @@ package xyz.phanta.libnine.capability.impl
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundNBT
 import net.minecraftforge.items.IItemHandlerModifiable
-import xyz.phanta.libnine.util.copy
+import xyz.phanta.libnine.util.item.copy
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
 import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalData
 import xyz.phanta.libnine.util.data.daedalus.AbstractIncrementalDataListener
-import xyz.phanta.libnine.util.isCongruentWith
-import xyz.phanta.libnine.util.matches
+import xyz.phanta.libnine.util.item.isCongruentWith
+import xyz.phanta.libnine.util.item.matches
 import kotlin.math.min
 
 open class AspectSlot(private val pred: ((ItemStack) -> Boolean)? = null)

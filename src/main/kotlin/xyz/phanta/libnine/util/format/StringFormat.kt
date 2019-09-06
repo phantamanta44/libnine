@@ -1,4 +1,4 @@
-package xyz.phanta.libnine.util
+package xyz.phanta.libnine.util.format
 
 import kotlin.math.absoluteValue
 import kotlin.math.floor

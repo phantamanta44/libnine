@@ -2,7 +2,6 @@ package xyz.phanta.libnine.util.render
 
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.util.ResourceLocation
-import xyz.phanta.libnine.util.bindTexture
 import xyz.phanta.libnine.util.math.PlanarVec
 
 interface ScreenDrawable {

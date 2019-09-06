@@ -1,12 +1,9 @@
-package xyz.phanta.libnine.util.world
+package xyz.phanta.libnine.util.component.face
 
 import net.minecraft.util.Direction
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.TranslationTextComponent
-import xyz.phanta.libnine.util.Localizable
-
-fun Direction.isVertical(): Boolean = this == Direction.UP || this == Direction.DOWN
-fun Direction.isHorizontal(): Boolean = !this.isVertical()
+import xyz.phanta.libnine.util.format.Localizable
 
 enum class BlockSide(private val transform: (Direction) -> Direction) : Localizable {
 

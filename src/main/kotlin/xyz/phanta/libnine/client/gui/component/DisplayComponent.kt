@@ -1,6 +1,6 @@
 package xyz.phanta.libnine.client.gui.component
 
-import xyz.phanta.libnine.util.drawTooltip
+import xyz.phanta.libnine.util.render.drawTooltip
 import xyz.phanta.libnine.util.math.PlanarVec
 import xyz.phanta.libnine.util.render.TextureRegion
 

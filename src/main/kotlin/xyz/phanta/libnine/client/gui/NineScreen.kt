@@ -11,8 +11,8 @@ import net.minecraft.util.text.ITextComponent
 import xyz.phanta.libnine.client.gui.component.ScreenComponent
 import xyz.phanta.libnine.client.gui.component.GuiComponentManager
 import xyz.phanta.libnine.container.NineContainer
-import xyz.phanta.libnine.util.DEF_TEXT_COL
-import xyz.phanta.libnine.util.bindTexture
+import xyz.phanta.libnine.util.render.DEF_TEXT_COL
+import xyz.phanta.libnine.util.render.bindTexture
 import xyz.phanta.libnine.util.math.MutablePlanarVec
 import xyz.phanta.libnine.util.math.PlanarVec
 

@@ -4,8 +4,8 @@ import net.minecraft.util.SoundEvents
 import org.lwjgl.glfw.GLFW
 import xyz.phanta.libnine.util.*
 import xyz.phanta.libnine.util.math.PlanarVec
-import xyz.phanta.libnine.util.render.TextureRegion
-import xyz.phanta.libnine.util.world.RedstoneBehaviour
+import xyz.phanta.libnine.util.render.*
+import xyz.phanta.libnine.util.component.redstone.RedstoneBehaviour
 import xyz.phanta.libnine.util.world.RedstoneControllable
 
 class ScreenComponentTextInput(
