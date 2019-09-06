@@ -10,7 +10,7 @@ import net.minecraft.util.math.Vec3i
 import net.minecraft.world.World
 import net.minecraftforge.common.capabilities.Capability
 import net.minecraftforge.fml.network.PacketDistributor
-import xyz.phanta.libnine.util.orNull
+import xyz.phanta.libnine.util.maybeCap
 
 operator fun BlockPos.plus(other: Vec3i): BlockPos = this.add(other)
 operator fun BlockPos.plus(dir: Direction): BlockPos = this.offset(dir)
@@ -58,8 +58,7 @@ fun TileEntity.getAdjacentTile(dir: Direction): TileEntity? = this.world!!.getTi
 fun <T : Any> TileEntity.adjacentCaps(cap: Capability<T>): List<T> =
         enumValues<Direction>().mapNotNull { getAdjacentCap(it, cap) }
 
-fun <T> TileEntity.getAdjacentCap(dir: Direction, cap: Capability<T>): T? =
-        getAdjacentTile(dir)?.getCapability(cap, dir.opposite)?.orNull()
+fun <T> TileEntity.getAdjacentCap(dir: Direction, cap: Capability<T>): T? = getAdjacentTile(dir)?.maybeCap(cap, dir.opposite)
 
 fun BlockPos.getCenter(): Vec3d = Vec3d(this.x + 0.5, this.y + 0.5, this.z + 0.5)
 
