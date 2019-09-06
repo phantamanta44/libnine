@@ -29,14 +29,12 @@ object Lightmap {
     private fun cacheCoords(x: Float, y: Float) {
         cachedX = x
         cachedY = y
-        GlStateManager.disableLighting()
         cached = true
     }
 
     fun restore() {
         if (optifined) return
         GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, cachedX, cachedY)
-        GlStateManager.enableLighting()
         cached = false
     }
 
