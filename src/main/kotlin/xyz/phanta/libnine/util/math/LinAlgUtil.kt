@@ -2,6 +2,7 @@ package xyz.phanta.libnine.util.math
 
 import net.minecraft.util.Direction
 import net.minecraft.util.math.Vec3d
+import kotlin.math.absoluteValue
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -19,7 +20,9 @@ object StdBasis {
 operator fun Vec3d.plus(vec: Vec3d): Vec3d = this.add(vec)
 operator fun Vec3d.minus(vec: Vec3d): Vec3d = this.subtract(vec)
 operator fun Vec3d.times(scalar: Double): Vec3d = this.scale(scalar)
+operator fun Double.times(vec: Vec3d): Vec3d = vec * this
 operator fun Vec3d.div(scalar: Double): Vec3d = this.scale(1 / scalar)
+operator fun Double.div(vec: Vec3d): Vec3d = vec / this
 
 infix fun Vec3d.dot(vec: Vec3d): Double = this.dotProduct(vec)
 infix fun Vec3d.cross(vec: Vec3d): Vec3d = this.crossProduct(vec)
@@ -34,12 +37,20 @@ fun Vec3d.castOntoPlane(dir: Vec3d, planarPoint: Vec3d, planeNormal: Vec3d): Vec
     return if (scale > 0) this + dir * scale else null
 }
 
-fun Vec3d.findOrthogonal(): Vec3d = when {
-    x == 0.0 -> StdBasis.X_POS
-    y == 0.0 -> StdBasis.Y_POS
-    z == 0.0 -> StdBasis.Z_POS
-    else -> Vec3d(x, -y, (y * y - x * x) / z)
+// http://lolengine.net/blog/2013/09/21/picking-orthogonal-vector-combing-coconuts
+fun Vec3d.findOrthogonal(): Vec3d = if (x.absoluteValue > z.absoluteValue) Vec3d(-y, x, 0.0) else Vec3d(0.0, -z, y)
+
+fun Vec3d.findOrthonormal(): Vec3d = findOrthogonal().normalize()
+
+fun Vec3d.findBasis2d(): Pair<Vec3d, Vec3d> = findOrthonormal().let { it to (it cross this).normalize() }
+
+fun Vec3d.findBasis3d(): Triple<Vec3d, Vec3d, Vec3d> = findOrthonormal().let {
+    Triple(it, (it cross this).normalize(), this.normalize())
 }
+
+fun Pair<Vec3d, Vec3d>.combinate(x: Double, y: Double): Vec3d = first * x + second * y
+
+fun Triple<Vec3d, Vec3d, Vec3d>.combinate(x: Double, y: Double, z: Double): Vec3d = first * x + second * y + third * z
 
 fun Vec3d.rotateAbout(axis: Vec3d, radians: Double): Vec3d {
     val parallelComponent = this onto axis
