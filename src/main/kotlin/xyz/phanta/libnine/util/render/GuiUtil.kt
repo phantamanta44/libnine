@@ -1,6 +1,5 @@
 package xyz.phanta.libnine.util.render
 
-import com.mojang.blaze3d.platform.GlStateManager
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.AbstractGui
 import net.minecraft.client.gui.screen.Screen
@@ -17,15 +16,16 @@ object DrawUtil {
 
     fun rect(pos: PlanarVec, width: Int, height: Int, colour: Int) {
         AbstractGui.fill(pos.x, pos.y, pos.x + width, pos.y + height, colour)
-        GlStateManager.color4f(1f, 1f, 1f, 1f)
+        GlStateUtil.resetColour()
     }
 
     fun string(string: String, x: Float, y: Float, colour: Int, shadow: Boolean = false) {
         if (shadow) {
-            Minecraft.getInstance().fontRenderer.drawString(string, x, y, colour)
-        } else {
             Minecraft.getInstance().fontRenderer.drawStringWithShadow(string, x, y, colour)
+        } else {
+            Minecraft.getInstance().fontRenderer.drawString(string, x, y, colour)
         }
+        GlStateUtil.resetColour()
     }
 
 }

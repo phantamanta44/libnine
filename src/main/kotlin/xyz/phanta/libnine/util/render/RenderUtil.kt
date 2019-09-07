@@ -55,3 +55,9 @@ object Lightmap {
     }
 
 }
+
+object GlStateUtil {
+
+    fun resetColour() = GlStateManager.color4f(1F, 1F, 1F, 1F)
+
+}

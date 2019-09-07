@@ -1,20 +1,21 @@
 package xyz.phanta.libnine.client.gui
 
+import com.mojang.blaze3d.platform.GlStateManager
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.inventory.ContainerScreen
-import com.mojang.blaze3d.platform.GlStateManager
 import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.resources.I18n
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.ITextComponent
-import xyz.phanta.libnine.client.gui.component.ScreenComponent
 import xyz.phanta.libnine.client.gui.component.GuiComponentManager
+import xyz.phanta.libnine.client.gui.component.ScreenComponent
 import xyz.phanta.libnine.container.NineContainer
-import xyz.phanta.libnine.util.render.DEF_TEXT_COL
-import xyz.phanta.libnine.util.render.bindTexture
 import xyz.phanta.libnine.util.math.MutablePlanarVec
 import xyz.phanta.libnine.util.math.PlanarVec
+import xyz.phanta.libnine.util.render.DEF_TEXT_COL
+import xyz.phanta.libnine.util.render.GlStateUtil
+import xyz.phanta.libnine.util.render.bindTexture
 
 interface ComponentScreen {
 
@@ -134,12 +135,12 @@ abstract class NineGuiContainer<C : NineContainer>(
 
     protected fun drawContainerName(name: String) {
         font.drawString(name, 8F, 6F, DEF_TEXT_COL)
-        GlStateManager.color3f(1F, 1F, 1F)
+        GlStateUtil.resetColour()
     }
 
     protected fun drawPlayerInventoryName() {
         font.drawString(I18n.format("container.inventory"), 8f, (this.ySize - 96 + 2).toFloat(), DEF_TEXT_COL)
-        GlStateManager.color3f(1F, 1F, 1F)
+        GlStateUtil.resetColour()
     }
 
 }
