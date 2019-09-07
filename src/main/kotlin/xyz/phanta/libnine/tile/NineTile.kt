@@ -75,6 +75,10 @@ abstract class NineTile(
 
     override fun write(compound: CompoundNBT): CompoundNBT = super.write(compound).also { serNbt(it) }
 
+    open fun onTileSyncPacket(stream: ByteReader) {
+        deserByteStream(stream)
+    }
+
 }
 
 abstract class NineTileTicking(mod: Virtue, type: TileEntityType<*>, requiresSync: Boolean)

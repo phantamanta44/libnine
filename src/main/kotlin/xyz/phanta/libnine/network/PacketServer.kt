@@ -25,7 +25,7 @@ object PacketServerSyncTileEntity : PacketType<PacketServerSyncTileEntity.Packet
             ((Minecraft.getInstance().world.getTileEntity(packet.pos)
                     ?: throw IllegalStateException("Expected tile entity at ${packet.pos}!"))
                     as? NineTile ?: throw IllegalStateException("Expected libnine tile entity at ${packet.pos}!"))
-                    .deserByteStream(ByteReader(packet.data))
+                    .onTileSyncPacket(ByteReader(packet.data))
         }
     }
 
