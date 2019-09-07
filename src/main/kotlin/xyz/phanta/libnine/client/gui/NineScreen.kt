@@ -77,15 +77,16 @@ abstract class NineScreen(
 
     override fun drawBackground(partialTicks: Float, mousePos: PlanarVec) {
         renderBackground()
-        bg?.let {
-            it.bindTexture()
+        if (bg != null) {
+            GlStateUtil.resetColour()
+            bg.bindTexture()
             blit(pos.x, pos.y, 0, 0, sizeX, sizeY)
         }
     }
 
 }
 
-abstract class NineGuiContainer<C : NineContainer>(
+abstract class NineScreenContainer<C : NineContainer>(
         container: C,
         playerInv: PlayerInventory,
         title: ITextComponent,
@@ -126,6 +127,7 @@ abstract class NineGuiContainer<C : NineContainer>(
     override fun drawBackground(partialTicks: Float, mousePos: PlanarVec) {
         renderBackground()
         if (bg != null) {
+            GlStateUtil.resetColour()
             bg.bindTexture()
             blit(pos.x, pos.y, 0, 0, sizeX, sizeY)
         }
