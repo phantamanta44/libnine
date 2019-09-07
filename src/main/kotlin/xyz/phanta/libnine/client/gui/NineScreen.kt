@@ -102,6 +102,11 @@ abstract class NineScreenContainer<C : NineContainer>(
     private val cachedMousePos: MutablePlanarVec = MutablePlanarVec(0, 0)
     private var partialTicks: Float = 0F
 
+    init {
+        this.xSize = sizeX
+        this.ySize = sizeY
+    }
+
     override fun init() {
         super.init()
         pos.assignFrom((this.width - this.sizeX) / 2, (this.height - this.sizeY) / 2)

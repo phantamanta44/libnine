@@ -20,16 +20,17 @@ abstract class NineContainer : Container {
     }
 
     @Suppress("LeakingThis")
-    constructor(windowId: Int, ipl: PlayerInventory) : super(null, windowId) {
+    constructor(windowId: Int, ipl: PlayerInventory, height: Int = 166) : super(null, windowId) {
         hasInvPlayer = true
-        initPlayerInventory { slot, x, y -> super.addSlot(Slot(ipl, slot, x, y)) }
+        initPlayerInventory(height) { slot, x, y -> super.addSlot(Slot(ipl, slot, x, y)) }
     }
 
-    protected open fun initPlayerInventory(addSlot: (Int, Int, Int) -> Unit) {
-        for (i in 0..2) {
-            for (j in 0..8) addSlot(j + i * 9 + 9, 8 + j * 18, 84 + i * 18)
+    protected open fun initPlayerInventory(height: Int, addSlot: (Int, Int, Int) -> Unit) {
+        val offset = height - 82
+        for (row in 0..2) {
+            for (col in 0..8) addSlot(col + row * 9 + 9, 8 + col * 18, offset + row * 18)
         }
-        for (i in 0..8) addSlot(i, 8 + i * 18, 142)
+        for (col in 0..8) addSlot(col, 8 + col * 18, offset + 58)
     }
 
     override fun canInteractWith(player: PlayerEntity): Boolean = true
