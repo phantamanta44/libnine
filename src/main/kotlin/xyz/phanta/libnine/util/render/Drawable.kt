@@ -12,24 +12,63 @@ interface ScreenDrawable {
 
     fun getRegion(x: Int, y: Int, width: Int, height: Int): ScreenDrawable
 
-    fun draw(x: Int, y: Int, width: Int, height: Int)
+    fun draw(
+            x: Double,
+            y: Double,
+            width: Double = this.width.toDouble(),
+            height: Double = this.height.toDouble(),
+            zIndex: Double = 0.0
+    )
 
-    fun draw(pos: PlanarVec, width: Int, height: Int) = draw(pos.x, pos.y, width, height)
+    fun draw(
+            x: Int,
+            y: Int,
+            width: Int = this.width,
+            height: Int = this.height,
+            zIndex: Double = 0.0
+    ) = draw(x.toDouble(), y.toDouble(), width.toDouble(), height.toDouble(), zIndex)
 
-    fun draw(x: Int, y: Int) = draw(x, y, width, height)
+    fun draw(
+            pos: PlanarVec,
+            width: Int = this.width,
+            height: Int = this.height,
+            zIndex: Double = 0.0
+    ) = draw(pos.x, pos.y, width, height, zIndex)
 
-    fun draw(pos: PlanarVec) = draw(pos.x, pos.y)
+    fun drawPartial(
+            x: Double,
+            y: Double,
+            u1: Float = 0F,
+            v1: Float = 0F,
+            u2: Float = 1F,
+            v2: Float = 1F,
+            width: Double = this.width.toDouble(),
+            height: Double = this.height.toDouble(),
+            zIndex: Double = 0.0
+    )
 
-    fun drawPartial(x: Int, y: Int, width: Int, height: Int, x1: Float, y1: Float, x2: Float, y2: Float)
+    fun drawPartial(
+            x: Int,
+            y: Int,
+            u1: Float = 0F,
+            v1: Float = 0F,
+            u2: Float = 1F,
+            v2: Float = 1F,
+            width: Int = this.width,
+            height: Int = this.height,
+            zIndex: Double = 0.0
+    ) = drawPartial(x.toDouble(), y.toDouble(), u1, v1, u2, v2, width.toDouble(), height.toDouble(), zIndex)
 
-    fun drawPartial(pos: PlanarVec, width: Int, height: Int, x1: Float, y1: Float, x2: Float, y2: Float) =
-            drawPartial(pos.x, pos.y, width, height, x1, y1, x2, y2)
-
-    fun drawPartial(x: Int, y: Int, x1: Float, y1: Float, x2: Float, y2: Float) =
-            drawPartial(x, y, width, height, x1, y1, x2, y2)
-
-    fun drawPartial(pos: PlanarVec, x1: Float, y1: Float, x2: Float, y2: Float) =
-            drawPartial(pos.x, pos.y, width, height, x1, y1, x2, y2)
+    fun drawPartial(
+            pos: PlanarVec,
+            u1: Float = 0F,
+            v1: Float = 0F,
+            u2: Float = 1F,
+            v2: Float = 1F,
+            width: Int = this.width,
+            height: Int = this.height,
+            zIndex: Double = 0.0
+    ) = drawPartial(pos.x, pos.y, u1, v1, u2, v2, width, height, zIndex)
 
 }
 
@@ -41,10 +80,20 @@ class TextureResource(private val texture: ResourceLocation, override val width:
 
     override fun getRegion(x: Int, y: Int, width: Int, height: Int): TextureRegion = TextureRegion(this, x, y, width, height)
 
-    override fun draw(x: Int, y: Int, width: Int, height: Int) = fullRegion.draw(x, y, width, height)
+    override fun draw(x: Double, y: Double, width: Double, height: Double, zIndex: Double) =
+            fullRegion.draw(x, y, width, height, zIndex)
 
-    override fun drawPartial(x: Int, y: Int, width: Int, height: Int, x1: Float, y1: Float, x2: Float, y2: Float) =
-            fullRegion.drawPartial(x, y, width, height, x1, y1, x2, y2)
+    override fun drawPartial(
+            x: Double,
+            y: Double,
+            u1: Float,
+            v1: Float,
+            u2: Float,
+            v2: Float,
+            width: Double,
+            height: Double,
+            zIndex: Double
+    ) = fullRegion.drawPartial(x, y, u1, v1, u2, v2, width, height, zIndex)
 
 }
 
@@ -68,31 +117,41 @@ class TextureRegion(
     override fun getRegion(x: Int, y: Int, width: Int, height: Int): ScreenDrawable =
             TextureRegion(texture, this.x + x, this.y + y, width, height)
 
-    override fun draw(x: Int, y: Int, width: Int, height: Int) {
+    override fun draw(x: Double, y: Double, width: Double, height: Double, zIndex: Double) {
         texture.bind()
         tessellate(DrawMode.QUADS, DefaultVertexFormats.POSITION_TEX) {
-            pos(x, y + height).tex(u1, v2).endVertex()
-            pos(x + width, y + height).tex(u2, v2).endVertex()
-            pos(x + width, y).tex(u2, v1).endVertex()
-            pos(x, y).tex(u1, v1).endVertex()
+            pos(x, y + height, zIndex).tex(u1, v2).endVertex()
+            pos(x + width, y + height, zIndex).tex(u2, v2).endVertex()
+            pos(x + width, y, zIndex).tex(u2, v1).endVertex()
+            pos(x, y, zIndex).tex(u1, v1).endVertex()
         }
     }
 
-    override fun drawPartial(x: Int, y: Int, width: Int, height: Int, x1: Float, y1: Float, x2: Float, y2: Float) {
-        val xStart = x + width * x1 // there's some code that kotlin just can't make better
-        val xEnd = x + width * x2
-        val yStart = y + height * y1
-        val yEnd = y + height * y2
-        val uStart = u1 + du * x1
-        val uEnd = u1 + du * x2
-        val vStart = v1 + dv * y1
-        val vEnd = v1 + dv * y2
+    override fun drawPartial(
+            x: Double,
+            y: Double,
+            u1: Float,
+            v1: Float,
+            u2: Float,
+            v2: Float,
+            width: Double,
+            height: Double,
+            zIndex: Double
+    ) {
+        val xStart = x + width * u1 // there's some code that kotlin just can't make better
+        val xEnd = x + width * u2
+        val yStart = y + height * v1
+        val yEnd = y + height * v2
+        val uStart = this.u1 + du * u1
+        val uEnd = this.u1 + du * u2
+        val vStart = this.v1 + dv * v1
+        val vEnd = this.v1 + dv * v2
         texture.bind()
         tessellate(DrawMode.QUADS, DefaultVertexFormats.POSITION_TEX) {
-            pos(xStart, yEnd).tex(uStart, vEnd).endVertex()
-            pos(xEnd, yEnd).tex(uEnd, vEnd).endVertex()
-            pos(xEnd, yStart).tex(uEnd, vStart).endVertex()
-            pos(xStart, yStart).tex(uStart, vStart).endVertex()
+            pos(xStart, yEnd, zIndex).tex(uStart, vEnd).endVertex()
+            pos(xEnd, yEnd, zIndex).tex(uEnd, vEnd).endVertex()
+            pos(xEnd, yStart, zIndex).tex(uEnd, vStart).endVertex()
+            pos(xStart, yStart, zIndex).tex(uStart, vStart).endVertex()
         }
     }
 
