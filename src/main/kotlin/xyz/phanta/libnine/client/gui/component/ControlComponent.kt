@@ -4,10 +4,7 @@ import net.minecraft.util.SoundEvents
 import org.lwjgl.glfw.GLFW
 import xyz.phanta.libnine.util.math.PlanarVec
 import xyz.phanta.libnine.util.play
-import xyz.phanta.libnine.util.render.DrawUtil
-import xyz.phanta.libnine.util.render.FONT_HEIGHT
-import xyz.phanta.libnine.util.render.TextureRegion
-import xyz.phanta.libnine.util.render.getMcWidth
+import xyz.phanta.libnine.util.render.*
 
 class ScreenComponentTextInput(
         pos: PlanarVec,
@@ -20,7 +17,8 @@ class ScreenComponentTextInput(
         private val invalidColour: Int,
         private val validator: (String) -> Boolean,
         private val callback: (String) -> Unit,
-        value: String = ""
+        value: String = "",
+        private val tooltip: (() -> String)?
 ) : ScreenComponent(pos, boxLength + 9 + FONT_HEIGHT, FONT_HEIGHT + 4) {
 
     private val buttonOrigin: PlanarVec = pos.add(boxLength + 5, 0)
@@ -45,6 +43,9 @@ class ScreenComponentTextInput(
     private fun isMouseOverButton(mousePos: PlanarVec): Boolean =
             mousePos.inRect(buttonOrigin, FONT_HEIGHT + 4, FONT_HEIGHT + 4)
 
+    private fun isMouseOverBox(mousePos: PlanarVec): Boolean =
+            mousePos.inRect(pos, boxLength + 4, FONT_HEIGHT + 4)
+
     override fun render(partialTicks: Float, mousePos: PlanarVec, mouseOver: Boolean) {
         when {
             !valid -> btnTextDisabled
@@ -58,9 +59,13 @@ class ScreenComponentTextInput(
         }
     }
 
+    override fun renderTooltip(partialTicks: Float, mousePos: PlanarVec) {
+        tooltip?.let { gui.drawTooltip(mousePos, it()) }
+    }
+
     override fun onMouseDown(mousePos: PlanarVec, button: Int, mouseOver: Boolean): Boolean {
         if (mouseOver) {
-            if (mousePos.inRect(pos, boxLength + 4, FONT_HEIGHT + 4)) {
+            if (isMouseOverBox(mousePos)) {
                 if (button == 1) value = ""
                 focused = true
             } else {

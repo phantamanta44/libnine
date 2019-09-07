@@ -20,7 +20,7 @@ class ScreenComponentVerticalBar(
 
     override fun render(partialTicks: Float, mousePos: PlanarVec, mouseOver: Boolean) {
         bg.draw(pos, width, height)
-        fg.drawPartial(innerPos, innerWidth, innerHeight, 0F, 1 - dataSrc(), 1F, 1F)
+        fg.drawPartial(innerPos, v1 = 1 - dataSrc(), width = innerWidth, height =  innerHeight)
     }
 
     override fun renderTooltip(partialTicks: Float, mousePos: PlanarVec) = gui.drawTooltip(mousePos, ttSrc())
