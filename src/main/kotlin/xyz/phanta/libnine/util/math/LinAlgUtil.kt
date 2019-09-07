@@ -17,6 +17,8 @@ object StdBasis {
 
 }
 
+fun vec3d(x: Number, y: Number, z: Number): Vec3d = Vec3d(x.toDouble(), y.toDouble(), z.toDouble())
+
 operator fun Vec3d.plus(vec: Vec3d): Vec3d = this.add(vec)
 operator fun Vec3d.minus(vec: Vec3d): Vec3d = this.subtract(vec)
 operator fun Vec3d.times(scalar: Double): Vec3d = this.scale(scalar)

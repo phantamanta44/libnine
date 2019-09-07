@@ -29,3 +29,5 @@ inline fun tessellate(mode: DrawMode, vertexFormat: VertexFormat, body: BufferBu
 fun BufferBuilder.pos(x: Number, y: Number, z: Number = 0): BufferBuilder = pos(x.toDouble(), y.toDouble(), z.toDouble())
 
 fun BufferBuilder.pos(pos: Vec3d): BufferBuilder = pos(pos.x, pos.y, pos.z)
+
+fun BufferBuilder.tex(x: Number, y: Number): BufferBuilder = tex(x.toDouble(), y.toDouble())

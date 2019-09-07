@@ -98,19 +98,19 @@ class TextureResource(private val texture: ResourceLocation, override val width:
 }
 
 class TextureRegion(
-        private val texture: TextureResource,
-        private val x: Int,
-        private val y: Int,
+        val texture: TextureResource,
+        val x: Int,
+        val y: Int,
         override val width: Int,
         override val height: Int
 ) : ScreenDrawable {
 
-    private val u1: Double = x.toDouble() / texture.width
-    private val v1: Double = y.toDouble() / texture.height
-    private val u2: Double = u1 + width.toDouble() / texture.width
-    private val v2: Double = v1 + height.toDouble() / texture.height
-    private val du: Double = u2 - u1
-    private val dv: Double = v2 - v1
+    val u1: Double = x.toDouble() / texture.width
+    val v1: Double = y.toDouble() / texture.height
+    val u2: Double = u1 + width.toDouble() / texture.width
+    val v2: Double = v1 + height.toDouble() / texture.height
+    val du: Double = u2 - u1
+    val dv: Double = v2 - v1
 
     constructor(texture: TextureResource) : this(texture, 0, 0, texture.width, texture.height)
 
