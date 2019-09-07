@@ -24,13 +24,15 @@ class ScreenComponentTextInput(
 ) : ScreenComponent(pos, boxLength + 9 + FONT_HEIGHT, FONT_HEIGHT + 4) {
 
     private val buttonOrigin: PlanarVec = pos.add(boxLength + 5, 0)
-    private var value: String = value
-        set(value) {
+    var value: String = value
+        private set(value) {
             field = value.substring(0, Math.min(value.length, textLength))
             updateValidity()
         }
-    private var focused: Boolean = false
-    private var valid: Boolean = false
+    var focused: Boolean = false
+        private set
+    var valid: Boolean = false
+        private set
 
     init {
         updateValidity()
