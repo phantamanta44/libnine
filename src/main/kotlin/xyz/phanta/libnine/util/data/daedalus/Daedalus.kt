@@ -37,9 +37,7 @@ open class DataManagerImpl internal constructor() : DataManager {
         get() = properties.any { it.value.second.dirty }
 
     internal inline fun <T> checkValid(body: () -> T): T {
-        if (!valid) {
-            throw IllegalStateException("Daedalus instance is already shut down!")
-        }
+        check(valid) { "Daedalus instance is already shut down!" }
         return body()
     }
 

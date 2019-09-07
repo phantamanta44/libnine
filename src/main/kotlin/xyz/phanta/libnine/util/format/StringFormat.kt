@@ -12,6 +12,7 @@ fun String.snakeify(): String = this.decapitalize().replace(CAMEL_PATTERN) { "${
 private val SI_PREFIXES: Array<String?> = arrayOf(null, "k", "M", "G", "T", "P", "E")
 private val SI_PREFIXES_FP: Array<String> = arrayOf("n", "\u03bc", "m", "", "k", "M", "G", "T", "P", "E")
 
+@Suppress("DuplicatedCode")
 fun Int.formatSi(unit: String): String {
     if (this == 0) return "0 $unit"
     val magnitude = floor(log10(this.absoluteValue.toDouble()) / 3).toInt()
@@ -22,6 +23,7 @@ fun Int.formatSi(unit: String): String {
     }
 }
 
+@Suppress("DuplicatedCode")
 fun Long.formatSi(unit: String): String {
     if (this == 0L) return "0 $unit"
     val magnitude = floor(log10(this.absoluteValue.toDouble()) / 3).toInt()

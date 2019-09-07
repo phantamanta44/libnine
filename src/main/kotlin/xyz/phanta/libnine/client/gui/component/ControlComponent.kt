@@ -24,7 +24,7 @@ class ScreenComponentTextInput(
     private val buttonOrigin: PlanarVec = pos.add(boxLength + 5, 0)
     var value: String = value
         private set(value) {
-            field = value.substring(0, Math.min(value.length, textLength))
+            field = value.substring(0, value.length.coerceAtMost(textLength))
             updateValidity()
         }
     var focused: Boolean = false
@@ -85,7 +85,7 @@ class ScreenComponentTextInput(
     override fun onKeyDown(keyCode: Int, mods: Int): Boolean {
         if (focused) {
             val currentLength = value.length
-            if (keyCode == GLFW.GLFW_KEY_BACKSPACE && !value.isEmpty()) {
+            if (keyCode == GLFW.GLFW_KEY_BACKSPACE && value.isNotEmpty()) {
                 if (mods and GLFW.GLFW_MOD_CONTROL != 0) {
                     var endIndex = 0
                     if (Character.isLetterOrDigit(value[currentLength - 1])) {

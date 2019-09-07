@@ -1,5 +1,7 @@
 package xyz.phanta.libnine.util.math
 
+import kotlin.math.hypot
+
 interface PlanarVec {
 
     companion object {
@@ -19,7 +21,7 @@ interface PlanarVec {
 
     operator fun minus(vec: PlanarVec): PlanarVec = add(-vec.x, -vec.y)
 
-    fun distanceTo(vec: PlanarVec): Double = Math.hypot((vec.x - x).toDouble(), (vec.y - y).toDouble())
+    fun distanceTo(vec: PlanarVec): Double = hypot((vec.x - x).toDouble(), (vec.y - y).toDouble())
 
     fun inRect(origin: PlanarVec, width: Int, height: Int): Boolean =
             x >= origin.x && x < origin.x + width && y >= origin.y && y < origin.y + height

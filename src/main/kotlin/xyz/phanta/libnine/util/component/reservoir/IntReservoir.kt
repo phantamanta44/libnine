@@ -36,7 +36,7 @@ class SimpleIntReservoir(override var capacity: Int, quantity: Int = 0) : Increm
         }
 
     init {
-        if (capacity < 0) throw IllegalArgumentException("Negative capacity!")
+        require(capacity >= 0) { "Negative capacity!" }
     }
 
     override fun draw(amount: Int, commit: Boolean): Int {
