@@ -26,7 +26,7 @@ public class L9BlockStated extends L9Block {
     @SuppressWarnings("NullableProblems")
     private List<VirtualState> states;
     @SuppressWarnings("NullableProblems")
-    private TObjectIntMap<VirtualState> statesInv;
+    private TObjectIntMap<IBlockState> statesInv;
 
     public L9BlockStated(String name, Material material) {
         super(name, material);
@@ -53,13 +53,14 @@ public class L9BlockStated extends L9Block {
         Accrue<IProperty<?>> accum = new Accrue<>(propList);
         accrueProperties(accum);
         states = Collections.unmodifiableList(VirtualState.cartesian(propList));
-        statesInv = new TObjectIntHashMap<>();
-        for (int i = 0; i < states.size(); i++) {
-            statesInv.put(states.get(i), i);
-        }
         accrueVolatileProperties(accum);
         props = Collections.unmodifiableList(propList);
-        return new BlockStateContainer(this, props.toArray(new IProperty[0]));
+        BlockStateContainer container = new BlockStateContainer(this, props.toArray(new IProperty[0]));
+        statesInv = new TObjectIntHashMap<>();
+        for (int i = 0; i < states.size(); i++) {
+            statesInv.put(states.get(i).synthesize(container), i);
+        }
+        return container;
     }
 
     @SuppressWarnings("WeakerAccess")
