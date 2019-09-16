@@ -22,13 +22,13 @@ public abstract class L9TileEntityTicking extends L9TileEntity implements ITicka
 
     @Override
     protected void setDirty() {
-        markDirty();
         shouldDispatchUpdate = true;
     }
 
     @Override
     public void update() {
         if (shouldDispatchUpdate) {
+            markDirty();
             dispatchTileUpdate();
             shouldDispatchUpdate = false;
         }
