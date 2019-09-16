@@ -6,15 +6,15 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class CapabilityBroker implements ICapabilityProvider {
 
-    private final Map<Capability, Object> capabilities;
+    private final Map<Capability<?>, Object> capabilities;
 
     public CapabilityBroker() {
-        this.capabilities = new HashMap<>();
+        this.capabilities = new IdentityHashMap<>();
     }
 
     public <T> CapabilityBroker with(Capability<T> capability, T aspect) {
