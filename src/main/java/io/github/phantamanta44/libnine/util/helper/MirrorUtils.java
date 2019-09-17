@@ -4,14 +4,14 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 public class MirrorUtils {
 
     public static <T> List<Class<? super T>> getHierarchy(Class<T> clazz) {
-        List<Class<? super T>> result = new LinkedList<>();
+        List<Class<? super T>> result = new ArrayList<>();
         Class<? super T> current = clazz;
         while (current != null) {
             result.add(current);

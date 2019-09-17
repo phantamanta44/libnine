@@ -8,8 +8,8 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.function.BiConsumer;
 
 public class FluidReservoir extends DelegatedIntReservoir implements IFluidTankProperties {
@@ -24,21 +24,21 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTankP
         super(backing);
         this.fluid = fluid;
         this.locked = locked;
-        this.callbacks = new LinkedList<>();
+        this.callbacks = new ArrayList<>();
     }
 
     public FluidReservoir(Fluid fluid, IIntReservoir backing) {
         super(backing);
         this.fluid = fluid;
         this.locked = true;
-        this.callbacks = new LinkedList<>();
+        this.callbacks = new ArrayList<>();
     }
 
     public FluidReservoir(IIntReservoir backing) {
         super(backing);
         this.fluid = null;
         this.locked = false;
-        this.callbacks = new LinkedList<>();
+        this.callbacks = new ArrayList<>();
     }
 
     public boolean hasFluid() {

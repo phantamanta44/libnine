@@ -5,8 +5,8 @@ import io.github.phantamanta44.libnine.util.function.IIntBiConsumer;
 import io.github.phantamanta44.libnine.util.math.MathUtils;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 
 public class SimpleIntReservoir implements IIntReservoir {
 
@@ -18,7 +18,7 @@ public class SimpleIntReservoir implements IIntReservoir {
     public SimpleIntReservoir(int qty, int capacity) {
         this.qty = qty;
         this.capacity = capacity;
-        this.callbacks = new LinkedList<>();
+        this.callbacks = new ArrayList<>();
     }
 
     public SimpleIntReservoir(int capacity) {

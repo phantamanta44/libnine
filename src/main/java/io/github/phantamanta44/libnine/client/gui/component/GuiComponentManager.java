@@ -2,16 +2,16 @@ package io.github.phantamanta44.libnine.client.gui.component;
 
 import net.minecraft.client.gui.GuiScreen;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 public class GuiComponentManager {
 
     private final GuiScreen gui;
-    private final LinkedList<ComponentState> comps;
+    private final ArrayList<ComponentState> comps;
 
     public GuiComponentManager(GuiScreen gui) {
         this.gui = gui;
-        this.comps = new LinkedList<>();
+        this.comps = new ArrayList<>();
     }
 
     public void register(GuiComponent comp) {

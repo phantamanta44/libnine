@@ -15,8 +15,8 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 public class L9BlockStated extends L9Block {
@@ -49,7 +49,7 @@ public class L9BlockStated extends L9Block {
 
     @Override
     protected BlockStateContainer createBlockState() {
-        List<IProperty<?>> propList = new LinkedList<>();
+        List<IProperty<?>> propList = new ArrayList<>();
         Accrue<IProperty<?>> accum = new Accrue<>(propList);
         accrueProperties(accum);
         states = Collections.unmodifiableList(VirtualState.cartesian(propList));
