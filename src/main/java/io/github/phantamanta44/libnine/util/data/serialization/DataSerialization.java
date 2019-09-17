@@ -1,6 +1,7 @@
 package io.github.phantamanta44.libnine.util.data.serialization;
 
 import io.github.phantamanta44.libnine.LibNine;
+import io.github.phantamanta44.libnine.util.LazyConstant;
 import io.github.phantamanta44.libnine.util.data.ByteUtils;
 import io.github.phantamanta44.libnine.util.data.ISerializable;
 import io.github.phantamanta44.libnine.util.format.FormatUtils;
@@ -19,11 +20,12 @@ import net.minecraftforge.fluids.FluidStack;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DataSerialization {
 
-    @SuppressWarnings("unchecked")
     private static final Collection<ISerializationProvider<?>> DEFAULT_SERIALIZATION_PROVIDERS = Arrays.asList(
             new LambdaSerializer<>(Integer.class,
                     NBTTagCompound::setInteger, NBTTagCompound::getInteger,
@@ -54,9 +56,9 @@ public class DataSerialization {
                     ByteUtils.Writer::writeTagCompound, ByteUtils.Reader::readTagCompound),
             new LambdaSerializer<>(ItemStack.class,
                     (t, k, s) -> {
-                            NBTTagCompound i = new NBTTagCompound();
-                            s.writeToNBT(i);
-                            t.setTag(k, i);
+                        NBTTagCompound i = new NBTTagCompound();
+                        s.writeToNBT(i);
+                        t.setTag(k, i);
                     }, (t, k) -> new ItemStack(t.getCompoundTag(k)),
                     ByteUtils.Writer::writeItemStack, ByteUtils.Reader::readItemStack),
             new LambdaSerializer<>(Fluid.class,
@@ -64,9 +66,9 @@ public class DataSerialization {
                     ByteUtils.Writer::writeFluid, ByteUtils.Reader::readFluid),
             new LambdaSerializer<>(FluidStack.class,
                     (t, k, s) -> {
-                            NBTTagCompound f = new NBTTagCompound();
-                            s.writeToNBT(f);
-                            t.setTag(k, f);
+                        NBTTagCompound f = new NBTTagCompound();
+                        s.writeToNBT(f);
+                        t.setTag(k, f);
                     }, (t, k) -> FluidStack.loadFluidStackFromNBT(t.getCompoundTag(k)),
                     ByteUtils.Writer::writeFluidStack, ByteUtils.Reader::readFluidStack),
             new LambdaSerializer<>(BlockPos.class,
@@ -91,51 +93,62 @@ public class DataSerialization {
                     ByteUtils.Writer::writeUuid, ByteUtils.Reader::readUuid)
     );
 
-    private static final Map<Class<?>, List<Field>> classMappings = new HashMap<>();
+    private static final Map<Class<?>, List<Field>> classMappings = new IdentityHashMap<>();
 
-    private static void calculateClassMappings(Class<?> src) {
-        LibNine.LOGGER.info("Calculating serialization mappings for class: {}", src.getName());
-        classMappings.put(src, MirrorUtils.getHierarchy(src).stream()
-                .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
-                .filter(f -> f.isAnnotationPresent(AutoSerialize.class))
-                .sorted(Comparator.comparing(Field::getName))
-                .peek(f -> f.setAccessible(true))
-                .collect(Collectors.toList()));
-    }
-
-    private static List<IPair<String, Object>> applyClassMappings(Object obj) {
-        return classMappings.get(obj.getClass()).stream()
-                .map(f -> {
-                    try {
-                        Object o = f.get(obj);
-                        return IPair.of(f.getName(), (o instanceof IDatum || o instanceof ISerializable) ? o : f);
-                    } catch (Exception e) {
-                        throw new IllegalStateException("Could not read field: " + f.toString(), e);
-                    }
-                })
-                .collect(Collectors.toList());
+    private static List<Field> getOrComputeClassMappings(Class<?> src) {
+        List<Field> mappings = classMappings.get(src);
+        if (mappings == null) {
+            LibNine.LOGGER.info("Calculating serialization mappings for class: {}", src.getName());
+            mappings = MirrorUtils.getHierarchy(src).stream()
+                    .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
+                    .filter(f -> f.isAnnotationPresent(AutoSerialize.class))
+                    .sorted(Comparator.comparing(Field::getName))
+                    .peek(f -> f.setAccessible(true))
+                    .collect(Collectors.toList());
+            classMappings.put(src, mappings);
+        }
+        return mappings;
     }
 
     private final Object target;
     private final Map<Class<?>, ISerializationProvider<?>> serializers;
-    
+    private final List<Supplier<IPair<String, ?>>> properties;
+
     public DataSerialization(Object target, Collection<ISerializationProvider<?>> serializationProviders) {
         this.target = target;
-        if (!classMappings.containsKey(target.getClass())) calculateClassMappings(target.getClass());
-        this.serializers = new HashMap<>();
+        this.serializers = new IdentityHashMap<>();
         for (ISerializationProvider<?> provider : serializationProviders) {
             serializers.put(provider.getSerializationType(), provider);
         }
-
+        this.properties = getOrComputeClassMappings(target.getClass()).stream()
+                .<Supplier<IPair<String, ?>>>map(f -> {
+                    Class<?> type = f.getType();
+                    if (IDatum.class.isAssignableFrom(type) || ISerializable.class.isAssignableFrom(type)) {
+                        return new LazyConstant<>(() -> {
+                            try {
+                                return IPair.of(f.getName(), f.get(target));
+                            } catch (Exception e) {
+                                throw new IllegalStateException("Could not read field: " + f.toString(), e);
+                            }
+                        });
+                    } else {
+                        return () -> IPair.of(f.getName(), f);
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     public DataSerialization(Object target) {
         this(target, DEFAULT_SERIALIZATION_PROVIDERS);
     }
 
+    private Stream<IPair<String, ?>> resolveProperties() {
+        return properties.stream().map(Supplier::get);
+    }
+
     @SuppressWarnings("unchecked")
     public void serializeNBT(NBTTagCompound tag) {
-        applyClassMappings(target).forEach(o -> {
+        resolveProperties().forEach(o -> {
             String key = FormatUtils.toTitleCase(o.getA());
             if (o.getB() instanceof ISerializable) {
                 NBTTagCompound serTag = new NBTTagCompound();
@@ -165,7 +178,7 @@ public class DataSerialization {
 
     @SuppressWarnings("unchecked")
     public void deserializeNBT(NBTTagCompound tag) {
-        applyClassMappings(target).forEach(o -> {
+        resolveProperties().forEach(o -> {
             String key = FormatUtils.toTitleCase(o.getA());
             if (o.getB() instanceof ISerializable) {
                 ((ISerializable)o.getB()).deserNBT(tag.getCompoundTag(key));
@@ -193,7 +206,7 @@ public class DataSerialization {
 
     @SuppressWarnings("unchecked")
     public void serializeBytes(ByteUtils.Writer data) {
-        applyClassMappings(target).forEach(o -> {
+        resolveProperties().forEach(o -> {
             if (o.getB() instanceof ISerializable) {
                 ((ISerializable)o.getB()).serBytes(data);
             } else if (o.getB() instanceof IDatum) {
@@ -220,7 +233,7 @@ public class DataSerialization {
 
     @SuppressWarnings("unchecked")
     public void deserializeBytes(ByteUtils.Reader data) {
-        applyClassMappings(target).forEach(o -> {
+        resolveProperties().forEach(o -> {
             if (o.getB() instanceof ISerializable) {
                 ((ISerializable)o.getB()).deserBytes(data);
             } else if (o.getB() instanceof IDatum) {
@@ -252,5 +265,5 @@ public class DataSerialization {
         }
         return serializer;
     }
-    
+
 }
