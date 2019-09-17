@@ -54,7 +54,9 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTankP
         if (locked && fluid != this.fluid) throw new UnsupportedOperationException("Fluid type is locked!");
         Fluid oldFluid = this.fluid;
         this.fluid = fluid;
-        callbacks.forEach(c -> c.accept(oldFluid, this.fluid));
+        for (BiConsumer<Fluid, Fluid> callback : callbacks) {
+            callback.accept(oldFluid, this.fluid);
+        }
     }
 
     @Override

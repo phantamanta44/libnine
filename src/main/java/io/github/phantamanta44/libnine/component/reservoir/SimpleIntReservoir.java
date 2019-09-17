@@ -34,7 +34,9 @@ public class SimpleIntReservoir implements IIntReservoir {
     public void setQuantity(int qty) {
         int oldQty = this.qty;
         this.qty = MathUtils.clamp(qty, 0, getCapacity());
-        callbacks.forEach(c -> c.accept(oldQty, this.qty));
+        for (IIntBiConsumer callback : callbacks) {
+            callback.accept(oldQty, this.qty);
+        }
     }
 
     @Override

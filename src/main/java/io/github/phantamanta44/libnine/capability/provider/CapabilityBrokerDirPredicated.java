@@ -34,7 +34,15 @@ public class CapabilityBrokerDirPredicated implements ICapabilityProvider {
     @SuppressWarnings("unchecked")
     public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
         Collection<IPair<BiPredicate, ?>> impls = capabilities.get(capability);
-        return impls != null && impls.stream().anyMatch(entry -> entry.getA().test(entry.getB(), facing));
+        if (impls == null) {
+            return false;
+        }
+        for (IPair<BiPredicate, ?> entry : impls) {
+            if (entry.getA().test(entry.getB(), facing)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Nullable
@@ -42,11 +50,15 @@ public class CapabilityBrokerDirPredicated implements ICapabilityProvider {
     @SuppressWarnings("unchecked")
     public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
         Collection<IPair<BiPredicate, ?>> impls = capabilities.get(capability);
-        return impls == null ? null : impls.stream()
-                .filter(entry -> entry.getA().test(entry.getB(), facing))
-                .findFirst()
-                .map(entry -> (T)entry.getB())
-                .orElse(null);
+        if (impls == null) {
+            return null;
+        }
+        for (IPair<BiPredicate, ?> entry : impls) {
+            if (entry.getA().test(entry.getB(), facing)) {
+                return (T)entry.getB();
+            }
+        }
+        return null;
     }
 
 }
