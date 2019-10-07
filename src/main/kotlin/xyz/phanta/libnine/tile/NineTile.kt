@@ -87,12 +87,12 @@ abstract class NineTileTicking(mod: Virtue, type: TileEntityType<*>, requiresSyn
     private var dirty: Boolean = false
 
     override fun dirty() {
-        markDirty()
         dirty = true
     }
 
     override fun tick() {
         if (dirty) {
+            markDirty()
             dispatchTileUpdate()
             dirty = false
         }
