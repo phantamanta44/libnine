@@ -63,16 +63,16 @@ class SidedCapabilityBroker : SimpleCapabilityBroker() {
 
 class PredicatedCapabilityBroker : ICapabilityProvider {
 
-    private val aspects: MutableMap<Capability<*>, Pair<Function<Boolean>, *>> = mutableMapOf()
+    private val aspects: MutableMap<Capability<*>, MutableList<Pair<Function<Boolean>, *>>> = mutableMapOf()
 
     @Suppress("UNCHECKED_CAST")
     override fun <T> getCapability(cap: Capability<T>, side: Direction?): LazyOptional<T> =
-            (aspects[cap] as? Pair<(T, Direction?) -> Boolean, T>)?.let {
-                if (it.first(it.second, side)) LazyOptional.of { it.second } else null
-            } ?: LazyOptional.empty()
+            (aspects[cap] as? List<Pair<(T, Direction?) -> Boolean, T>>)
+                    ?.map { if (it.first(it.second, side)) LazyOptional.of { it.second } else null }
+                    ?.firstOrNull() ?: LazyOptional.empty()
 
     fun <T> putCapability(cap: Capability<T>, predicate: (T, Direction?) -> Boolean, aspect: T) {
-        aspects[cap] = predicate to aspect
+        aspects.computeIfAbsent(cap) { mutableListOf() } += predicate to aspect
     }
 
 }
