@@ -34,12 +34,16 @@ import java.util.function.Supplier
 import kotlin.reflect.KMutableProperty0
 
 typealias DefBody<T> = T.() -> Unit
+typealias Definitions = DefBody<DefinitionDefContext>
 
 interface Definer {
 
-    fun definitions(): DefBody<DefinitionDefContext>
+    fun definitions(): Definitions
 
 }
+
+@DslMarker
+annotation class DefDsl
 
 class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, BlockDefContext {
 

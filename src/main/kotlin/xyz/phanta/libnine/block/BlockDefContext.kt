@@ -6,12 +6,14 @@ import net.minecraft.item.Item
 import net.minecraft.item.BlockItem
 import net.minecraft.util.ResourceLocation
 import xyz.phanta.libnine.definition.DefBody
+import xyz.phanta.libnine.definition.DefDsl
 import xyz.phanta.libnine.definition.Registrar
 import xyz.phanta.libnine.util.format.snakeify
 import kotlin.reflect.KMutableProperty0
 
 typealias BlockPrimer = (BlockDefBuilder<*>) -> BlockDefBuilder<*>
 
+@DefDsl
 interface BlockDefContextBase {
 
     val registrar: Registrar
