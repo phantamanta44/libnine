@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("NullableProblems")
+@SuppressWarnings("NotNullFieldNotInitialized")
 public class PacketServerSyncTileEntity implements IMessage {
 
     private int dimension;

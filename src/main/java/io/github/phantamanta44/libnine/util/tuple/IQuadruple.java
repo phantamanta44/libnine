@@ -75,6 +75,7 @@ public interface IQuadruple<A, B, C, D> {
             return d;
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof IQuadruple)) return false;

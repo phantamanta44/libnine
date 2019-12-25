@@ -184,6 +184,7 @@ public class Registrar {
     private static class TileRegistration {
 
         private final LazyConstant<Virtue> virtue;
+        @SuppressWarnings("rawtypes")
         private final LazyConstant<Class> clazz;
 
         TileRegistration(String modId, String className) {

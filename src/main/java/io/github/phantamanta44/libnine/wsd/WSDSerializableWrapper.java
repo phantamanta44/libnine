@@ -8,7 +8,7 @@ public class WSDSerializableWrapper<T extends INbtSerializable> extends L9WSD {
 
     private T value;
 
-    public WSDSerializableWrapper(Virtue virtue, IWSDIdentity identity, T initialValue) {
+    public WSDSerializableWrapper(Virtue virtue, IWSDIdentity<?> identity, T initialValue) {
         super(virtue, identity);
         this.value = initialValue;
     }

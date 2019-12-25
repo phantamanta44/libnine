@@ -20,7 +20,7 @@ public class MirrorUtils {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T> IMethod<T> reflectMethod(Class<?> clazz, String name, Class<?>... args) {
         try {
             Method method = clazz.getDeclaredMethod(name, args);
@@ -32,7 +32,7 @@ public class MirrorUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T> IField<T> reflectField(Class<?> clazz, String name) {
         try {
             Field field = clazz.getDeclaredField(name);

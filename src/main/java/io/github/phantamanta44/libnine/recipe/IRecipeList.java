@@ -7,7 +7,7 @@ import io.github.phantamanta44.libnine.recipe.output.IRcpOut;
 import javax.annotation.Nullable;
 import java.util.Collection;
 
-public interface IRecipeList<T, I extends IRcpIn<T>, O extends IRcpOut, R extends IRcp<T, I, O>> {
+public interface IRecipeList<T, I extends IRcpIn<T>, O extends IRcpOut<?>, R extends IRcp<T, I, O>> {
 
     @Nullable
     R findRecipe(T input);

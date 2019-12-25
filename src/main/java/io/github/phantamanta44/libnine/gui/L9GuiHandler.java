@@ -13,6 +13,7 @@ import net.minecraftforge.fml.common.network.IGuiHandler;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("rawtypes")
 public class L9GuiHandler implements IGuiHandler {
 
     private final Virtue virtue;

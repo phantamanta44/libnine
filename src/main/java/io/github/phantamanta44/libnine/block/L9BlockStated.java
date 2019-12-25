@@ -21,11 +21,12 @@ import java.util.List;
 
 public class L9BlockStated extends L9Block {
 
-    @SuppressWarnings("NullableProblems")
+
+    @SuppressWarnings("NotNullFieldNotInitialized")
     private List<IProperty<?>> props;
-    @SuppressWarnings("NullableProblems")
+    @SuppressWarnings("NotNullFieldNotInitialized")
     private List<VirtualState> states;
-    @SuppressWarnings("NullableProblems")
+    @SuppressWarnings("NotNullFieldNotInitialized")
     private TObjectIntMap<IBlockState> statesInv;
 
     public L9BlockStated(String name, Material material) {

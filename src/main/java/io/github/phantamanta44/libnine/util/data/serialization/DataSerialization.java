@@ -146,7 +146,7 @@ public class DataSerialization {
         return properties.stream().map(Supplier::get);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void serializeNBT(NBTTagCompound tag) {
         resolveProperties().forEach(o -> {
             String key = FormatUtils.toTitleCase(o.getA());
@@ -176,7 +176,7 @@ public class DataSerialization {
         });
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void deserializeNBT(NBTTagCompound tag) {
         resolveProperties().forEach(o -> {
             String key = FormatUtils.toTitleCase(o.getA());
@@ -204,7 +204,7 @@ public class DataSerialization {
         });
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void serializeBytes(ByteUtils.Writer data) {
         resolveProperties().forEach(o -> {
             if (o.getB() instanceof ISerializable) {
@@ -231,7 +231,7 @@ public class DataSerialization {
         });
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void deserializeBytes(ByteUtils.Reader data) {
         resolveProperties().forEach(o -> {
             if (o.getB() instanceof ISerializable) {
@@ -258,6 +258,7 @@ public class DataSerialization {
         });
     }
 
+    @SuppressWarnings("rawtypes")
     private ISerializationProvider getSerializationProvider(Class<?> clazz) {
         ISerializationProvider serializer = serializers.get(clazz);
         if (serializer == null) {

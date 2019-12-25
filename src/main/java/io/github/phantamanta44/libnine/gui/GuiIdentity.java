@@ -29,6 +29,7 @@ public class GuiIdentity<S extends Container, C> {
         return name.hashCode();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object o) {
         return o instanceof GuiIdentity && ((GuiIdentity)o).name.equals(name);

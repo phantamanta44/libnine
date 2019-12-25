@@ -13,6 +13,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.BiPredicate;
 
+@SuppressWarnings("rawtypes")
 public class CapabilityBrokerDirPredicated implements ICapabilityProvider {
 
     private final Map<Capability<?>, Collection<IPair<BiPredicate, ?>>> capabilities;

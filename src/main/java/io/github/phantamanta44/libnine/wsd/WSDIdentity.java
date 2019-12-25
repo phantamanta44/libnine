@@ -30,6 +30,7 @@ public class WSDIdentity<T extends L9WSD> implements IWSDIdentity<T> {
         return id.hashCode();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object o) {
         return o instanceof WSDIdentity && ((WSDIdentity)o).id.equals(id);

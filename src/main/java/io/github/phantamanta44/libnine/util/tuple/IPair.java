@@ -53,6 +53,7 @@ public interface IPair<A, B> {
             return b;
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof IPair)) return false;

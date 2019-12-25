@@ -21,15 +21,16 @@ public class RecipeManager implements IRecipeManager {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T, I extends IRcpIn<T>, O extends IRcpOut, R extends IRcp<T, I, O>> IRecipeList<T, I, O, R> getRecipeList(Class<R> type) {
+    public <T, I extends IRcpIn<T>, O extends IRcpOut<?>, R extends IRcp<T, I, O>> IRecipeList<T, I, O, R> getRecipeList(Class<R> type) {
         return (IRecipeList<T, I, O, R>)recipeLists.get(type);
     }
 
     @Override
-    public void addType(Class<? extends IRcp> type) {
+    public void addType(Class<? extends IRcp<?, ?, ?>> type) {
         recipeLists.putIfAbsent(type, new RecipeListImpl());
     }
 
+    @SuppressWarnings("rawtypes")
     private static class RecipeListImpl implements IRecipeList {
 
         private final Collection<IRcp> recipes;

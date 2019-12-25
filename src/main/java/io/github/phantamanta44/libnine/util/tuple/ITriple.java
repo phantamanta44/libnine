@@ -62,6 +62,7 @@ public interface ITriple<A, B, C> {
             return c;
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof ITriple)) return false;

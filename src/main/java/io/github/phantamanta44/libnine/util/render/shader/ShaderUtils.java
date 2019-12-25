@@ -22,6 +22,7 @@ public class ShaderUtils {
 
     private static final Set<ShaderProgramImpl> validShaders = new HashSet<>();
 
+    @SuppressWarnings("deprecation")
     public static void registerReloadHook() {
         ((IReloadableResourceManager)Minecraft.getMinecraft().getResourceManager())
                 .registerReloadListener(manager -> reloadShaders());
@@ -105,7 +106,7 @@ public class ShaderUtils {
 
         private final List<IShader> shaderSources;
         private final List<Uniform<?, ?>> uniforms;
-        private int[] shaderIds;
+        private final int[] shaderIds;
         private int programId = -1;
         private final TObjectIntMap<Uniform<?, ?>> unifMapping = new TObjectIntHashMap<>();
 
@@ -240,7 +241,7 @@ public class ShaderUtils {
 
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static class NoopUniform extends Uniform {
 
         private static final UniformType DUMMY_TYPE = new UniformType((l, v, c) -> {

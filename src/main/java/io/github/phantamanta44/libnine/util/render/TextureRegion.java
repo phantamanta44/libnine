@@ -86,6 +86,7 @@ public class TextureRegion {
         tess.draw();
     }
 
+    @SuppressWarnings("RedundantCast")
     public void draw(int x, int y, double zIndex, int width, int height) {
         draw((double)x, (double)y, zIndex, (double)width, (double)height);
     }
@@ -130,6 +131,7 @@ public class TextureRegion {
         tess.draw();
     }
 
+    @SuppressWarnings("RedundantCast")
     public void drawPartial(int x, int y, double zIndex, int width, int height, float x1, float y1, float x2, float y2) {
         drawPartial((double)x, (double)y, zIndex, (double)width, (double)height, x1, y1, x2, y2);
     }

@@ -109,6 +109,7 @@ public class L9CommonProxy {
         }
         Side actualSide = FMLCommonHandler.instance().getSide();
         for (ASMDataTable.ASMData target : event.getAsmData().getAll(InitMe.class.getName())) {
+            @SuppressWarnings("rawtypes")
             List sides = (List)target.getAnnotationInfo().get("sides");
             boolean shouldContinue = true;
             if (sides != null) {

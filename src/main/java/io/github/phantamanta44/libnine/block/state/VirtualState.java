@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("rawtypes")
 public class VirtualState {
 
     private final Map<IProperty<?>, Comparable<?>> props;

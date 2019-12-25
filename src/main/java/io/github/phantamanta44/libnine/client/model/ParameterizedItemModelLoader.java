@@ -115,7 +115,7 @@ public class ParameterizedItemModelLoader implements ICustomModelLoader {
         }
 
         ResourceLocation injectResource(String resource) {
-            resources.put("models/" + Long.toString(resourceIndex) + ".json", resource);
+            resources.put("models/" + resourceIndex + ".json", resource);
             return new ResourceLocation(RESOURCE_DOMAIN, Long.toString(resourceIndex++));
         }
 

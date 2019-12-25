@@ -13,7 +13,7 @@ import java.util.List;
 public abstract class GuiComponent {
 
     protected final int x, y, width, height;
-    @SuppressWarnings("NullableProblems")
+    @SuppressWarnings("NotNullFieldNotInitialized")
     protected GuiScreen gui;
 
     public GuiComponent(int x, int y, int width, int height) {

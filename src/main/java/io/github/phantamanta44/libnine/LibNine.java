@@ -12,17 +12,17 @@ import org.apache.logging.log4j.Logger;
 public class LibNine {
 
     @Mod.Instance(L9Const.MOD_ID)
-    @SuppressWarnings("NullableProblems")
+    @SuppressWarnings("NotNullFieldNotInitialized")
     public static LibNine INSTANCE;
 
     @SidedProxy(
             serverSide = "io.github.phantamanta44.libnine.L9CommonProxy",
             clientSide = "io.github.phantamanta44.libnine.client.L9ClientProxy"
     )
-    @SuppressWarnings("NullableProblems")
+    @SuppressWarnings("NotNullFieldNotInitialized")
     public static L9CommonProxy PROXY;
 
-    @SuppressWarnings("NullableProblems")
+    @SuppressWarnings("NotNullFieldNotInitialized")
     public static Logger LOGGER;
 
     @Mod.EventHandler

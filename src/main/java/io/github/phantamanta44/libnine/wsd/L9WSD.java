@@ -7,7 +7,7 @@ import net.minecraft.world.storage.WorldSavedData;
 
 public abstract class L9WSD extends WorldSavedData implements INbtSerializable {
 
-    public L9WSD(Virtue virtue, IWSDIdentity identity) {
+    public L9WSD(Virtue virtue, IWSDIdentity<?> identity) {
         super(String.format("%s:%s_%s", virtue.getModId(), identity.getPrefix(), identity.getIdentifier()));
     }
 

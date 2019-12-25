@@ -10,6 +10,7 @@ public class FormatUtils {
             "n", "\u03bc", "m", "", "k", "M", "G", "T", "P", "E"
     };
 
+    @SuppressWarnings("DuplicatedCode")
     public static String formatSI(int num, String unit) {
         if (num == 0) return "0 " + unit;
         int magnitude = (int)Math.floor(Math.log10(Math.abs(num)) / 3);
@@ -17,6 +18,7 @@ public class FormatUtils {
         return String.format("%.2f %s%s", num / Math.pow(10, magnitude * 3), SI_PREFIXES[magnitude], unit);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public static String formatSI(long num, String unit) {
         if (num == 0) return "0 " + unit;
         int magnitude = (int)Math.floor(Math.log10(Math.abs(num)) / 3);

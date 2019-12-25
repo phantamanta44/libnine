@@ -25,6 +25,7 @@ public class Uniform<T, C> {
         return GL20.glGetUniformLocation(programId, name);
     }
 
+    @Nullable
     public C getContext() {
         return context;
     }
@@ -34,6 +35,7 @@ public class Uniform<T, C> {
         return name.hashCode();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Uniform && name.equals(((Uniform)obj).name);

@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("NullableProblems")
+@SuppressWarnings("NotNullFieldNotInitialized")
 public class PacketClientContainerInteraction implements IMessage {
 
     private byte[] data;
