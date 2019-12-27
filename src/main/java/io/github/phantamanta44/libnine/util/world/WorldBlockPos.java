@@ -4,7 +4,9 @@ import io.github.phantamanta44.libnine.LibNine;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -66,6 +68,14 @@ public class WorldBlockPos {
 
     public BlockPos getPos() {
         return pos;
+    }
+
+    public WorldBlockPos offset(Vec3i vec) {
+        return new WorldBlockPos(world, pos.add(vec));
+    }
+
+    public WorldBlockPos offset(EnumFacing dir) {
+        return new WorldBlockPos(world, pos.offset(dir));
     }
 
     @Override

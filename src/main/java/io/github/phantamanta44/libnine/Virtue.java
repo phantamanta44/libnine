@@ -1,6 +1,8 @@
 package io.github.phantamanta44.libnine;
 
 import io.github.phantamanta44.libnine.block.L9Block;
+import io.github.phantamanta44.libnine.component.multiblock.IMultiBlockUnit;
+import io.github.phantamanta44.libnine.component.multiblock.MultiBlockType;
 import io.github.phantamanta44.libnine.gui.L9GuiHandler;
 import io.github.phantamanta44.libnine.item.L9Item;
 import io.github.phantamanta44.libnine.network.PacketClientContainerInteraction;
@@ -118,6 +120,11 @@ public class Virtue {
         sound.setRegistryName(id);
         LibNine.PROXY.getRegistrar().queueSoundEventReg(sound);
         return sound;
+    }
+
+    public <T extends IMultiBlockUnit<T>> MultiBlockType<T> newMultiBlockType(String key, int maxSearchDist,
+                                                                              Class<T> componentType) {
+        return new MultiBlockType<>(newResourceLocation(key), maxSearchDist, componentType);
     }
 
     public void setCreativeTabFor(L9Item item) {

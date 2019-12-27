@@ -66,6 +66,7 @@ public class L9Gui extends GuiScreen implements IScreenDrawable {
         RenderHelper.disableStandardItemLighting();
         drawForeground(partialTicks, mX - posX, mY - posY);
         components.draw(partialTicks, mX - posX, mY - posY);
+        drawOverlay(partialTicks, mX - posX, mY - posY);
         GlStateManager.popMatrix();
         GlStateManager.enableLighting();
         GlStateManager.enableDepth();
@@ -84,6 +85,11 @@ public class L9Gui extends GuiScreen implements IScreenDrawable {
 
     @Override
     public void drawForeground(float partialTicks, int mX, int mY) {
+        // NO-OP
+    }
+
+    @Override
+    public void drawOverlay(float partialTicks, int mX, int mY) {
         // NO-OP
     }
 

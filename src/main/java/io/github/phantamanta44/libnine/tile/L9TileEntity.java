@@ -60,8 +60,12 @@ public class L9TileEntity extends TileEntity implements ISerializable {
      */
 
     protected void setDirty() {
-        markDirty();
-        if (!getWorld().isRemote) dispatchTileUpdate();
+        if (world != null) {
+            markDirty();
+            if (!world.isRemote){
+                LibNine.PROXY.getTileEntityDispatcher().queueTileUpdate(this);
+            }
+        }
     }
 
     @Override
@@ -76,7 +80,7 @@ public class L9TileEntity extends TileEntity implements ISerializable {
         if (pos != null) worldPos = new WorldBlockPos(world, pos);
     }
 
-    protected void dispatchTileUpdate() {
+    public void dispatchTileUpdate() {
         if (requiresSync) LibNine.PROXY.dispatchTileUpdate(this);
     }
 

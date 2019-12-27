@@ -12,4 +12,6 @@ public interface IScreenDrawable {
 
     void drawForeground(float partialTicks, int mX, int mY);
 
+    void drawOverlay(float partialTicks, int mX, int mY);
+
 }

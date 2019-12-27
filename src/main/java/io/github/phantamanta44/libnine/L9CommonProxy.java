@@ -1,5 +1,6 @@
 package io.github.phantamanta44.libnine;
 
+import io.github.phantamanta44.libnine.event.TileEntityDispatchHandler;
 import io.github.phantamanta44.libnine.network.PacketServerSyncTileEntity;
 import io.github.phantamanta44.libnine.recipe.IRecipeList;
 import io.github.phantamanta44.libnine.recipe.IRecipeManager;
@@ -14,6 +15,7 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.discovery.ASMDataTable;
@@ -32,6 +34,7 @@ public class L9CommonProxy {
 
     private final Registrar registrar;
     private final RecipeManager recipeManager;
+    private final TileEntityDispatchHandler teDispatcher = new TileEntityDispatchHandler();
 
     public L9CommonProxy() {
         registrar = initRegistrar();
@@ -61,6 +64,10 @@ public class L9CommonProxy {
 
     public IRecipeManager getRecipeManager() {
         return recipeManager;
+    }
+
+    public TileEntityDispatchHandler getTileEntityDispatcher() {
+        return teDispatcher;
     }
 
     public void dispatchTileUpdate(L9TileEntity tile) {
@@ -94,6 +101,7 @@ public class L9CommonProxy {
 
     protected void onPreInit(FMLPreInitializationEvent event) {
         registrar.hookEvents();
+        MinecraftForge.EVENT_BUS.register(teDispatcher);
         tileIter:
         for (ASMDataTable.ASMData target : event.getAsmData().getAll(RegisterTile.class.getName())) {
             //noinspection unchecked

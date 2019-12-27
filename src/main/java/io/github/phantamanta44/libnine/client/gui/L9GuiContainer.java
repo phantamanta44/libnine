@@ -71,6 +71,7 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
     protected void drawGuiContainerForegroundLayer(int mX, int mY) {
         drawForeground(partialTicks, mX - posX, mY - posY);
         components.draw(partialTicks, mX - posX, mY - posY);
+        drawOverlay(partialTicks, mX - posX, mY - posY);
     }
 
     @Override
@@ -86,6 +87,11 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
     @Override
     public void drawForeground(float partialTicks, int mX, int mY) {
         drawPlayerInventoryName();
+    }
+
+    @Override
+    public void drawOverlay(float partialTicks, int mX, int mY) {
+        // NO-OP
     }
 
     protected void drawContainerName(String name) {
