@@ -16,6 +16,7 @@ import net.minecraft.world.biome.Biome
 import net.minecraft.world.gen.GenerationStage
 import net.minecraft.world.gen.feature.IFeatureConfig
 import net.minecraft.world.gen.placement.IPlacementConfig
+import net.minecraftforge.registries.ForgeRegistries
 import org.apache.commons.lang3.mutable.MutableObject
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.block.BlockDefBuilder
@@ -27,6 +28,7 @@ import xyz.phanta.libnine.item.ItemDefContext
 import xyz.phanta.libnine.recipe.RecipeSchema
 import xyz.phanta.libnine.tile.NineTile
 import xyz.phanta.libnine.util.format.snakeify
+import xyz.phanta.libnine.util.fromObjectHolder
 import xyz.phanta.libnine.worldgen.BiomeSet
 import xyz.phanta.libnine.worldgen.NineFeature
 import xyz.phanta.libnine.worldgen.NineFeatureDistribution
@@ -99,7 +101,7 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
     }
 
     fun <T : NineTile> tileEntity(dest: KMutableProperty0<() -> T>, factory: (Virtue, TileEntityType<T>) -> T) =
-            dest.set(tileEntity(dest.name.snakeify(), factory))
+            dest.set(tileEntity(dest.name.snakeify(), factory)) // probably nobody is going to try a registry override
 
     // TODO containers
     /*@Suppress("UNCHECKED_CAST")
@@ -134,7 +136,7 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
     }
 
     fun soundEvent(dest: KMutableProperty0<SoundEvent>, soundPath: String) =
-            dest.set(soundEvent(dest.name.snakeify(), soundPath))
+            dest.fromObjectHolder(ForgeRegistries.SOUND_EVENTS, soundEvent(dest.name.snakeify(), soundPath)) { it }
 
     @Suppress("UNCHECKED_CAST")
     fun <I : IInventory, R : IRecipe<I>> recipeType(
@@ -163,13 +165,13 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
     fun <X> particleCtx(dest: KMutableProperty0<(X) -> IParticleData>, typeFactory: (ResourceLocation) -> NineParticleType<X>) {
         val type = typeFactory(registrar.mod.resource(dest.name.snakeify()))
         registrar.particles += type
-        dest.set { NineParticleType.Data(type, it) }
+        dest.set { NineParticleType.Data(type, it) } // probably nobody is going to try a registry override
     }
 
     fun particle(dest: KMutableProperty0<() -> IParticleData>, typeFactory: (ResourceLocation) -> NineParticleType<Unit>) {
         val type = typeFactory(registrar.mod.resource(dest.name.snakeify()))
         registrar.particles += type
-        dest.set { NineParticleType.Data(type, Unit) }
+        dest.set { NineParticleType.Data(type, Unit) } // probably nobody is going to try a registry override
     }
 
 }

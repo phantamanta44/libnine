@@ -2,13 +2,15 @@ package xyz.phanta.libnine.block
 
 import net.minecraft.block.Block
 import net.minecraft.block.material.Material
-import net.minecraft.item.Item
 import net.minecraft.item.BlockItem
+import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
+import net.minecraftforge.registries.ForgeRegistries
 import xyz.phanta.libnine.definition.DefBody
 import xyz.phanta.libnine.definition.DefDsl
 import xyz.phanta.libnine.definition.Registrar
 import xyz.phanta.libnine.util.format.snakeify
+import xyz.phanta.libnine.util.fromObjectHolder
 import kotlin.reflect.KMutableProperty0
 
 typealias BlockPrimer = (BlockDefBuilder<*>) -> BlockDefBuilder<*>
@@ -26,13 +28,17 @@ interface BlockDefContextBase {
             body: (BlockDefBuilder<B>) -> Pair<B, BlockItem> = { it.build() }
     ): B
 
+    @Suppress("UNCHECKED_CAST")
     fun <B : Block> block(
             dest: KMutableProperty0<in B>,
             blockFactory: (Block.Properties) -> B,
             propsFactory: () -> Block.Properties,
             itemBlockFactory: (B, Item.Properties) -> BlockItem = ::BlockItem,
             body: (BlockDefBuilder<B>) -> Pair<B, BlockItem> = { it.build() }
-    ) = dest.set(block(dest.name.snakeify(), blockFactory, propsFactory, itemBlockFactory, body))
+    ) = dest.fromObjectHolder(
+            ForgeRegistries.BLOCKS,
+            block(dest.name.snakeify(), blockFactory, propsFactory, itemBlockFactory, body)
+    ) { it as B }
 
     fun <B : Block> block(
             name: String,
@@ -86,8 +92,9 @@ interface BlockDefContextAugmented<A : Block> : BlockDefContextBase {
 
     fun block(name: String, body: (BlockDefBuilder<A>) -> Pair<A, BlockItem> = { it.build() }): A
 
+    @Suppress("UNCHECKED_CAST")
     fun block(dest: KMutableProperty0<in A>, body: (BlockDefBuilder<A>) -> Pair<A, BlockItem> = { it.build() }) =
-            dest.set(block(dest.name.snakeify(), body))
+            dest.fromObjectHolder(ForgeRegistries.BLOCKS, block(dest.name.snakeify(), body)) { it as A }
 
     fun blocksBy(primer: BlockPrimer, body: DefBody<BlockDefContextAugmented<A>>)
 

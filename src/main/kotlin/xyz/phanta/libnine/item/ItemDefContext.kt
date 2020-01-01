@@ -2,10 +2,12 @@ package xyz.phanta.libnine.item
 
 import net.minecraft.item.Item
 import net.minecraft.util.ResourceLocation
+import net.minecraftforge.registries.ForgeRegistries
 import xyz.phanta.libnine.definition.DefBody
 import xyz.phanta.libnine.definition.DefDsl
 import xyz.phanta.libnine.definition.Registrar
 import xyz.phanta.libnine.util.format.snakeify
+import xyz.phanta.libnine.util.fromObjectHolder
 import kotlin.reflect.KMutableProperty0
 
 typealias ItemPrimer = (ItemDefBuilder<*>) -> ItemDefBuilder<*>
@@ -21,11 +23,12 @@ interface ItemDefContextBase {
             body: (ItemDefBuilder<I>) -> I = { it.build() }
     ): I
 
+    @Suppress("UNCHECKED_CAST")
     fun <I : Item> item(
             dest: KMutableProperty0<in I>,
             factory: (Item.Properties) -> I,
             body: (ItemDefBuilder<I>) -> I = { it.build() }
-    ) = dest.set(item(dest.name.snakeify(), factory, body))
+    ) = dest.fromObjectHolder(ForgeRegistries.ITEMS, item(dest.name.snakeify(), factory, body)) { it as I }
 
     fun <I : Item> itemsAug(
             factory: (Item.Properties) -> I,
@@ -48,8 +51,9 @@ interface ItemDefContextAugmented<A : Item> : ItemDefContextBase {
 
     fun item(name: String, body: (ItemDefBuilder<A>) -> A = { it.build() }): A
 
+    @Suppress("UNCHECKED_CAST")
     fun item(dest: KMutableProperty0<in A>, body: (ItemDefBuilder<A>) -> A = { it.build() }) =
-            dest.set(item(dest.name.snakeify(), body))
+            dest.fromObjectHolder(ForgeRegistries.ITEMS, item(dest.name.snakeify(), body)) { it as A }
 
     fun itemsBy(primer: ItemPrimer, body: DefBody<ItemDefContextAugmented<A>>)
 
