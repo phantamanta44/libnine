@@ -23,18 +23,19 @@ interface DataManager {
 
     fun readByteStream(stream: ByteReader)
 
-    fun <T : IncrementalData> property(name: String, property: T): T
+    fun <T : IncrementalData> property(name: String, property: T, needsSync: Boolean): T
 
 }
 
 open class DataManagerImpl internal constructor() : DataManager {
 
-    internal val properties: NavigableMap<String, Pair<IncrementalData, IncrementalDataListener>> = TreeMap()
-    private val deltaMarker: ByteStreamDeltaMarker = ByteStreamDeltaMarker { properties.size }
+    internal val properties: NavigableMap<String, PropertyEntry> = TreeMap()
+    private val syncedProperties: MutableList<PropertyEntry> = mutableListOf()
+    private val deltaMarker: ByteStreamDeltaMarker = ByteStreamDeltaMarker { syncedProperties.size }
     private var valid: Boolean = true
 
     override val dirty: Boolean
-        get() = properties.any { it.value.second.dirty }
+        get() = properties.any { it.value.listener.dirty }
 
     internal inline fun <T> checkValid(body: () -> T): T {
         check(valid) { "Daedalus instance is already shut down!" }
@@ -42,22 +43,22 @@ open class DataManagerImpl internal constructor() : DataManager {
     }
 
     override fun destroy() {
-        properties.forEach { (_, v) -> v.second.valid = false }
+        properties.forEach { (_, v) -> v.listener.valid = false }
         properties.clear()
         valid = false
     }
 
     override fun genFullTag(): CompoundNBT = checkValid {
         CompoundNBT().also {
-            properties.forEach { (k, v) -> it.put(k, CompoundNBT().also(v.first::serNbt)) }
+            properties.forEach { (k, v) -> it.put(k, CompoundNBT().also(v.property::serNbt)) }
         }
     }
 
     override fun genDeltaTag(): CompoundNBT = checkValid {
         CompoundNBT().also {
-            properties.filter { (_, v) -> v.second.dirty }.forEach { (k, v) ->
-                it.put(k, CompoundNBT().also(v.second::serDeltaNbt))
-                v.second.clearDirtyState()
+            properties.filter { (_, v) -> v.listener.dirty }.forEach { (k, v) ->
+                it.put(k, CompoundNBT().also(v.listener::serDeltaNbt))
+                v.listener.clearDirtyState()
             }
         }
     }
@@ -65,14 +66,14 @@ open class DataManagerImpl internal constructor() : DataManager {
     override fun readTag(tag: CompoundNBT) = checkValid {
         tag.keySet().forEach {
             (properties[it]
-                    ?: throw IllegalArgumentException("Unknown property: $it")).first.deserNbt(tag.getCompound(it))
+                    ?: throw IllegalArgumentException("Unknown property: $it")).property.deserNbt(tag.getCompound(it))
         }
     }
 
     override fun genFullByteStream(stream: ByteWriter) {
         checkValid {
             deltaMarker.writeFullField(stream)
-            properties.forEach { (_, v) -> v.first.serByteStream(stream) }
+            syncedProperties.forEach { e -> e.property.serByteStream(stream) }
         }
     }
 
@@ -80,11 +81,11 @@ open class DataManagerImpl internal constructor() : DataManager {
         checkValid {
             val field = deltaMarker.createField()
             val subStream = ByteWriter()
-            properties.values.withIndex()
-                    .filter { (_, value) -> value.second.dirty }
-                    .forEach { (index, value) ->
+            syncedProperties.withIndex()
+                    .filter { (_, value) -> value.listener.dirty }
+                    .forEach { (index, entry) ->
                         field.set(index)
-                        value.second.serDeltaByteStream(subStream)
+                        entry.listener.serDeltaByteStream(subStream)
                     }
             field.write(stream)
             stream.bytes(subStream.toArray())
@@ -94,16 +95,27 @@ open class DataManagerImpl internal constructor() : DataManager {
     override fun readByteStream(stream: ByteReader) {
         checkValid {
             val field = deltaMarker.readField(stream)
-            properties.values.withIndex()
+            syncedProperties.withIndex()
                     .filter { (index, _) -> field[index] }
-                    .forEach { (_, value) ->
-                        value.first.deserByteStream(stream)
+                    .forEach { (_, entry) ->
+                        entry.property.deserByteStream(stream)
                     }
         }
     }
 
-    override fun <T : IncrementalData> property(name: String, property: T): T = checkValid {
-        property.also { properties[name] = it to it.extractListener() }
+    override fun <T : IncrementalData> property(name: String, property: T, needsSync: Boolean): T = checkValid {
+        property.also {
+            PropertyEntry(it, needsSync).let { entry ->
+                properties[name] = entry
+                if (needsSync) {
+                    syncedProperties += entry
+                }
+            }
+        }
+    }
+
+    internal class PropertyEntry(val property: IncrementalData, val needsSync: Boolean) {
+        val listener: IncrementalDataListener = property.extractListener()
     }
 
 }
@@ -114,7 +126,7 @@ class Daedalus : DataManagerImpl() {
 
     fun copy(): DataManager = checkValid {
         Daedalus().also {
-            properties.forEach { (k, v) -> it.property(k, v.first) }
+            properties.forEach { (k, v) -> it.property(k, v.property, v.needsSync) }
             children += it
         }
     }

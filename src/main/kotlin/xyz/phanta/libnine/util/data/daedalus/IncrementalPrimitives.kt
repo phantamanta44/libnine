@@ -4,7 +4,7 @@ import net.minecraft.nbt.CompoundNBT
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
 
-fun DataManager.int(name: String, initial: Int = 0): IncrementalProperty<Int> =
+fun DataManager.int(name: String, initial: Int = 0, needsSync: Boolean = true): IncrementalProperty<Int> =
         this.property(name, object : IncrementalProperty<Int>(initial) {
             override fun serNbt(tag: CompoundNBT) = tag.putInt("value", value)
 
@@ -19,9 +19,9 @@ fun DataManager.int(name: String, initial: Int = 0): IncrementalProperty<Int> =
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.int()
             }
-        })
+        }, needsSync)
 
-fun DataManager.float(name: String, initial: Float = 0F): IncrementalProperty<Float> =
+fun DataManager.float(name: String, initial: Float = 0F, needsSync: Boolean = true): IncrementalProperty<Float> =
         this.property(name, object : IncrementalProperty<Float>(initial) {
             override fun serNbt(tag: CompoundNBT) = tag.putFloat("value", value)
 
@@ -36,9 +36,9 @@ fun DataManager.float(name: String, initial: Float = 0F): IncrementalProperty<Fl
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.float()
             }
-        })
+        }, needsSync)
 
-fun DataManager.double(name: String, initial: Double = 0.0): IncrementalProperty<Double> =
+fun DataManager.double(name: String, initial: Double = 0.0, needsSync: Boolean = true): IncrementalProperty<Double> =
         this.property(name, object : IncrementalProperty<Double>(initial) {
             override fun serNbt(tag: CompoundNBT) = tag.putDouble("value", value)
 
@@ -53,9 +53,9 @@ fun DataManager.double(name: String, initial: Double = 0.0): IncrementalProperty
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.double()
             }
-        })
+        }, needsSync)
 
-fun DataManager.byte(name: String, initial: Byte = 0): IncrementalProperty<Byte> =
+fun DataManager.byte(name: String, initial: Byte = 0, needsSync: Boolean = true): IncrementalProperty<Byte> =
         this.property(name, object : IncrementalProperty<Byte>(initial) {
             override fun serNbt(tag: CompoundNBT) = tag.putByte("value", value)
 
@@ -70,9 +70,9 @@ fun DataManager.byte(name: String, initial: Byte = 0): IncrementalProperty<Byte>
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.byte()
             }
-        })
+        }, needsSync)
 
-fun DataManager.short(name: String, initial: Short = 0): IncrementalProperty<Short> =
+fun DataManager.short(name: String, initial: Short = 0, needsSync: Boolean = true): IncrementalProperty<Short> =
         this.property(name, object : IncrementalProperty<Short>(initial) {
             override fun serNbt(tag: CompoundNBT) = tag.putShort("value", value)
 
@@ -87,9 +87,9 @@ fun DataManager.short(name: String, initial: Short = 0): IncrementalProperty<Sho
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.short()
             }
-        })
+        }, needsSync)
 
-fun DataManager.long(name: String, initial: Long = 0): IncrementalProperty<Long> =
+fun DataManager.long(name: String, initial: Long = 0, needsSync: Boolean = true): IncrementalProperty<Long> =
         this.property(name, object : IncrementalProperty<Long>(initial) {
             override fun serNbt(tag: CompoundNBT) = tag.putLong("value", value)
 
@@ -104,9 +104,9 @@ fun DataManager.long(name: String, initial: Long = 0): IncrementalProperty<Long>
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.long()
             }
-        })
+        }, needsSync)
 
-fun DataManager.boolean(name: String, initial: Boolean = false): IncrementalProperty<Boolean> =
+fun DataManager.boolean(name: String, initial: Boolean = false, needsSync: Boolean = true): IncrementalProperty<Boolean> =
         this.property(name, object : IncrementalProperty<Boolean>(initial) {
             override fun serNbt(tag: CompoundNBT) = tag.putBoolean("value", value)
 
@@ -121,9 +121,9 @@ fun DataManager.boolean(name: String, initial: Boolean = false): IncrementalProp
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.bool()
             }
-        })
+        }, needsSync)
 
-fun DataManager.string(name: String, initial: String): IncrementalProperty<String> =
+fun DataManager.string(name: String, initial: String, needsSync: Boolean = true): IncrementalProperty<String> =
         this.property(name, object : IncrementalProperty<String>(initial) {
             override fun serNbt(tag: CompoundNBT) = tag.putString("value", value)
 
@@ -138,9 +138,9 @@ fun DataManager.string(name: String, initial: String): IncrementalProperty<Strin
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.string()
             }
-        })
+        }, needsSync)
 
-inline fun <reified T : Enum<T>> DataManager.enum(name: String, initial: T): IncrementalProperty<T> =
+inline fun <reified T : Enum<T>> DataManager.enum(name: String, initial: T, needsSync: Boolean = true): IncrementalProperty<T> =
         this.property(name, object : IncrementalProperty<T>(initial) {
             override fun serNbt(tag: CompoundNBT) = tag.putString("value", value.name)
 
@@ -155,4 +155,4 @@ inline fun <reified T : Enum<T>> DataManager.enum(name: String, initial: T): Inc
             override fun deserByteStream(stream: ByteReader) {
                 value = enumValues<T>()[stream.int()]
             }
-        })
+        }, needsSync)

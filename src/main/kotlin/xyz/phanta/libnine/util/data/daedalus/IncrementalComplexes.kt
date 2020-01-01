@@ -11,7 +11,7 @@ import xyz.phanta.libnine.util.data.nbt.deserializeVec3d
 import xyz.phanta.libnine.util.data.nbt.serializeNbt
 import java.util.*
 
-fun DataManager.blockPos(name: String, initial: BlockPos = BlockPos.ZERO): IncrementalProperty<BlockPos> =
+fun DataManager.blockPos(name: String, initial: BlockPos = BlockPos.ZERO, needsSync: Boolean = true): IncrementalProperty<BlockPos> =
         this.property(name, object : IncrementalProperty<BlockPos>(initial) {
             override fun serNbt(tag: CompoundNBT) {
                 tag.put("value", NBTUtil.writeBlockPos(value))
@@ -28,9 +28,9 @@ fun DataManager.blockPos(name: String, initial: BlockPos = BlockPos.ZERO): Incre
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.blockPos()
             }
-        })
+        }, needsSync)
 
-fun DataManager.vec3d(name: String, initial: Vec3d = Vec3d.ZERO): IncrementalProperty<Vec3d> =
+fun DataManager.vec3d(name: String, initial: Vec3d = Vec3d.ZERO, needsSync: Boolean = true): IncrementalProperty<Vec3d> =
         this.property(name, object : IncrementalProperty<Vec3d>(initial) {
             override fun serNbt(tag: CompoundNBT) {
                 tag.put("value", value.serializeNbt())
@@ -47,9 +47,9 @@ fun DataManager.vec3d(name: String, initial: Vec3d = Vec3d.ZERO): IncrementalPro
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.vec3d()
             }
-        })
+        }, needsSync)
 
-fun DataManager.uuid(name: String, initial: UUID = UUID.randomUUID()): IncrementalProperty<UUID> =
+fun DataManager.uuid(name: String, initial: UUID = UUID.randomUUID(), needsSync: Boolean = true): IncrementalProperty<UUID> =
         this.property(name, object : IncrementalProperty<UUID>(initial) {
             override fun serNbt(tag: CompoundNBT) {
                 tag.put("value", NBTUtil.writeUniqueId(value))
@@ -66,9 +66,9 @@ fun DataManager.uuid(name: String, initial: UUID = UUID.randomUUID()): Increment
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.uuid()
             }
-        })
+        }, needsSync)
 
-fun DataManager.resourceLocation(name: String, initial: ResourceLocation): IncrementalProperty<ResourceLocation> =
+fun DataManager.resourceLocation(name: String, initial: ResourceLocation, needsSync: Boolean = true): IncrementalProperty<ResourceLocation> =
         this.property(name, object : IncrementalProperty<ResourceLocation>(initial) {
             override fun serNbt(tag: CompoundNBT) {
                 tag.putString("ns", value.namespace)
@@ -86,4 +86,4 @@ fun DataManager.resourceLocation(name: String, initial: ResourceLocation): Incre
             override fun deserByteStream(stream: ByteReader) {
                 value = stream.resourceLocation()
             }
-        })
+        }, needsSync)
