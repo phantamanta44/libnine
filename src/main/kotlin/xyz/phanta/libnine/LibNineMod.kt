@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import xyz.phanta.libnine.client.event.ClientTickHandler
 import xyz.phanta.libnine.definition.InitializationContext
+import xyz.phanta.libnine.tile.NineTile
 
 @Mod("libnine")
 object Nine : Virtue() {
@@ -16,6 +17,7 @@ object Nine : Virtue() {
 
     override fun init(context: InitializationContext) {
         DistExecutor.runWhenOn(Dist.CLIENT) { Runnable { NineClient.clientInit(context) } }
+        context.listen<TickEvent.ServerTickEvent> { NineTile.flushDirtySet() }
     }
 
 }

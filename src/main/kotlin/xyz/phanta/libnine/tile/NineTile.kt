@@ -23,26 +23,43 @@ abstract class NineTile(
         private val requiresSync: Boolean
 ) : TileEntity(type), Serializable {
 
+    companion object {
+        internal val dirtySet: MutableSet<NineTile> = mutableSetOf()
+
+        internal fun flushDirtySet() {
+            dirtySet.forEach { it.handleDirtyState() }
+            dirtySet.clear()
+        }
+    }
+
     protected val daedalus: Daedalus = Daedalus()
     protected val capabilities: ICapabilityProvider? by lazy { initCapabilities() }
+
+    private var dirtyState: Boolean = false
 
     // init
 
     protected open fun initCapabilities(): ICapabilityProvider? = null
 
-    // api
+    // internal behaviour
 
-    protected open fun dirty() {
+    internal fun handleDirtyState() {
         markDirty()
-        if (!getWorld()!!.isRemote) dispatchTileUpdate()
-    }
-
-    protected fun dispatchTileUpdate() {
+        dirtyState = false
         if (requiresSync) {
             mod.netHandler.postToClient(
                     PacketDistributor.NEAR.with { world!!.getPacketRange(pos, 64.0) },
                     PacketServerSyncTileEntity.Packet(pos, ByteWriter().also { daedalus.genDeltaByteStream(it) }.toArray())
             )
+        }
+    }
+
+    // api
+
+    protected open fun dirty() {
+        if (!dirtyState) {
+            dirtyState = true
+            dirtySet += this
         }
     }
 
@@ -93,7 +110,7 @@ abstract class NineTileTicking(mod: Virtue, type: TileEntityType<*>, requiresSyn
     override fun tick() {
         if (dirty) {
             markDirty()
-            dispatchTileUpdate()
+            handleDirtyState()
             dirty = false
         }
         doTick()
