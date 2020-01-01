@@ -27,6 +27,10 @@ interface ComponentScreen {
         // NO-OP
     }
 
+    fun drawOverlay(partialTicks: Float, mousePos: PlanarVec) {
+        // NO-OP
+    }
+
 }
 
 abstract class NineScreen(
@@ -68,6 +72,7 @@ abstract class NineScreen(
 
         drawForeground(partialTicks, cachedMousePos)
         components.draw(partialTicks, cachedMousePos)
+        drawOverlay(partialTicks, cachedMousePos)
 
         GlStateManager.popMatrix()
         GlStateManager.enableLighting()
@@ -127,6 +132,7 @@ abstract class NineScreenContainer<C : NineContainer>(
     override fun drawGuiContainerForegroundLayer(mouseX: Int, mouseY: Int) {
         drawForeground(partialTicks, cachedMousePos.assignFrom(mouseY - pos.x, mouseX - pos.y))
         components.draw(partialTicks, cachedMousePos)
+        drawOverlay(partialTicks, cachedMousePos);
     }
 
     override fun drawBackground(partialTicks: Float, mousePos: PlanarVec) {
