@@ -66,7 +66,7 @@ object GlStateUtil {
     fun setColour(colour: Int, alpha: Float = 1F) =
             GlStateManager.color4f(getComponent(colour, 2), getComponent(colour, 1), getComponent(colour, 0), alpha)
 
-    fun setColour(colour: TextFormatting, alpha: Float = 1F) = setColour(colour.color!!)
+    fun setColour(colour: TextFormatting, alpha: Float = 1F) = setColour(colour.color!!, alpha)
 
     private fun getComponent(colour: Int, index: Int): Float = ((colour shr (index * 8)) and 0xFF) / 255F
 
