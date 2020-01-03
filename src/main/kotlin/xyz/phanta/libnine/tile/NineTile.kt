@@ -35,7 +35,7 @@ abstract class NineTile(
     protected val daedalus: Daedalus = Daedalus()
     protected val capabilities: ICapabilityProvider? by lazy { initCapabilities() }
 
-    private var dirtyState: Boolean = false
+    internal var dirtyState: Boolean = false
 
     // init
 
@@ -101,17 +101,15 @@ abstract class NineTile(
 abstract class NineTileTicking(mod: Virtue, type: TileEntityType<*>, requiresSync: Boolean)
     : NineTile(mod, type, requiresSync), ITickableTileEntity {
 
-    private var dirty: Boolean = false
-
     override fun dirty() {
-        dirty = true
+        if (!dirtyState) {
+            dirtyState = true
+        }
     }
 
     override fun tick() {
-        if (dirty) {
-            markDirty()
+        if (dirtyState) {
             handleDirtyState()
-            dirty = false
         }
         doTick()
     }
