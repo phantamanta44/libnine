@@ -3,6 +3,7 @@ package xyz.phanta.libnine.util.data.nbt
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.*
 import net.minecraft.util.ResourceLocation
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraftforge.fluids.FluidStack
 
@@ -18,6 +19,8 @@ fun CompoundNBT.putCompound(key: String, body: CompoundNbtDef) = put(key, nbtCom
 fun CompoundNBT.putList(key: String, body: ListNbtDef) = put(key, nbtList(body = body))
 
 fun CompoundNBT.putVec3d(key: String, value: Vec3d) = put(key, value.serializeNbt())
+
+fun CompoundNBT.putBlockPos(key: String, value: BlockPos) = put(key, value.serializeNbt())
 
 fun CompoundNBT.putResLoc(key: String, value: ResourceLocation) = put(key, value.serializeNbt())
 
@@ -44,6 +47,8 @@ fun ListNBT.addCompound(body: CompoundNbtDef) = add(nbtCompound(body = body))
 fun ListNBT.addList(body: ListNbtDef) = add(nbtList(body = body))
 
 fun ListNBT.addVec3d(value: Vec3d) = add(value.serializeNbt())
+
+fun ListNBT.addBlockPos(value: BlockPos) = add(value.serializeNbt())
 
 fun ListNBT.addResLoc(value: ResourceLocation) = add(value.serializeNbt())
 

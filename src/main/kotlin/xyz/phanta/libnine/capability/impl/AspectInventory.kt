@@ -78,10 +78,10 @@ open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.
     override fun isItemValid(slot: Int, stack: ItemStack): Boolean = preds[slot]?.invoke(stack) ?: true
 
     override fun serNbt(tag: CompoundNBT) {
-        tag.put("Items", slots.asNbtList {
+        tag.put("items", slots.asNbtList {
             CompoundNBT().also { tag ->
                 if (it.isEmpty) {
-                    tag.putBoolean("Empty", true)
+                    tag.putBoolean("empty", true)
                 } else {
                     it.write(tag)
                 }
@@ -90,11 +90,11 @@ open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.
     }
 
     override fun deserNbt(tag: CompoundNBT) {
-        val list = tag.getList("Items", Constants.NBT.TAG_COMPOUND)
+        val list = tag.getList("items", Constants.NBT.TAG_COMPOUND)
         for (i in slots.indices) {
             val itemTag = list.getCompound(i)
             if (!itemTag.isEmpty) {
-                setStackInSlot(i, if (itemTag.contains("Empty")) ItemStack.EMPTY else ItemStack.read(itemTag))
+                setStackInSlot(i, if (itemTag.contains("empty")) ItemStack.EMPTY else ItemStack.read(itemTag))
             }
         }
     }
@@ -134,14 +134,14 @@ open class AspectInventory(size: Int) : AbstractIncrementalData<AspectInventory.
                 val itemTag = CompoundNBT()
                 if (!lastKnownState[i].isCongruentWith(slots[i])) {
                     if (slots[i].isEmpty) {
-                        itemTag.putBoolean("Empty", true)
+                        itemTag.putBoolean("empty", true)
                     } else {
                         slots[i].write(itemTag)
                     }
                 }
                 listTag.add(itemTag)
             }
-            tag.put("Items", listTag)
+            tag.put("items", listTag)
         }
 
         override fun serDeltaByteStream(stream: ByteWriter) {

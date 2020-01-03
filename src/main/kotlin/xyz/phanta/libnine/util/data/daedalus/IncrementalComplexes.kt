@@ -56,7 +56,7 @@ fun DataManager.uuid(name: String, initial: UUID = UUID.randomUUID(), needsSync:
             }
 
             override fun deserNbt(tag: CompoundNBT) {
-                value = NBTUtil.readUniqueId(tag.getCompound("valule"))
+                value = NBTUtil.readUniqueId(tag.getCompound("value"))
             }
 
             override fun serByteStream(stream: ByteWriter) {

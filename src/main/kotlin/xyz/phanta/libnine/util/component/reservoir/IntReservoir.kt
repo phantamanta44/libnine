@@ -51,10 +51,10 @@ class SimpleIntReservoir(override var capacity: Int, quantity: Int = 0) : Increm
         return toTransfer
     }
 
-    override fun serNbt(tag: CompoundNBT) = tag.putInt("Quantity", quantity)
+    override fun serNbt(tag: CompoundNBT) = tag.putInt("quantity", quantity)
 
     override fun deserNbt(tag: CompoundNBT) {
-        quantity = tag.getInt("Quantity")
+        quantity = tag.getInt("quantity")
     }
 
     override fun serByteStream(stream: ByteWriter) {

@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundNBT
 import net.minecraft.nbt.INBT
 import net.minecraft.nbt.ListNBT
 import net.minecraft.util.ResourceLocation
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 
 fun Vec3d.serializeNbt(): CompoundNBT = nbtCompound {
@@ -20,6 +21,14 @@ fun ResourceLocation.serializeNbt(): CompoundNBT = nbtCompound {
 }
 
 fun CompoundNBT.deserializeResourceLocation() = ResourceLocation(getString("ns"), getString("path"))
+
+fun BlockPos.serializeNbt(): CompoundNBT = nbtCompound {
+    putInt("x", x)
+    putInt("y", y)
+    putInt("z", z)
+}
+
+fun CompoundNBT.deserializeBlockPos(): BlockPos = BlockPos(getInt("x"), getInt("y"), getInt("z"))
 
 fun <T, N : INBT> List<T>.asNbtList(transform: (T) -> N): ListNBT = ListNBT().also { it.addAll(this.map(transform)) }
 
