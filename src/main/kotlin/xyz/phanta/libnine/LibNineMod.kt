@@ -10,10 +10,12 @@ import xyz.phanta.libnine.client.event.ClientTickHandler
 import xyz.phanta.libnine.definition.InitializationContext
 import xyz.phanta.libnine.tile.NineTile
 
-@Mod("libnine")
+@Mod(Nine.MOD_ID)
 object Nine : Virtue() {
 
-    val LOGGER: Logger = LogManager.getLogger("libnine")
+    const val MOD_ID: String = "libnine"
+
+    val LOGGER: Logger = LogManager.getLogger(MOD_ID)
 
     override fun init(context: InitializationContext) {
         DistExecutor.runWhenOn(Dist.CLIENT) { Runnable { NineClient.clientInit(context) } }
