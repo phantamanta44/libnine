@@ -3,13 +3,11 @@ package xyz.phanta.libnine.util.math
 import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.Vec3i
 
+@Suppress("DuplicatedCode")
 fun List<Vec3d>.computeContainingCuboid3d(): Pair<Vec3d, Vec3d> {
     check(this.isNotEmpty()) { "Cannot compute containing cuboid of no points!" }
     val iter = this.iterator()
-    val first = iter.next()
-    var minX = first.x
-    var minY = first.y
-    var minZ = first.z
+    var (minX, minY, minZ) = iter.next()
     var maxX = minX
     var maxY = minY
     var maxZ = minZ
@@ -34,13 +32,11 @@ fun List<Vec3d>.computeContainingCuboid3d(): Pair<Vec3d, Vec3d> {
     return Vec3d(minX, minY, minZ) to Vec3d(maxX, maxY, maxZ)
 }
 
+@Suppress("DuplicatedCode")
 fun List<Vec3i>.computeContainingCuboid3i(): Pair<Vec3i, Vec3i> {
     check(this.isNotEmpty()) { "Cannot compute containing cuboid of no points!" }
     val iter = this.iterator()
-    val first = iter.next()
-    var minX = first.x
-    var minY = first.y
-    var minZ = first.z
+    var (minX, minY, minZ) = iter.next()
     var maxX = minX
     var maxY = minY
     var maxZ = minZ

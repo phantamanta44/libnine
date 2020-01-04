@@ -15,6 +15,9 @@ interface PlanarVec {
     val x: Int
     val y: Int
 
+    operator fun component1(): Int = x
+    operator fun component2(): Int = y
+
     fun add(xAddend: Int, yAddend: Int): PlanarVec = ImmutablePlanarVec(x + xAddend, y + yAddend)
 
     operator fun plus(vec: PlanarVec): PlanarVec = add(vec.x, vec.y)

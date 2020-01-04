@@ -3,6 +3,9 @@ package xyz.phanta.libnine.util.component.multiblock.matcher
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3i
 import net.minecraft.world.World
+import xyz.phanta.libnine.util.math.component1
+import xyz.phanta.libnine.util.math.component2
+import xyz.phanta.libnine.util.math.component3
 import xyz.phanta.libnine.util.math.computeContainingCuboid3i
 import xyz.phanta.libnine.util.world.plus
 import java.util.*
@@ -24,15 +27,9 @@ class StructureMatcherCuboid(
 ) : StructureMatcher {
 
     override fun testStructure(world: World, basePos: BlockPos, components: List<Vec3i>): Boolean {
-        val minMax = components.computeContainingCuboid3i()
-        val min = minMax.first
-        val max = minMax.second
-        val minX = min.x
-        val minY = min.y
-        val minZ = min.z
-        val maxX = max.x
-        val maxY = max.y
-        val maxZ = max.z
+        val (min, max) = components.computeContainingCuboid3i()
+        val (minX, minY, minZ) = min
+        val (maxX, maxY, maxZ) = max
         val dx = maxX - minX + 1
         val dy = maxY - minY + 1
         val dz = maxZ - minZ + 1
