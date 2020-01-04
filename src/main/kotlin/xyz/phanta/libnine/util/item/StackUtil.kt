@@ -2,6 +2,7 @@ package xyz.phanta.libnine.util.item
 
 import net.minecraft.item.ItemStack
 import net.minecraftforge.items.ItemHandlerHelper
+import xyz.phanta.libnine.util.function.DisplayableMatcher
 
 fun ItemStack.copy(newCount: Int): ItemStack = when {
     newCount == 0 -> ItemStack.EMPTY
@@ -17,3 +18,5 @@ fun ItemStack.isCongruentWith(other: ItemStack): Boolean = ItemStack.areItemStac
 
 val ItemStack.countRemaining: Int
     get() = this.maxStackSize - this.count
+
+fun ItemStack.matcher(): DisplayableMatcher<ItemStack> = DisplayableMatcher.of(this) { it.matches(this) }
