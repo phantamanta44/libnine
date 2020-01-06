@@ -41,11 +41,9 @@ abstract class NineContainer : Container {
             if (slot != null && slot.hasStack) {
                 val stack = slot.stack
                 val orig = stack.copy()
-                var shouldDoPlayerInvTransfer = true // is the transfer entirely within the player's inv?
                 if (hasInvOther) {
                     if (index >= 36) {
                         if (!mergeItemStack(stack, 0, 36, false)) return ItemStack.EMPTY
-                        shouldDoPlayerInvTransfer = false
                     } else {
                         var changed = false
                         for (i in 36 until inventorySlots.size) {
@@ -56,14 +54,11 @@ abstract class NineContainer : Container {
                                 }
                             }
                         }
-                        if (changed) {
-                            shouldDoPlayerInvTransfer = false
-                        } else {
+                        if (!changed) {
                             return ItemStack.EMPTY
                         }
                     }
-                }
-                if (shouldDoPlayerInvTransfer) {
+                } else {
                     if (index < 27) {
                         if (!mergeItemStack(stack, 27, 36, false)) return ItemStack.EMPTY
                     } else if (!mergeItemStack(stack, 0, 27, false)) {
@@ -84,9 +79,9 @@ abstract class NineContainer : Container {
         return ItemStack.EMPTY
     }
 
-    override fun addSlot(slotIn: Slot): Slot {
+    override fun addSlot(slot: Slot): Slot {
         hasInvOther = true
-        return addSlot(slotIn)
+        return addSlot(slot)
     }
 
     protected fun sendInteraction(body: (ByteWriter) -> Unit) {

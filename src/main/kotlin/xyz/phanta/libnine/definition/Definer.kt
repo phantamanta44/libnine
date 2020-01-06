@@ -1,27 +1,35 @@
 package xyz.phanta.libnine.definition
 
 import net.minecraft.block.Block
+import net.minecraft.client.gui.ScreenManager
+import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.IInventory
+import net.minecraft.inventory.container.ContainerType
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.IRecipe
 import net.minecraft.item.crafting.IRecipeType
+import net.minecraft.network.PacketBuffer
 import net.minecraft.particles.IParticleData
 import net.minecraft.tileentity.TileEntityType
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.SoundEvent
+import net.minecraft.util.text.ITextComponent
 import net.minecraft.world.biome.Biome
 import net.minecraft.world.gen.GenerationStage
 import net.minecraft.world.gen.feature.IFeatureConfig
 import net.minecraft.world.gen.placement.IPlacementConfig
+import net.minecraftforge.fml.network.IContainerFactory
 import net.minecraftforge.registries.ForgeRegistries
 import org.apache.commons.lang3.mutable.MutableObject
 import xyz.phanta.libnine.Virtue
 import xyz.phanta.libnine.block.BlockDefBuilder
 import xyz.phanta.libnine.block.BlockDefContext
 import xyz.phanta.libnine.client.fx.NineParticleType
+import xyz.phanta.libnine.client.gui.NineScreenContainer
+import xyz.phanta.libnine.container.NineContainer
 import xyz.phanta.libnine.item.ItemDefBuilder
 import xyz.phanta.libnine.item.ItemDefBuilderImpl
 import xyz.phanta.libnine.item.ItemDefContext
@@ -103,14 +111,13 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
     fun <T : NineTile> tileEntity(dest: KMutableProperty0<() -> T>, factory: (Virtue, TileEntityType<T>) -> T) =
             dest.set(tileEntity(dest.name.snakeify(), factory)) // probably nobody is going to try a registry override
 
-    // TODO containers
-    /*@Suppress("UNCHECKED_CAST")
-    fun <C : NineContainer, G : NineGuiContainer<C>> container(
+    @Suppress("UNCHECKED_CAST")
+    fun <C : NineContainer, G : NineScreenContainer<C>> container(
             dest: KMutableProperty0<in ContainerType<C>>,
-            containerFactory: (Int, PlayerInventory) -> C,
+            containerFactory: (Int, PlayerInventory, PacketBuffer) -> C,
             guiFactory: (C, ITextComponent) -> G
     ) {
-        val type = ContainerType(containerFactory)
+        val type = ContainerType(IContainerFactory(containerFactory))
         registrar.containerTypes += type
         ScreenManager.registerFactory(type) { container, _, title -> guiFactory(container, title) }
         dest.set(type)
@@ -118,15 +125,15 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <C : NineContainer, G : NineGuiContainer<C>, T : NineTile> containerTileEntity(
+    fun <C : NineContainer, G : NineScreenContainer<C>, T : NineTile> containerTileEntity(
             dest: KMutableProperty0<in ContainerType<C>>,
             containerFactory: (T) -> C,
             guiFactory: (C, ITextComponent) -> G
     ) = container(
             dest,
-            { windowId, playerInv -> containerFactory(foobar) },
+            { _, playerInv, buf -> containerFactory(playerInv.player.world.getTileEntity(buf.readBlockPos()) as T) },
             guiFactory
-    )*/
+    )
 
     fun soundEvent(name: String, soundPath: String): SoundEvent {
         val event = SoundEvent(registrar.mod.resource(soundPath))
