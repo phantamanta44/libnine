@@ -21,6 +21,9 @@ import net.minecraft.world.biome.Biome
 import net.minecraft.world.gen.GenerationStage
 import net.minecraft.world.gen.feature.IFeatureConfig
 import net.minecraft.world.gen.placement.IPlacementConfig
+import net.minecraftforge.common.ForgeConfigSpec
+import net.minecraftforge.fml.ModLoadingContext
+import net.minecraftforge.fml.config.ModConfig
 import net.minecraftforge.fml.network.IContainerFactory
 import net.minecraftforge.registries.ForgeRegistries
 import org.apache.commons.lang3.mutable.MutableObject
@@ -29,6 +32,8 @@ import xyz.phanta.libnine.block.BlockDefBuilder
 import xyz.phanta.libnine.block.BlockDefContext
 import xyz.phanta.libnine.client.fx.NineParticleType
 import xyz.phanta.libnine.client.gui.NineScreenContainer
+import xyz.phanta.libnine.config.ConfigBlock
+import xyz.phanta.libnine.config.ConfigDefContext
 import xyz.phanta.libnine.container.NineContainer
 import xyz.phanta.libnine.item.ItemDefBuilder
 import xyz.phanta.libnine.item.ItemDefBuilderImpl
@@ -55,7 +60,7 @@ interface Definer {
 @DslMarker
 annotation class DefDsl
 
-class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, BlockDefContext {
+class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, BlockDefContext, ConfigDefContext {
 
     override fun <I : Item> item(name: String, factory: (Item.Properties) -> I, body: (ItemDefBuilder<I>) -> I): I {
         val item = body(createItemBuilder(registrar.mod.resource(name), factory))
@@ -179,6 +184,18 @@ class DefinitionDefContext(override val registrar: Registrar) : ItemDefContext, 
         val type = typeFactory(registrar.mod.resource(dest.name.snakeify()))
         registrar.particles += type
         dest.set { NineParticleType.Data(type, Unit) } // probably nobody is going to try a registry override
+    }
+
+    override fun config(spec: ConfigBlock, type: ModConfig.Type, fileName: String?) {
+        val config = ForgeConfigSpec.Builder().also { spec.populate(it) }.build()
+        if (fileName != null) {
+            ModLoadingContext.get().registerConfig(type, config, fileName)
+        } else {
+            ModLoadingContext.get().registerConfig(type, config)
+        }
+        registrar.bus.addListener<ModConfig.ModConfigEvent> {
+            if (it.config == config) spec.refresh()
+        }
     }
 
 }
