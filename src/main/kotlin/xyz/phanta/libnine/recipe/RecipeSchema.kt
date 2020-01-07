@@ -43,10 +43,15 @@ class RecipeSchema<I : IInventory, R : IRecipe<I>>(
 
 }
 
-class RecipeComponent<R, T>(val consumer: (R, T) -> Unit, val producer: (R) -> T, val part: RecipePart<T>) {
+class RecipeComponent<R, T>(
+        val consumer: (R, T) -> Unit,
+        val producer: (R) -> T,
+        private val key: String,
+        private val part: RecipePart<T>
+) {
 
     fun deserialize(dto: JsonObject, recipe: R) {
-        consumer(recipe, part.deserialize(dto.get(part.key)))
+        consumer(recipe, part.deserialize(dto.get(key)))
     }
 
     fun read(stream: ByteReader, recipe: R) {
@@ -59,15 +64,15 @@ class RecipeComponent<R, T>(val consumer: (R, T) -> Unit, val producer: (R) -> T
 
 }
 
-infix fun <R : IRecipe<*>, T> KMutableProperty1<R, T>.from(part: RecipePart<T>): RecipeComponent<R, T> =
-        RecipeComponent(this::set, this::get, part)
+fun <R : IRecipe<*>, T> KMutableProperty1<R, T>.from(key: String, part: RecipePart<T>): RecipeComponent<R, T> =
+        RecipeComponent(this::set, this::get, key, part)
 
-abstract class RecipePart<T>(internal val key: String) {
+interface RecipePart<T> {
 
-    abstract fun deserialize(dto: JsonElement): T
+    fun deserialize(dto: JsonElement): T
 
-    abstract fun read(stream: ByteReader): T
+    fun read(stream: ByteReader): T
 
-    abstract fun write(stream: ByteWriter, obj: T)
+    fun write(stream: ByteWriter, obj: T)
 
 }

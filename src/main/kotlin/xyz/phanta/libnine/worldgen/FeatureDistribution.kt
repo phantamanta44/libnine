@@ -5,6 +5,7 @@ import net.minecraft.world.IWorld
 import net.minecraft.world.gen.GenerationSettings
 import net.minecraft.world.gen.ChunkGenerator
 import xyz.phanta.libnine.util.math.clamp
+import xyz.phanta.libnine.util.probability.bernoulli
 import java.util.*
 import kotlin.math.floor
 
@@ -48,7 +49,7 @@ class FeatureDistributionSparse(private val probability: Double, private val del
             chunkGen: ChunkGenerator<out GenerationSettings>,
             origin: BlockPos,
             rand: Random
-    ): List<BlockPos> = if (rand.nextDouble() < probability) {
+    ): List<BlockPos> = if (rand.bernoulli(probability)) {
         delegate.computeDistribution(world, chunkGen, origin, rand)
     } else {
         Collections.emptyList()
