@@ -17,6 +17,10 @@ class ConstantVar<T>(val value: T) : RandomVar<T> {
 
 }
 
+fun <I, O> RandomVar<I>.map(mapFun: (I) -> O): RandomVar<O> = object : RandomVar<O> {
+    override fun sample(rand: Random): O = mapFun(this@map.sample(rand))
+}
+
 fun <I1, I2, O> RandomVar<I1>.join(i2: RandomVar<I2>, joinFun: (I1, I2) -> O): RandomVar<O> = object : RandomVar<O> {
     override fun sample(rand: Random): O = joinFun(this@join.sample(rand), i2.sample(rand))
 }

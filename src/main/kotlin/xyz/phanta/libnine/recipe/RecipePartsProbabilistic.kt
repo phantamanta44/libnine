@@ -1,13 +1,12 @@
 package xyz.phanta.libnine.recipe
 
 import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import xyz.phanta.libnine.util.data.*
 import xyz.phanta.libnine.util.probability.randomvar.*
 
 object RecipePartsProbabilistic {
 
-    class RandomInt : RecipePart<RandomVar<Int>> {
+    object RandomInt : RecipePart<RandomVar<Int>> {
         override fun deserialize(dto: JsonElement): RandomVar<Int> {
             return if (dto.isJsonPrimitive) {
                 ConstantVar(dto.asInt)
@@ -21,7 +20,7 @@ object RecipePartsProbabilistic {
                     )
                     "uniform" -> DiscreteUniformVar((distDto.getInt("min")..distDto.getInt("max")).toList())
                     "weighted" -> WeightedVar(distDto.getArray("outcomes").map {
-                        (it as JsonObject).getInt("value") to (it.tryDouble("weight") ?: 1.0)
+                        it.asJsonObject.getInt("value") to (it.asJsonObject.tryDouble("weight") ?: 1.0)
                     })
                     "binomial" -> {
                         val offset = distDto.tryInt("offset") ?: 0

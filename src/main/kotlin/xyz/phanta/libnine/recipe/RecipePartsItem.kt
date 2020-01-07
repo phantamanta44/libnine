@@ -4,12 +4,16 @@ import com.google.gson.JsonElement
 import io.netty.buffer.Unpooled
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.Ingredient
-import net.minecraft.item.crafting.ShapedRecipe
 import net.minecraft.network.PacketBuffer
+import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.crafting.CraftingHelper
+import net.minecraftforge.common.util.JsonUtils
+import net.minecraftforge.registries.ForgeRegistries
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
-import xyz.phanta.libnine.util.probability.randomvar.RandomVar
+import xyz.phanta.libnine.util.data.getString
+import xyz.phanta.libnine.util.item.ProbabilisticStack
+import xyz.phanta.libnine.util.probability.randomvar.ConstantVar
 
 object RecipePartsItem {
 
@@ -28,7 +32,7 @@ object RecipePartsItem {
     }
 
     object Stack : RecipePart<ItemStack> {
-        override fun deserialize(dto: JsonElement): ItemStack = ShapedRecipe.deserializeItem(dto.asJsonObject)
+        override fun deserialize(dto: JsonElement): ItemStack = CraftingHelper.getItemStack(dto.asJsonObject, true)
 
         override fun read(stream: ByteReader): ItemStack = stream.itemStack()
 
@@ -37,17 +41,30 @@ object RecipePartsItem {
         }
     }
 
-    object OutputStack : RecipePart<RandomVar<ItemStack>> {
-        override fun deserialize(dto: JsonElement): RandomVar<ItemStack> {
-            TODO("no impl")
+    object ProbStack : RecipePart<ProbabilisticStack> {
+        override fun deserialize(dto: JsonElement): ProbabilisticStack {
+            val stackDto = dto.asJsonObject
+            val itemId = ResourceLocation(stackDto.getString("item"))
+            return ProbabilisticStack(
+                    ForgeRegistries.ITEMS.getValue(itemId) ?: throw NoSuchElementException("Unknown item: $itemId"),
+                    stackDto.get("count")?.let { RecipePartsProbabilistic.RandomInt.deserialize(it) } ?: ConstantVar(1),
+                    JsonUtils.readNBT(stackDto, "nbt")
+            )
         }
 
-        override fun read(stream: ByteReader): RandomVar<ItemStack> {
-            TODO("no impl")
+        override fun read(stream: ByteReader): ProbabilisticStack {
+            val itemId = stream.resourceLocation()
+            return ProbabilisticStack(
+                    ForgeRegistries.ITEMS.getValue(itemId) ?: throw NoSuchElementException("Unknown item: $itemId"),
+                    RecipePartsProbabilistic.RandomInt.read(stream),
+                    if (stream.bool()) stream.tagCompound() else null
+            )
         }
 
-        override fun write(stream: ByteWriter, obj: RandomVar<ItemStack>) {
-            TODO("no impl")
+        override fun write(stream: ByteWriter, obj: ProbabilisticStack) {
+            stream.resourceLocation(obj.item.registryName!!)
+            RecipePartsProbabilistic.RandomInt.write(stream, obj.countVar)
+            obj.nbt?.let { stream.bool(true).tagCompound(it) } ?: stream.bool(false)
         }
     }
 
