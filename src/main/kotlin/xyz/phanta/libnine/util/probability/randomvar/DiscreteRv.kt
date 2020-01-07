@@ -19,26 +19,22 @@ class DiscreteUniformVar<T>(val outcomes: List<T>) : RandomVar<T> {
 class WeightedVar<T>(val outcomes: List<Pair<T, Double>>) : RandomVar<T> {
 
     private val weights: List<Double>
-    private val values: List<T>
     private val maxWeight: Double
 
     init {
         val weights = mutableListOf<Double>()
-        val values = mutableListOf<T>()
         var cumulativeWeight = 0.0
-        outcomes.forEach { (outcome, weight) ->
+        outcomes.forEach { (_, weight) ->
             weights += cumulativeWeight
             cumulativeWeight += weight
-            values += outcome
         }
         this.weights = weights
-        this.values = values
         this.maxWeight = cumulativeWeight
     }
 
     override fun sample(rand: Random): T {
         val index = weights.binarySearch(rand.nextDouble(maxWeight))
-        return if (index > 0) values[index] else values[-index - 2]
+        return (if (index > 0) outcomes[index] else outcomes[-index - 2]).first
     }
 
 }
