@@ -21,13 +21,14 @@ import java.util.List;
 
 public class L9BlockStated extends L9Block {
 
-
     @SuppressWarnings("NotNullFieldNotInitialized")
     private List<IProperty<?>> props;
     @SuppressWarnings("NotNullFieldNotInitialized")
     private List<VirtualState> states;
     @SuppressWarnings("NotNullFieldNotInitialized")
     private TObjectIntMap<IBlockState> statesInv;
+    @SuppressWarnings("NotNullFieldNotInitialized")
+    private List<PropApplicator<?>> volatilePropDefaults;
 
     public L9BlockStated(String name, Material material) {
         super(name, material);
@@ -50,16 +51,34 @@ public class L9BlockStated extends L9Block {
 
     @Override
     protected BlockStateContainer createBlockState() {
-        List<IProperty<?>> propList = new ArrayList<>();
-        Accrue<IProperty<?>> accum = new Accrue<>(propList);
-        accrueProperties(accum);
-        states = Collections.unmodifiableList(VirtualState.cartesian(propList));
-        accrueVolatileProperties(accum);
-        props = Collections.unmodifiableList(propList);
+        // accrue properties
+        List<IProperty<?>> propsPersistent = new ArrayList<>(), propsVolatile = new ArrayList<>();
+        accrueProperties(new Accrue<>(propsPersistent));
+        accrueVolatileProperties(new Accrue<>(propsVolatile));
+
+        // compute persistent states; functions as meta -> prop mapping
+        states = Collections.unmodifiableList(VirtualState.cartesian(propsPersistent));
+
+        // collect all props into block state container
+        props = new ArrayList<>(propsPersistent);
+        props.addAll(propsVolatile);
+        props = Collections.unmodifiableList(props);
         BlockStateContainer container = new BlockStateContainer(this, props.toArray(new IProperty[0]));
+
+        // compute inverse prop -> meta mapping
         statesInv = new TObjectIntHashMap<>();
         for (int i = 0; i < states.size(); i++) {
             statesInv.put(states.get(i).synthesize(container), i);
+        }
+
+        // store default values for volatile props
+        // used to set defaults on lookup key for prop -> meta mapping, since the statesInv
+        // map is keyed only by the non-volatile properties. will cause slight performance
+        // impact in exchange for reduced memory consumption
+        volatilePropDefaults = new ArrayList<>();
+        IBlockState baseState = container.getBaseState();
+        for (IProperty<?> prop : propsVolatile) {
+            volatilePropDefaults.add(new PropApplicator<>(prop, baseState));
         }
         return container;
     }
@@ -117,6 +136,9 @@ public class L9BlockStated extends L9Block {
 
     @Override
     public int getMetaFromState(IBlockState state) {
+        for (PropApplicator<?> applicator : volatilePropDefaults) {
+            state = applicator.apply(state);
+        }
         return statesInv.get(state);
     }
 
@@ -124,6 +146,22 @@ public class L9BlockStated extends L9Block {
     @Override
     public IBlockState getStateFromMeta(int meta) {
         return (meta >= 0 && meta < states.size()) ? states.get(meta).synthesize(getBlockState()) : getDefaultState();
+    }
+
+    private static class PropApplicator<T extends Comparable<T>> {
+
+        private final IProperty<T> property;
+        private final T value;
+
+        PropApplicator(IProperty<T> property, IBlockState sourceState) {
+            this.property = property;
+            this.value = sourceState.getValue(property);
+        }
+
+        IBlockState apply(IBlockState state) {
+            return state.withProperty(property, value);
+        }
+
     }
 
 }
