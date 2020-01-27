@@ -5,6 +5,7 @@ import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.network.NetworkEvent
 import net.minecraftforge.fml.network.NetworkRegistry
 import net.minecraftforge.fml.network.PacketDistributor
+import net.minecraftforge.fml.network.simple.SimpleChannel
 import xyz.phanta.libnine.util.data.ByteReader
 import xyz.phanta.libnine.util.data.ByteWriter
 import java.util.function.BiConsumer
@@ -14,7 +15,7 @@ private const val PROTOCOL_VERSION: String = "0"
 
 class NetworkHandler(channelId: ResourceLocation) {
 
-    private val channel = NetworkRegistry.newSimpleChannel(
+    private val channel: SimpleChannel = NetworkRegistry.newSimpleChannel(
             channelId, { PROTOCOL_VERSION }, { it == PROTOCOL_VERSION }, { it == PROTOCOL_VERSION })
 
     fun postToClient(target: PacketDistributor.PacketTarget, message: PacketData) {
