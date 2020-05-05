@@ -32,10 +32,13 @@ public class SimpleIntReservoir implements IIntReservoir {
 
     @Override
     public void setQuantity(int qty) {
-        int oldQty = this.qty;
-        this.qty = MathUtils.clamp(qty, 0, getCapacity());
-        for (IIntBiConsumer callback : callbacks) {
-            callback.accept(oldQty, this.qty);
+        qty = MathUtils.clamp(qty, 0, getCapacity());
+        if (qty != this.qty) {
+            int oldQty = this.qty;
+            this.qty = qty;
+            for (IIntBiConsumer callback : callbacks) {
+                callback.accept(oldQty, qty);
+            }
         }
     }
 

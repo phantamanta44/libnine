@@ -10,6 +10,7 @@ import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 public class FluidReservoir extends DelegatedIntReservoir implements IFluidTankProperties {
@@ -51,11 +52,13 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTankP
     }
 
     public void setFluid(@Nullable Fluid fluid) {
-        if (locked && fluid != this.fluid) throw new UnsupportedOperationException("Fluid type is locked!");
-        Fluid oldFluid = this.fluid;
-        this.fluid = fluid;
-        for (BiConsumer<Fluid, Fluid> callback : callbacks) {
-            callback.accept(oldFluid, this.fluid);
+        if (!Objects.equals(fluid, this.fluid)) {
+            if (locked) throw new UnsupportedOperationException("Fluid type is locked!");
+            Fluid oldFluid = this.fluid;
+            this.fluid = fluid;
+            for (BiConsumer<Fluid, Fluid> callback : callbacks) {
+                callback.accept(oldFluid, fluid);
+            }
         }
     }
 
