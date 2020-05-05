@@ -8,7 +8,6 @@ import io.github.phantamanta44.libnine.util.format.FormatUtils;
 import io.github.phantamanta44.libnine.util.helper.MirrorUtils;
 import io.github.phantamanta44.libnine.util.math.Vec2i;
 import io.github.phantamanta44.libnine.util.nbt.NBTUtils;
-import io.github.phantamanta44.libnine.util.tuple.IPair;
 import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -18,6 +17,7 @@ import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Supplier;
@@ -112,7 +112,7 @@ public class DataSerialization {
 
     private final Object target;
     private final Map<Class<?>, ISerializationProvider<?>> serializers;
-    private final List<Supplier<IPair<String, ?>>> properties;
+    private final List<Supplier<DataProperty>> properties;
 
     public DataSerialization(Object target, Collection<ISerializationProvider<?>> serializationProviders) {
         this.target = target;
@@ -121,20 +121,26 @@ public class DataSerialization {
             serializers.put(provider.getSerializationType(), provider);
         }
         this.properties = getOrComputeClassMappings(target.getClass()).stream()
-                .<Supplier<IPair<String, ?>>>map(f -> {
+                .<Supplier<DataProperty>>map(f -> new LazyConstant<>(() -> {
                     Class<?> type = f.getType();
-                    if (IDatum.class.isAssignableFrom(type) || ISerializable.class.isAssignableFrom(type)) {
-                        return new LazyConstant<>(() -> {
-                            try {
-                                return IPair.of(f.getName(), f.get(target));
-                            } catch (Exception e) {
-                                throw new IllegalStateException("Could not read field: " + f.toString(), e);
-                            }
-                        });
+                    if (IDatum.class.isAssignableFrom(type)) {
+                        try {
+                            return new DataPropertyDatum<>(
+                                    f.getAnnotation(AutoSerialize.class), f.getName(), (IDatum<?>)f.get(target));
+                        } catch (Exception e) {
+                            throw new IllegalStateException("Could not read field: " + f.toString(), e);
+                        }
+                    } else if (ISerializable.class.isAssignableFrom(type)) {
+                        try {
+                            return new DataPropertySerializable(
+                                    f.getAnnotation(AutoSerialize.class), f.getName(), (ISerializable)f.get(target));
+                        } catch (Exception e) {
+                            throw new IllegalStateException("Could not read field: " + f.toString(), e);
+                        }
                     } else {
-                        return () -> IPair.of(f.getName(), f);
+                        return new DataPropertyMutableField<>(f.getAnnotation(AutoSerialize.class), f.getName(), f);
                     }
-                })
+                }))
                 .collect(Collectors.toList());
     }
 
@@ -142,129 +148,221 @@ public class DataSerialization {
         this(target, DEFAULT_SERIALIZATION_PROVIDERS);
     }
 
-    private Stream<IPair<String, ?>> resolveProperties() {
+    private Stream<DataProperty> resolveProperties() {
         return properties.stream().map(Supplier::get);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void serializeNBT(NBTTagCompound tag) {
-        resolveProperties().forEach(o -> {
-            String key = FormatUtils.toTitleCase(o.getA());
-            if (o.getB() instanceof ISerializable) {
-                NBTTagCompound serTag = new NBTTagCompound();
-                ((ISerializable)o.getB()).serNBT(serTag);
-                tag.setTag(key, serTag);
-            } else if (o.getB() instanceof IDatum) {
-                IDatum d = (IDatum)o.getB();
-                if (d.get().getClass().isEnum()) {
-                    tag.setShort(key, (short)((Enum<?>)d.get()).ordinal());
-                } else {
-                    getSerializationProvider(d.get().getClass()).serializeNBT(d.get(), key, tag);
-                }
-            } else {
-                Field f = (Field)o.getB();
-                try {
-                    if (f.getType().isEnum()) {
-                        tag.setShort(key, (short)((Enum<?>)f.get(target)).ordinal());
-                    } else {
-                        getSerializationProvider(f.getType()).serializeNBT(f.get(target), key, tag);
-                    }
-                } catch (Exception e) {
-                    throw new IllegalStateException("Could not read field: " + f.toString(), e);
-                }
-            }
-        });
+        resolveProperties().forEach(prop -> prop.serializeNBT(tag));
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void deserializeNBT(NBTTagCompound tag) {
-        resolveProperties().forEach(o -> {
-            String key = FormatUtils.toTitleCase(o.getA());
-            if (o.getB() instanceof ISerializable) {
-                ((ISerializable)o.getB()).deserNBT(tag.getCompoundTag(key));
-            } else if (o.getB() instanceof IDatum) {
-                IDatum d = (IDatum)o.getB();
-                if (d.get().getClass().isEnum()) {
-                    d.set(d.get().getClass().getEnumConstants()[tag.getShort(key)]);
-                } else {
-                    d.set(getSerializationProvider(d.get().getClass()).deserializeNBT(key, tag));
-                }
-            } else {
-                Field f = (Field)o.getB();
-                try {
-                    if (f.getType().isEnum()) {
-                        f.set(target, f.getType().getEnumConstants()[tag.getShort(key)]);
-                    } else {
-                        f.set(target, getSerializationProvider(f.getType()).deserializeNBT(key, tag));
-                    }
-                } catch (Exception e) {
-                    throw new IllegalStateException("Could not write field: " + f.toString(), e);
-                }
-            }
-        });
+        resolveProperties().forEach(prop -> prop.deserializeNBT(tag));
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void serializeBytes(ByteUtils.Writer data) {
-        resolveProperties().forEach(o -> {
-            if (o.getB() instanceof ISerializable) {
-                ((ISerializable)o.getB()).serBytes(data);
-            } else if (o.getB() instanceof IDatum) {
-                IDatum d = (IDatum)o.getB();
-                if (d.get().getClass().isEnum()) {
-                    data.writeShort((short)((Enum<?>)d.get()).ordinal());
-                } else {
-                    getSerializationProvider(d.get().getClass()).serializeBytes(d.get(), data);
-                }
-            } else {
-                Field f = (Field)o.getB();
-                try {
-                    if (f.getType().isEnum()) {
-                        data.writeShort((short)((Enum<?>)f.get(target)).ordinal());
-                    } else {
-                        getSerializationProvider(f.getType()).serializeBytes(f.get(target), data);
-                    }
-                } catch (Exception e) {
-                    throw new IllegalStateException("Could not read field: " + f.toString(), e);
-                }
-            }
-        });
+        serializeBytes(data, true);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void serializeBytes(ByteUtils.Writer data, boolean sync) {
+        Stream<DataProperty> props = resolveProperties();
+        (sync ? props.filter(prop -> prop.sync) : props).forEach(prop -> prop.serializeBytes(data));
+    }
+
     public void deserializeBytes(ByteUtils.Reader data) {
-        resolveProperties().forEach(o -> {
-            if (o.getB() instanceof ISerializable) {
-                ((ISerializable)o.getB()).deserBytes(data);
-            } else if (o.getB() instanceof IDatum) {
-                IDatum d = (IDatum)o.getB();
-                if (d.get().getClass().isEnum()) {
-                    d.set(d.get().getClass().getEnumConstants()[data.readShort()]);
-                } else {
-                    d.set(getSerializationProvider(d.get().getClass()).deserializeBytes(data));
-                }
-            } else {
-                Field f = (Field)o.getB();
-                try {
-                    if (f.getType().isEnum()) {
-                        f.set(target, f.getType().getEnumConstants()[data.readShort()]);
-                    } else {
-                        f.set(target, getSerializationProvider(f.getType()).deserializeBytes(data));
-                    }
-                } catch (Exception e) {
-                    throw new IllegalStateException("Could not write field: " + f.toString(), e);
-                }
-            }
-        });
+        deserializeBytes(data, true);
     }
 
-    @SuppressWarnings("rawtypes")
-    private ISerializationProvider getSerializationProvider(Class<?> clazz) {
-        ISerializationProvider serializer = serializers.get(clazz);
+    public void deserializeBytes(ByteUtils.Reader data, boolean sync) {
+        Stream<DataProperty> props = resolveProperties();
+        (sync ? props.filter(prop -> prop.sync) : props).forEach(prop -> prop.deserializeBytes(data));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> ISerializationProvider<T> getSerializationProvider(Class<T> clazz) {
+        ISerializationProvider<T> serializer = (ISerializationProvider<T>)serializers.get(clazz);
         if (serializer == null) {
             throw new UnsupportedOperationException("No serializer for type: " + clazz.getName());
         }
         return serializer;
+    }
+
+    private static abstract class DataProperty {
+
+        final String key;
+        final boolean sync;
+
+        DataProperty(AutoSerialize annot, String fallbackName) {
+            String name = annot.value();
+            this.key = FormatUtils.toTitleCase(name.isEmpty() ? fallbackName : name);
+            this.sync = annot.sync();
+        }
+
+        abstract void serializeNBT(NBTTagCompound tag);
+
+        abstract void deserializeNBT(NBTTagCompound tag);
+
+        abstract void serializeBytes(ByteUtils.Writer data);
+
+        abstract void deserializeBytes(ByteUtils.Reader data);
+
+    }
+
+    private static class DataPropertySerializable extends DataProperty {
+
+        private final ISerializable datum;
+
+        DataPropertySerializable(AutoSerialize annot, String fallbackName, ISerializable datum) {
+            super(annot, fallbackName);
+            this.datum = datum;
+        }
+
+        @Override
+        public void serializeNBT(NBTTagCompound tag) {
+            NBTTagCompound serTag = new NBTTagCompound();
+            datum.serNBT(serTag);
+            tag.setTag(key, serTag);
+        }
+
+        @Override
+        public void deserializeNBT(NBTTagCompound tag) {
+            datum.deserNBT(tag.getCompoundTag(key));
+        }
+
+        @Override
+        public void serializeBytes(ByteUtils.Writer data) {
+            datum.serBytes(data);
+        }
+
+        @Override
+        public void deserializeBytes(ByteUtils.Reader data) {
+            datum.deserBytes(data);
+        }
+
+    }
+
+    private class DataPropertyDatum<T> extends DataProperty {
+
+        private final IDatum<T> datum;
+        @Nullable
+        private Class<T> dataClass = null;
+
+        DataPropertyDatum(AutoSerialize annot, String fallbackName, IDatum<T> datum) {
+            super(annot, fallbackName);
+            this.datum = datum;
+        }
+
+        @SuppressWarnings("unchecked")
+        private Class<T> getDataClass() {
+            if (dataClass == null) {
+                dataClass = (Class<T>)datum.get().getClass();
+            }
+            return dataClass;
+        }
+
+        @Override
+        public void serializeNBT(NBTTagCompound tag) {
+            if (getDataClass().isEnum()) {
+                tag.setShort(key, (short)((Enum<?>)datum.get()).ordinal());
+            } else {
+                getSerializationProvider(getDataClass()).serializeNBT(datum.get(), key, tag);
+            }
+        }
+
+        @Override
+        public void deserializeNBT(NBTTagCompound tag) {
+            if (getDataClass().isEnum()) {
+                datum.set(getDataClass().getEnumConstants()[tag.getShort(key)]);
+            } else {
+                datum.set(getSerializationProvider(getDataClass()).deserializeNBT(key, tag));
+            }
+        }
+
+        @Override
+        public void serializeBytes(ByteUtils.Writer data) {
+            if (getDataClass().isEnum()) {
+                data.writeShort((short)((Enum<?>)datum.get()).ordinal());
+            } else {
+                getSerializationProvider(getDataClass()).serializeBytes(datum.get(), data);
+            }
+        }
+
+        @Override
+        public void deserializeBytes(ByteUtils.Reader data) {
+            if (getDataClass().isEnum()) {
+                datum.set(getDataClass().getEnumConstants()[data.readShort()]);
+            } else {
+                datum.set(getSerializationProvider(getDataClass()).deserializeBytes(data));
+            }
+        }
+
+    }
+
+    private class DataPropertyMutableField<T> extends DataProperty {
+
+        private final Field field;
+        private final Class<T> dataClass;
+
+        @SuppressWarnings("unchecked")
+        DataPropertyMutableField(AutoSerialize annot, String fallbackName, Field field) {
+            super(annot, fallbackName);
+            this.field = field;
+            this.dataClass = (Class<T>)field.getType(); // why isn't Field parametric???
+        }
+
+        @SuppressWarnings("unchecked")
+        private T fieldGet() {
+            try {
+                return (T)field.get(target);
+            } catch (Exception e) {
+                throw new IllegalStateException("Could not read field: " + field.toString(), e);
+            }
+        }
+
+        private void fieldSet(T value) {
+            try {
+                field.set(target, value);
+            } catch (Exception e) {
+                throw new IllegalStateException("Could not write field: " + field.toString(), e);
+            }
+        }
+
+        @Override
+        void serializeNBT(NBTTagCompound tag) {
+            if (dataClass.isEnum()) {
+                tag.setShort(key, (short)((Enum<?>)fieldGet()).ordinal());
+            } else {
+                getSerializationProvider(dataClass).serializeNBT(fieldGet(), key, tag);
+            }
+        }
+
+        @Override
+        void deserializeNBT(NBTTagCompound tag) {
+            if (dataClass.isEnum()) {
+                fieldSet(dataClass.getEnumConstants()[tag.getShort(key)]);
+            } else {
+                fieldSet(getSerializationProvider(dataClass).deserializeNBT(key, tag));
+            }
+        }
+
+        @Override
+        void serializeBytes(ByteUtils.Writer data) {
+            if (dataClass.isEnum()) {
+                data.writeShort((short)((Enum<?>)fieldGet()).ordinal());
+            } else {
+                getSerializationProvider(dataClass).serializeBytes(fieldGet(), data);
+            }
+        }
+
+        @Override
+        void deserializeBytes(ByteUtils.Reader data) {
+            if (dataClass.isEnum()) {
+                fieldSet(dataClass.getEnumConstants()[data.readShort()]);
+            } else {
+                fieldSet(getSerializationProvider(dataClass).deserializeBytes(data));
+            }
+        }
+
     }
 
 }

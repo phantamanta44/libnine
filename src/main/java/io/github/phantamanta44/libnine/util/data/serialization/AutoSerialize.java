@@ -11,4 +11,6 @@ public @interface AutoSerialize {
 
     String value() default "";
 
+    boolean sync() default true;
+
 }

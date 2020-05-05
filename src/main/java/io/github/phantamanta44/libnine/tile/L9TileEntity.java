@@ -122,12 +122,12 @@ public class L9TileEntity extends TileEntity implements ISerializable {
 
     @Override
     public void serBytes(ByteUtils.Writer data) {
-        serializer.serializeBytes(data);
+        serializer.serializeBytes(data, true); // assume this mechanism is only ever used for sync
     }
 
     @Override
     public void deserBytes(ByteUtils.Reader data) {
-        serializer.deserializeBytes(data);
+        serializer.deserializeBytes(data, true); // assume this mechanism is only ever used for sync
     }
 
     public void onTileSyncPacket(ByteUtils.Reader data) {
