@@ -4,11 +4,31 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class MirrorUtils {
+
+    @Nullable
+    private static Field fField_modifiers = null;
+
+    public static void writeModifiers(Field field, int modifiers) {
+        if (fField_modifiers == null) {
+            try {
+                fField_modifiers = Field.class.getDeclaredField("modifiers");
+                fField_modifiers.setAccessible(true);
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to reflect field modifiers!", e);
+            }
+        }
+        try {
+            fField_modifiers.setInt(field, modifiers);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to write field modifieres!", e);
+        }
+    }
 
     public static <T> List<Class<? super T>> getHierarchy(Class<T> clazz) {
         List<Class<? super T>> result = new ArrayList<>();
@@ -53,13 +73,13 @@ public class MirrorUtils {
                 throw new MirrorException("Could not invoke method: " + unwrap(), e);
             }
         }
-        
+
         Method unwrap();
-        
+
         class Impl<T> implements IMethod<T> {
-            
+
             private final Method method;
-            
+
             Impl(Method method) {
                 this.method = method;
             }
@@ -68,16 +88,21 @@ public class MirrorUtils {
             public Method unwrap() {
                 return method;
             }
-            
+
         }
-        
+
     }
 
     public interface IField<T> {
 
         default void set(@Nullable Object target, T value) {
             try {
-                unwrap().set(target, value);
+                Field field = unwrap();
+                int modifiers = field.getModifiers();
+                if ((modifiers & Modifier.FINAL) != 0) {
+                    writeModifiers(field, modifiers & ~Modifier.FINAL);
+                }
+                field.set(target, value);
             } catch (IllegalAccessException e) {
                 throw new MirrorException("Could not mutate field: " + unwrap(), e);
             }
@@ -91,7 +116,7 @@ public class MirrorUtils {
                 throw new MirrorException("Could not read field: " + unwrap(), e);
             }
         }
-        
+
         Field unwrap();
 
         class Impl<T> implements IField<T> {
@@ -110,13 +135,13 @@ public class MirrorUtils {
         }
 
     }
-    
+
     public static class MirrorException extends RuntimeException {
-        
+
         MirrorException(String reason, Exception cause) {
             super(reason, cause);
         }
-        
+
     }
 
 }

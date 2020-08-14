@@ -14,6 +14,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IUnlistedProperty;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,12 +51,19 @@ public class L9BlockStated extends L9Block {
         // NO-OP
     }
 
+    @SuppressWarnings("WeakerAccess")
+    protected void accrueExtendedProperties(Accrue<IUnlistedProperty<?>> props) {
+        // NO-OP
+    }
+
     @Override
     protected BlockStateContainer createBlockState() {
         // accrue properties
         List<IProperty<?>> propsPersistent = new ArrayList<>(), propsVolatile = new ArrayList<>();
+        List<IUnlistedProperty<?>> propsExt = new ArrayList<>();
         accrueProperties(new Accrue<>(propsPersistent));
         accrueVolatileProperties(new Accrue<>(propsVolatile));
+        accrueExtendedProperties(new Accrue<>(propsExt));
 
         // compute persistent states; functions as meta -> prop mapping
         states = Collections.unmodifiableList(VirtualState.cartesian(propsPersistent));
@@ -63,7 +72,9 @@ public class L9BlockStated extends L9Block {
         props = new ArrayList<>(propsPersistent);
         props.addAll(propsVolatile);
         props = Collections.unmodifiableList(props);
-        BlockStateContainer container = new BlockStateContainer(this, props.toArray(new IProperty[0]));
+        BlockStateContainer container = propsExt.isEmpty()
+                ? new BlockStateContainer(this, props.toArray(new IProperty[0]))
+                : new ExtendedBlockState(this, props.toArray(new IProperty[0]), propsExt.toArray(new IUnlistedProperty[0]));
 
         // compute inverse prop -> meta mapping
         statesInv = new TObjectIntHashMap<>();

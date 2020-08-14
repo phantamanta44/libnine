@@ -6,6 +6,7 @@ import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.translation.I18n;
 
 public class ItemUtils {
@@ -51,6 +52,14 @@ public class ItemUtils {
     @SuppressWarnings("deprecation")
     public static String getLocalizedSubName(L9ItemSubs item, int meta) {
         return I18n.translateToLocal(String.format("item.%s%d.name", item.getRegistryName(), meta));
+    }
+
+    public static NBTTagCompound getOrCreateTag(ItemStack stack) {
+        NBTTagCompound tag = stack.getTagCompound();
+        if (tag == null) {
+            stack.setTagCompound(tag = new NBTTagCompound());
+        }
+        return tag;
     }
 
 }

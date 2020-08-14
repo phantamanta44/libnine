@@ -13,6 +13,10 @@ import java.util.function.BiConsumer;
 
 public class WorldUtils {
 
+    public static final EnumFacing[] FACES_AND_NULL = {
+            null, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST
+    };
+
     public static void dropItem(World world, Vec3d pos, ItemStack stack) {
         if (!world.isRemote && !stack.isEmpty()) {
             EntityItem ent = new EntityItem(world, pos.x, pos.y, pos.z, stack);
@@ -57,13 +61,11 @@ public class WorldUtils {
     public static Vec3d getBlockCenter(BlockPos pos) {
         return new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
     }
-    
+
     public static boolean pointLiesInBlock(Vec3d point, BlockPos block) {
         return point.x >= block.getX() && point.x <= block.getX() + 1
                 && point.y >= block.getY() && point.y <= block.getY() + 1
                 && point.z >= block.getZ() && point.z <= block.getZ() + 1;
     }
-
-
 
 }

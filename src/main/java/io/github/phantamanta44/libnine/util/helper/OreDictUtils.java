@@ -19,7 +19,7 @@ public class OreDictUtils {
     }
 
     public static boolean exists(String entry) {
-        return !OreDictionary.getOres(entry).isEmpty();
+        return !OreDictionary.getOres(entry, false).isEmpty();
     }
 
     public static boolean matchesOredict(ItemStack stack, String ore) {
@@ -32,7 +32,7 @@ public class OreDictUtils {
     }
 
     public static IDisplayableMatcher<ItemStack> matchesOredict(String ore) {
-        return IDisplayableMatcher.ofMany(() -> OreDictionary.getOres(ore), s -> matchesOredict(s, ore));
+        return IDisplayableMatcher.ofMany(() -> OreDictionary.getOres(ore, false), s -> matchesOredict(s, ore));
     }
 
 }

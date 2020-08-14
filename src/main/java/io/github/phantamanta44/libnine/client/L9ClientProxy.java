@@ -28,6 +28,10 @@ import java.util.List;
 
 public class L9ClientProxy extends L9CommonProxy {
 
+    public L9ClientProxy() {
+        L9Models.registerModels(); // models should be registered asap
+    }
+
     /*
      * Internal
      */
@@ -70,7 +74,6 @@ public class L9ClientProxy extends L9CommonProxy {
     @Override
     protected void onPreInit(FMLPreInitializationEvent event) {
         ShaderUtils.registerReloadHook();
-        L9Models.registerModels();
         super.onPreInit(event);
         MinecraftForge.EVENT_BUS.register(new ClientTickHandler());
         MinecraftForge.EVENT_BUS.register(new MultiBlockDebugRenderHandler());
