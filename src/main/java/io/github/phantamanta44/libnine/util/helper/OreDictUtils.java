@@ -2,12 +2,16 @@ package io.github.phantamanta44.libnine.util.helper;
 
 import io.github.phantamanta44.libnine.util.IDisplayableMatcher;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class OreDictUtils {
+
+    private static final List<NonNullList<ItemStack>> idToStack
+            = MirrorUtils.<List<NonNullList<ItemStack>>>reflectField(OreDictionary.class, "idToStack").get(null);
 
     @Nullable
     public static ItemStack getStack(String entry, int qty) {
@@ -33,6 +37,11 @@ public class OreDictUtils {
 
     public static IDisplayableMatcher<ItemStack> matchesOredict(String ore) {
         return IDisplayableMatcher.ofMany(() -> OreDictionary.getOres(ore, false), s -> matchesOredict(s, ore));
+    }
+
+    @Nullable
+    public static List<ItemStack> getOresById(int id) {
+        return idToStack.get(id);
     }
 
 }
