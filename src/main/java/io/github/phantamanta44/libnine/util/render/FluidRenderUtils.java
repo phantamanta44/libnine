@@ -57,10 +57,11 @@ public class FluidRenderUtils {
 
     public static void renderFluidIntoGui(Tessellator tess, BufferBuilder buf, int x, int y, int width, int height,
                                           @Nullable FluidStack fluidStack, int capacity) {
-        if (fluidStack != null) {
+        if (fluidStack != null && fluidStack.amount > 0) {
             TextureAtlasSprite sprite = FluidRenderUtils.prepareRender(fluidStack);
             if (sprite != null) {
-                doRenderFluid(tess, buf, x, y, width, height, sprite, fluidStack.amount / (double)capacity);
+                doRenderFluid(tess, buf, x, y, width, height, sprite,
+                        Math.max(fluidStack.amount / (double)capacity, 1D / height)); // ensure at least 1 pixel is drawn
             }
         }
     }
