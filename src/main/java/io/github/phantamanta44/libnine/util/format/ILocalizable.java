@@ -2,7 +2,7 @@ package io.github.phantamanta44.libnine.util.format;
 
 import net.minecraft.util.text.translation.I18n;
 
-public interface Localizable {
+public interface ILocalizable {
 
     String getTranslationKey();
 
