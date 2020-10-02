@@ -119,7 +119,7 @@ public class StructureMatcherCuboid implements IStructureMatcher {
                 }
             }
             if (!wallEdgeMatcher.testStructure(basePos, wallEdge)) {
-                return true;
+                return false;
             }
         }
         if (!wallMatcher.testStructure(basePos, walls) || !bodyMatcher.testStructure(basePos, body)) {
