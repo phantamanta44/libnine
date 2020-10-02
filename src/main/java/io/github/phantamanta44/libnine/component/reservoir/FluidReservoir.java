@@ -13,6 +13,13 @@ import java.util.function.BiConsumer;
 
 public class FluidReservoir extends DelegatedIntReservoir implements IFluidTank {
 
+    public static FluidReservoir observable(IIntReservoir backing, Runnable observer) {
+        FluidReservoir reservoir = new FluidReservoir(backing);
+        reservoir.onFluidChange((o, n) -> observer.run());
+        reservoir.onQuantityChange((o, n) -> observer.run());
+        return reservoir;
+    }
+
     private final boolean locked;
     private final Collection<BiConsumer<FluidStack, FluidStack>> callbacks;
 
