@@ -12,6 +12,8 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 public class L9AspectFluidHandler implements IFluidHandler, ISerializable {
 
@@ -21,6 +23,10 @@ public class L9AspectFluidHandler implements IFluidHandler, ISerializable {
     public L9AspectFluidHandler(boolean overflowProtection, FluidReservoir... tanks) {
         this.overflowProtection = overflowProtection;
         this.tanks = tanks;
+    }
+
+    public L9AspectFluidHandler(boolean overflowProtection, int tankCount, Supplier<FluidReservoir> tankFactory) {
+        this(overflowProtection, IntStream.range(0, tankCount).mapToObj(i -> tankFactory.get()).toArray(FluidReservoir[]::new));
     }
 
     public FluidReservoir[] getTanks() {
