@@ -11,8 +11,8 @@ public class L9AspectFluidHandlerItem extends L9AspectFluidHandler implements IF
 
     private final ItemStack container;
 
-    public L9AspectFluidHandlerItem(ItemStack container, FluidReservoir mainTank, FluidReservoir... secondaryTanks) {
-        super(mainTank, secondaryTanks);
+    public L9AspectFluidHandlerItem(ItemStack container, boolean overflowProtection, FluidReservoir... tanks) {
+        super(overflowProtection, tanks);
         this.container = container;
     }
 

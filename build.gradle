@@ -11,7 +11,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
-version = '1.1.10'
+version = '1.2.0'
 group = 'io.github.phantamanta44.libnine'
 archivesBaseName = 'libnine-1.12.2'
 
