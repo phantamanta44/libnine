@@ -170,7 +170,9 @@ public class L9AspectSlot implements IItemHandlerModifiable, ISerializable {
             if (simulate) return super.insertItem(stack, true);
             ItemStack original = getStackInSlot().copy();
             ItemStack result = super.insertItem(stack, false);
-            observer.onSlotChanged(0, original, getStackInSlot());
+            if (result.getCount() != stack.getCount()) {
+                observer.onSlotChanged(0, original, getStackInSlot());
+            }
             return result;
         }
 
@@ -179,7 +181,9 @@ public class L9AspectSlot implements IItemHandlerModifiable, ISerializable {
             if (simulate) return super.extractItem(amount, true);
             ItemStack original = getStackInSlot().copy();
             ItemStack result = super.extractItem(amount, false);
-            observer.onSlotChanged(0, original, getStackInSlot());
+            if (!result.isEmpty()) {
+                observer.onSlotChanged(0, original, getStackInSlot());
+            }
             return result;
         }
 
