@@ -21,7 +21,7 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTank 
     }
 
     private final boolean locked;
-    private final Collection<BiConsumer<FluidStack, FluidStack>> callbacks;
+    private final Collection<BiConsumer<FluidStack, FluidStack>> callbacks = new ArrayList<>();
 
     @Nullable
     private Fluid fluid;
@@ -33,7 +33,16 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTank 
         this.fluid = fluid;
         this.fluidData = fluidData;
         this.locked = locked;
-        this.callbacks = new ArrayList<>();
+        backing.onQuantityChange((o, n) -> {
+            if (n <= 0 && !locked) {
+                FluidStack oldFluid = getFluid();
+                this.fluid = null;
+                this.fluidData = null;
+                for (BiConsumer<FluidStack, FluidStack> callback : callbacks) {
+                    callback.accept(oldFluid, null);
+                }
+            }
+        });
     }
 
     public FluidReservoir(@Nullable FluidStack fluid, IIntReservoir backing, boolean locked) {
@@ -93,25 +102,6 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTank 
     }
 
     @Override
-    public void setQuantity(int qty) {
-        if (qty < 0) {
-            qty = 0;
-        }
-        if (getQuantity() == qty) {
-            return;
-        }
-        super.setQuantity(qty);
-        if (qty == 0 && !locked) {
-            FluidStack oldFluid = getFluid();
-            fluid = null;
-            fluidData = null;
-            for (BiConsumer<FluidStack, FluidStack> callback : callbacks) {
-                callback.accept(oldFluid, null);
-            }
-        }
-    }
-
-    @Override
     public int getFluidAmount() {
         return getQuantity();
     }
@@ -145,8 +135,9 @@ public class FluidReservoir extends DelegatedIntReservoir implements IFluidTank 
         if (fluid == null) {
             return null;
         }
+        Fluid oldFluid = fluid;
         int drained = draw(maxDrain, doDrain);
-        return drained > 0 ? new FluidStack(fluid, drained, fluidData) : null;
+        return drained > 0 ? new FluidStack(oldFluid, drained, fluidData) : null;
     }
 
     public boolean canFillFluidType(FluidStack fluidStack) {
