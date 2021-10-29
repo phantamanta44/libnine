@@ -61,4 +61,20 @@ public class MathUtils {
         return IPair.of(new Vec3i(minX, minY, minZ), new Vec3i(maxX, maxY, maxZ));
     }
 
+    public static Vec3i add(Vec3i a, int x, int y, int z) {
+        return new Vec3i(a.getX() + x, a.getY() + y, a.getZ() + z);
+    }
+
+    public static Vec3i add(Vec3i a, Vec3i b) {
+        return add(a, b.getX(), b.getY(), b.getZ());
+    }
+
+    public static Vec3i subtract(Vec3i a, int x, int y, int z) {
+        return new Vec3i(a.getX() - x, a.getY() - y, a.getZ() - z);
+    }
+
+    public static Vec3i subtract(Vec3i a, Vec3i b) {
+        return subtract(a, b.getX(), b.getY(), b.getZ());
+    }
+
 }
