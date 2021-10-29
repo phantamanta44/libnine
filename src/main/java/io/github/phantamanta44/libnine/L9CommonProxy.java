@@ -1,5 +1,6 @@
 package io.github.phantamanta44.libnine;
 
+import io.github.phantamanta44.libnine.event.ModDependentEventBusSubscriber;
 import io.github.phantamanta44.libnine.event.TileEntityDispatchHandler;
 import io.github.phantamanta44.libnine.network.PacketServerSyncTileEntity;
 import io.github.phantamanta44.libnine.recipe.IRecipeList;
@@ -29,6 +30,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 
 public class L9CommonProxy {
 
@@ -102,28 +104,53 @@ public class L9CommonProxy {
     protected void onPreInit(FMLPreInitializationEvent event) {
         registrar.hookEvents();
         MinecraftForge.EVENT_BUS.register(teDispatcher);
-        tileIter:
-        for (ASMDataTable.ASMData target : event.getAsmData().getAll(RegisterTile.class.getName())) {
-            //noinspection unchecked
+        processAnnotations(event.getAsmData());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void processAnnotations(ASMDataTable asmData) {
+        Side actualSide = FMLCommonHandler.instance().getSide();
+
+        tile_iter:
+        for (ASMDataTable.ASMData target : asmData.getAll(RegisterTile.class.getName())) {
             List<String> deps = (List<String>)target.getAnnotationInfo().get("deps");
             if (deps != null) {
-                for (String dep : deps){
+                for (String dep : deps) {
                     if (!Loader.isModLoaded(dep)) {
-                        continue tileIter;
+                        continue tile_iter;
                     }
                 }
             }
             getRegistrar().queueTileEntityReg((String)target.getAnnotationInfo().get("value"), target.getClassName());
         }
-        Side actualSide = FMLCommonHandler.instance().getSide();
-        for (ASMDataTable.ASMData target : event.getAsmData().getAll(InitMe.class.getName())) {
-            @SuppressWarnings("rawtypes")
-            List sides = (List)target.getAnnotationInfo().get("sides");
+
+        mod_dep_sub_iter:
+        for (ASMDataTable.ASMData annot : asmData.getAll(ModDependentEventBusSubscriber.class.getName())) {
+            Map<String, Object> data = annot.getAnnotationInfo();
+            List<Side> acceptedSides = (List<Side>)data.get("side");
+            if (acceptedSides != null && !acceptedSides.contains(actualSide)) {
+                continue;
+            }
+            for (String depModId : (List<String>)data.get("dependencies")) {
+                if (!Loader.isModLoaded(depModId)) {
+                    continue mod_dep_sub_iter;
+                }
+            }
+            try {
+                MinecraftForge.EVENT_BUS.register(Class.forName(annot.getClassName()));
+            } catch (ClassNotFoundException e) {
+                LibNine.LOGGER.warn("Failed to register mod-dependent event subscriber: " + annot.getClassName(), e);
+            }
+        }
+
+        for (ASMDataTable.ASMData target : asmData.getAll(InitMe.class.getName())) {
+            List<ModAnnotation.EnumHolder> sides
+                    = (List<ModAnnotation.EnumHolder>)target.getAnnotationInfo().get("sides");
             boolean shouldContinue = true;
             if (sides != null) {
                 shouldContinue = false;
-                for (Object side : sides) {
-                    if (actualSide == Side.valueOf(((ModAnnotation.EnumHolder)side).getValue())) {
+                for (ModAnnotation.EnumHolder side : sides) {
+                    if (actualSide == Side.valueOf(side.getValue())) {
                         shouldContinue = true;
                     }
                 }
