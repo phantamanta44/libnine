@@ -45,7 +45,7 @@ public class L9GuiHandler implements IGuiHandler {
     public <S extends Container, C> void registerClientGui(GuiIdentity<S, C> identity, IGuiFactory<S, C> factory) {
         clientGuiMappings.put(indexFor(identity), factory);
     }
-    
+
     public int getGuiId(GuiIdentity<?, ?> identity) {
         return guiIdentityMappings.get(identity);
     }
@@ -64,14 +64,14 @@ public class L9GuiHandler implements IGuiHandler {
     @Override
     @SuppressWarnings("unchecked")
     public Object getClientGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
-        return clientGuiMappings.get(id).create(
-                serverGuiMappings.get(id).create(player, world, x, y, z),
-                player, world, x, y, z);
+        Container cont = serverGuiMappings.get(id).create(player, world, x, y, z);
+        return cont != null ? clientGuiMappings.get(id).create(cont, player, world, x, y, z) : null;
     }
 
     @FunctionalInterface
     public interface IContainerFactory<T extends Container> {
 
+        @Nullable
         T create(EntityPlayer player, World world, int x, int y, int z);
 
     }
@@ -79,6 +79,7 @@ public class L9GuiHandler implements IGuiHandler {
     @FunctionalInterface
     public interface IGuiFactory<S extends Container, C> {
 
+        @Nullable
         C create(S container, EntityPlayer player, World world, int x, int y, int z);
 
     }
