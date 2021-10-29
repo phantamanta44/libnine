@@ -11,6 +11,16 @@ import java.util.Arrays;
 
 public class FluidHandlerUtils {
 
+    @Nullable
+    public static FluidStack copyStackWithAmount(@Nullable FluidStack base, int amount) {
+        if (base == null || amount <= 0) {
+            return null;
+        }
+        FluidStack newStack = base.copy();
+        newStack.amount = amount;
+        return newStack;
+    }
+
     public static IFluidHandler insertOnly(IFluidHandler fluidHandler) {
         return new InsertOnlyFluidHandler(fluidHandler);
     }
