@@ -11,12 +11,9 @@ import net.minecraft.item.ItemStack;
 
 public class L9Container extends Container {
 
-    private final boolean hasInvPlayer;
-    private boolean hasInvOther;
+    private boolean hasInvPlayer = false, hasInvOther = false;
 
     public L9Container(InventoryPlayer ipl, int height) {
-        this.hasInvPlayer = true;
-        this.hasInvOther = false;
         initPlayerInventory(ipl, height);
     }
 
@@ -25,19 +22,18 @@ public class L9Container extends Container {
     }
 
     public L9Container() {
-        this.hasInvPlayer = false;
-        this.hasInvOther = false;
+        // NO-OP
     }
 
     protected void initPlayerInventory(InventoryPlayer ipl, int height) {
         int offset = height - 82;
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                super.addSlotToContainer(new Slot(ipl, col + row * 9 + 9, 8 + col * 18, offset + row * 18));
+                addSlotToContainer(new Slot(ipl, col + row * 9 + 9, 8 + col * 18, offset + row * 18));
             }
         }
         for (int col = 0; col < 9; ++col) {
-            super.addSlotToContainer(new Slot(ipl, col, 8 + col * 18, offset + 58));
+            addSlotToContainer(new Slot(ipl, col, 8 + col * 18, offset + 58));
         }
     }
 
@@ -96,9 +92,13 @@ public class L9Container extends Container {
     }
 
     @Override
-    protected Slot addSlotToContainer(Slot slotIn) {
-        hasInvOther = true;
-        return super.addSlotToContainer(slotIn);
+    protected Slot addSlotToContainer(Slot slot) {
+        if (slot.inventory instanceof InventoryPlayer) {
+            hasInvPlayer = true;
+        } else {
+            hasInvOther = true;
+        }
+        return super.addSlotToContainer(slot);
     }
 
     protected void sendInteraction(byte[] data) {
