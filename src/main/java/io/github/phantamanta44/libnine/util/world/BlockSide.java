@@ -1,5 +1,6 @@
 package io.github.phantamanta44.libnine.util.world;
 
+import com.google.common.collect.ImmutableList;
 import io.github.phantamanta44.libnine.constant.NameConst;
 import io.github.phantamanta44.libnine.util.ImpossibilityRealizedException;
 import io.github.phantamanta44.libnine.util.format.ILocalizable;
@@ -15,6 +16,8 @@ public enum BlockSide implements ILocalizable {
     LEFT(EnumFacing::rotateY),
     DOWN(f -> EnumFacing.DOWN),
     RIGHT(EnumFacing::rotateYCCW);
+
+    public static final ImmutableList<BlockSide> VALUES = ImmutableList.copyOf(values());
 
     private final UnaryOperator<EnumFacing> transformer;
 
