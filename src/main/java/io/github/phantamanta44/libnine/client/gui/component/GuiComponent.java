@@ -23,8 +23,24 @@ public abstract class GuiComponent {
         this.height = height;
     }
 
-    void setGui(GuiScreen gui) {
+    public void setGui(GuiScreen gui) {
         this.gui = gui;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     protected void bindTexture(ResourceLocation texture) {
