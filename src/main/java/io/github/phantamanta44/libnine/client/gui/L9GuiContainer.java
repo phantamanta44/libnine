@@ -50,6 +50,14 @@ public class L9GuiContainer extends GuiContainer implements IScreenDrawable {
         posY = (this.height - this.sizeY) / 2;
     }
 
+    public int getOffsetX() {
+        return posX;
+    }
+
+    public int getOffsetY() {
+        return posY;
+    }
+
     @Override
     public void addComponent(GuiComponent comp) {
         components.register(comp);
