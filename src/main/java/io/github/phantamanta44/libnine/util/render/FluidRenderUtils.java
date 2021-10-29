@@ -29,8 +29,8 @@ public class FluidRenderUtils {
         return sprite;
     }
 
-    private static void doRenderFluid(Tessellator tess, BufferBuilder buf, int x, int y, int width, int height,
-                                      TextureAtlasSprite sprite, double fraction) {
+    public static void renderFluidIntoGui(Tessellator tess, BufferBuilder buf, int x, int y, int width, int height,
+                                          TextureAtlasSprite sprite, double fraction) {
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(
                 GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -60,7 +60,7 @@ public class FluidRenderUtils {
         if (fluidStack != null && fluidStack.amount > 0) {
             TextureAtlasSprite sprite = FluidRenderUtils.prepareRender(fluidStack);
             if (sprite != null) {
-                doRenderFluid(tess, buf, x, y, width, height, sprite,
+                renderFluidIntoGui(tess, buf, x, y, width, height, sprite,
                         Math.max(fluidStack.amount / (double)capacity, 1D / height)); // ensure at least 1 pixel is drawn
             }
         }
