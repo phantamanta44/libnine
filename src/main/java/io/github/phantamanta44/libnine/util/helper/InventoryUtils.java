@@ -9,7 +9,9 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 
-import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -40,20 +42,38 @@ public class InventoryUtils {
         }
     }
 
+    public static IItemHandlerModifiable restrict(IItemHandlerModifiable delegate,
+                                                  boolean allowInsert, boolean allowExtract) {
+        return new RestrictedItemHandler(delegate, allowInsert, allowExtract);
+    }
+
+    @Deprecated
     public static IItemHandlerModifiable insertOnly(IItemHandlerModifiable delegate) {
-        return new InsertOnlyItemHandler(delegate);
+        return restrict(delegate, true, false);
     }
 
+    @Deprecated
     public static IItemHandlerModifiable extractOnly(IItemHandlerModifiable delegate) {
-        return new ExtractOnlyItemHandler(delegate);
+        return restrict(delegate, false, true);
     }
 
-    private static class InsertOnlyItemHandler implements IItemHandlerModifiable {
+    public static IItemHandler join(IItemHandler... handlers) {
+        return join(Arrays.asList(handlers));
+    }
+
+    public static IItemHandler join(List<? extends IItemHandler> handlers) {
+        return new AppendingItemHandler(handlers);
+    }
+
+    private static class RestrictedItemHandler implements IItemHandlerModifiable {
 
         private final IItemHandlerModifiable delegate;
+        private final boolean allowInsert, allowExtract;
 
-        InsertOnlyItemHandler(IItemHandlerModifiable delegate) {
+        private RestrictedItemHandler(IItemHandlerModifiable delegate, boolean allowInsert, boolean allowExtract) {
             this.delegate = delegate;
+            this.allowInsert = allowInsert;
+            this.allowExtract = allowExtract;
         }
 
         @Override
@@ -62,7 +82,6 @@ public class InventoryUtils {
         }
 
         @Override
-        @Nonnull
         public ItemStack getStackInSlot(int slot) {
             return delegate.getStackInSlot(slot);
         }
@@ -73,15 +92,13 @@ public class InventoryUtils {
         }
 
         @Override
-        @Nonnull
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            return delegate.insertItem(slot, stack, simulate);
+            return allowInsert ? delegate.insertItem(slot, stack, simulate) : stack;
         }
 
         @Override
-        @Nonnull
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            return ItemStack.EMPTY;
+            return allowExtract ? delegate.extractItem(slot, amount, simulate) : ItemStack.EMPTY;
         }
 
         @Override
@@ -96,50 +113,79 @@ public class InventoryUtils {
 
     }
 
-    private static class ExtractOnlyItemHandler implements IItemHandlerModifiable {
+    private static class AppendingItemHandler implements IItemHandler {
 
-        private final IItemHandlerModifiable delegate;
+        private final List<DelegateSlot> slots;
 
-        ExtractOnlyItemHandler(IItemHandlerModifiable delegate) {
-            this.delegate = delegate;
+        public AppendingItemHandler(List<? extends IItemHandler> delegates) {
+            this.slots = new ArrayList<>();
+            for (IItemHandler delegate : delegates) {
+                for (int i = 0; i < delegate.getSlots(); i++) {
+                    slots.add(new DelegateSlot(delegate, i));
+                }
+            }
         }
 
         @Override
         public int getSlots() {
-            return delegate.getSlots();
+            return slots.size();
         }
 
         @Override
-        @Nonnull
         public ItemStack getStackInSlot(int slot) {
-            return delegate.getStackInSlot(slot);
+            return slots.get(slot).getStackInSlot();
         }
 
         @Override
-        public void setStackInSlot(int slot, ItemStack stack) {
-            delegate.setStackInSlot(slot, stack);
-        }
-
-        @Override
-        @Nonnull
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            return stack;
+            return slots.get(slot).insertItem(stack, simulate);
         }
 
         @Override
-        @Nonnull
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            return delegate.extractItem(slot, amount, simulate);
+            return slots.get(slot).extractItem(amount, simulate);
         }
 
         @Override
         public int getSlotLimit(int slot) {
-            return delegate.getSlotLimit(slot);
+            return slots.get(slot).getSlotLimit();
         }
 
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
-            return false;
+            return slots.get(slot).isItemValid(stack);
+        }
+
+        private static class DelegateSlot {
+
+            private final IItemHandler delegate;
+            private final int slotIndex;
+
+            public DelegateSlot(IItemHandler delegate, int slotIndex) {
+                this.delegate = delegate;
+                this.slotIndex = slotIndex;
+            }
+
+            public ItemStack getStackInSlot() {
+                return delegate.getStackInSlot(slotIndex);
+            }
+
+            public ItemStack insertItem(ItemStack stack, boolean simulate) {
+                return delegate.insertItem(slotIndex, stack, simulate);
+            }
+
+            public ItemStack extractItem(int amount, boolean simulate) {
+                return delegate.extractItem(slotIndex, amount, simulate);
+            }
+
+            public int getSlotLimit() {
+                return delegate.getSlotLimit(slotIndex);
+            }
+
+            public boolean isItemValid(ItemStack stack) {
+                return delegate.isItemValid(slotIndex, stack);
+            }
+
         }
 
     }

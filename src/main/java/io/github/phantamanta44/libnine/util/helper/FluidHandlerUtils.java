@@ -3,13 +3,24 @@ package io.github.phantamanta44.libnine.util.helper;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.fluids.capability.FluidTankProperties;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class FluidHandlerUtils {
+
+    public static boolean canFluidsStack(@Nullable FluidStack a, @Nullable FluidStack b) {
+        if (a == null || a.amount <= 0) {
+            return b == null || b.amount <= 0;
+        } else if (b == null || b.amount <= 0) {
+            return false;
+        }
+        return a.getFluid().getName().equals(b.getFluid().getName()) && Objects.equals(a.tag, b.tag);
+    }
 
     @Nullable
     public static FluidStack copyStackWithAmount(@Nullable FluidStack base, int amount) {
@@ -21,174 +32,129 @@ public class FluidHandlerUtils {
         return newStack;
     }
 
+    public static IFluidHandler restrict(IFluidHandler fluidHandler, boolean allowInsert, boolean allowExtract) {
+        return new RestrictedFluidHandler(fluidHandler, allowInsert, allowExtract);
+    }
+
+    @Deprecated
     public static IFluidHandler insertOnly(IFluidHandler fluidHandler) {
-        return new InsertOnlyFluidHandler(fluidHandler);
+        return restrict(fluidHandler, true, false);
     }
 
+    @Deprecated
     public static IFluidHandler extractOnly(IFluidHandler fluidHandler) {
-        return new ExtractOnlyFluidHandler(fluidHandler);
+        return restrict(fluidHandler, false, true);
     }
 
+    public static IFluidTank restrict(IFluidTank tank, boolean allowInsert, boolean allowExtract) {
+        return new RestrictedFluidTank(tank, allowInsert, allowExtract);
+    }
+
+    @Deprecated
     public static IFluidTank insertOnly(IFluidTank tank) {
-        return new InsertOnlyFluidTank(tank);
+        return restrict(tank, true, false);
     }
 
+    @Deprecated
     public static IFluidTank extractOnly(IFluidTank tank) {
-        return new ExtractOnlyFluidTank(tank);
+        return restrict(tank, false, true);
     }
 
-    private static class InsertOnlyFluidHandler implements IFluidHandler {
+    public static IFluidHandler asFluidHandler(IFluidTank tank, boolean canFill, boolean canDrain) {
+        return new TankFluidHandler(tank, canFill, canDrain);
+    }
+
+    public static IFluidHandler asFluidHandler(IFluidTank tank) {
+        return new TankFluidHandler(tank, true, true);
+    }
+
+    private static class RestrictedFluidHandler implements IFluidHandler {
 
         private final IFluidHandler delegate;
+        private final boolean allowInsert, allowExtract;
 
-        InsertOnlyFluidHandler(IFluidHandler delegate) {
+        private RestrictedFluidHandler(IFluidHandler delegate, boolean allowInsert, boolean allowExtract) {
             this.delegate = delegate;
+            this.allowInsert = allowInsert;
+            this.allowExtract = allowExtract;
         }
 
         @Override
         public IFluidTankProperties[] getTankProperties() {
-            return Arrays.stream(delegate.getTankProperties()).map(Properties::new).toArray(IFluidTankProperties[]::new);
+            return Arrays.stream(delegate.getTankProperties())
+                    .map(TankPropertiesWrapper::new)
+                    .toArray(IFluidTankProperties[]::new);
         }
 
         @Override
-        public int fill(FluidStack resource, boolean doFill) {
-            return delegate.fill(resource, doFill);
-        }
-
-        @Override
-        @Nullable
-        public FluidStack drain(FluidStack resource, boolean doDrain) {
-            return null;
+        public int fill(FluidStack fluid, boolean simulate) {
+            return allowInsert ? delegate.fill(fluid, simulate) : 0;
         }
 
         @Override
         @Nullable
-        public FluidStack drain(int maxDrain, boolean doDrain) {
-            return null;
+        public FluidStack drain(FluidStack fluid, boolean simulate) {
+            return allowExtract ? delegate.drain(fluid, simulate) : null;
         }
 
-        private static class Properties implements IFluidTankProperties {
+        @Override
+        @Nullable
+        public FluidStack drain(int maxDrain, boolean simulate) {
+            return allowExtract ? delegate.drain(maxDrain, simulate) : null;
+        }
 
-            private final IFluidTankProperties props;
+        private class TankPropertiesWrapper implements IFluidTankProperties {
 
-            Properties(IFluidTankProperties props) {
-                this.props = props;
+            private final IFluidTankProperties delegateProps;
+
+            private TankPropertiesWrapper(IFluidTankProperties delegateProps) {
+                this.delegateProps = delegateProps;
             }
 
             @Override
             @Nullable
             public FluidStack getContents() {
-                return props.getContents();
+                return delegateProps.getContents();
             }
 
             @Override
             public int getCapacity() {
-                return props.getCapacity();
+                return delegateProps.getCapacity();
             }
 
             @Override
             public boolean canFill() {
-                return props.canFill();
+                return allowInsert && delegateProps.canFill();
             }
 
             @Override
             public boolean canDrain() {
-                return false;
+                return allowExtract && delegateProps.canDrain();
             }
 
             @Override
             public boolean canFillFluidType(FluidStack fluidStack) {
-                return props.canFillFluidType(fluidStack);
+                return allowInsert && delegateProps.canFillFluidType(fluidStack);
             }
 
             @Override
             public boolean canDrainFluidType(FluidStack fluidStack) {
-                return false;
+                return allowExtract && delegateProps.canDrainFluidType(fluidStack);
             }
 
         }
 
     }
 
-    private static class ExtractOnlyFluidHandler implements IFluidHandler {
-
-        private final IFluidHandler delegate;
-
-        ExtractOnlyFluidHandler(IFluidHandler delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public IFluidTankProperties[] getTankProperties() {
-            return Arrays.stream(delegate.getTankProperties()).map(Properties::new).toArray(IFluidTankProperties[]::new);
-        }
-
-        @Override
-        public int fill(FluidStack resource, boolean doFill) {
-            return 0;
-        }
-
-        @Override
-        @Nullable
-        public FluidStack drain(FluidStack resource, boolean doDrain) {
-            return delegate.drain(resource, doDrain);
-        }
-
-        @Override
-        @Nullable
-        public FluidStack drain(int maxDrain, boolean doDrain) {
-            return delegate.drain(maxDrain, doDrain);
-        }
-
-        private static class Properties implements IFluidTankProperties {
-
-            private final IFluidTankProperties props;
-
-            Properties(IFluidTankProperties props) {
-                this.props = props;
-            }
-
-            @Override
-            @Nullable
-            public FluidStack getContents() {
-                return props.getContents();
-            }
-
-            @Override
-            public int getCapacity() {
-                return props.getCapacity();
-            }
-
-            @Override
-            public boolean canFill() {
-                return false;
-            }
-
-            @Override
-            public boolean canDrain() {
-                return props.canDrain();
-            }
-
-            @Override
-            public boolean canFillFluidType(FluidStack fluidStack) {
-                return false;
-            }
-
-            @Override
-            public boolean canDrainFluidType(FluidStack fluidStack) {
-                return props.canDrainFluidType(fluidStack);
-            }
-
-        }
-
-    }
-
-    private static class InsertOnlyFluidTank implements IFluidTank {
+    private static class RestrictedFluidTank implements IFluidTank {
 
         private final IFluidTank delegate;
+        private final boolean allowInsert, allowExtract;
 
-        InsertOnlyFluidTank(IFluidTank delegate) {
+        private RestrictedFluidTank(IFluidTank delegate, boolean allowInsert, boolean allowExtract) {
             this.delegate = delegate;
+            this.allowInsert = allowInsert;
+            this.allowExtract = allowExtract;
         }
 
         @Override
@@ -213,56 +179,54 @@ public class FluidHandlerUtils {
         }
 
         @Override
-        public int fill(FluidStack resource, boolean doFill) {
-            return delegate.fill(resource, doFill);
+        public int fill(FluidStack fluid, boolean simulate) {
+            return allowInsert ? delegate.fill(fluid, simulate) : 0;
         }
 
         @Override
         @Nullable
-        public FluidStack drain(int maxDrain, boolean doDrain) {
-            return null;
+        public FluidStack drain(int maxDrain, boolean simulate) {
+            return allowExtract ? delegate.drain(maxDrain, simulate) : null;
         }
 
     }
 
-    private static class ExtractOnlyFluidTank implements IFluidTank {
+    private static class TankFluidHandler implements IFluidHandler {
 
-        private final IFluidTank delegate;
+        private final IFluidTank tank;
+        private final boolean canFill, canDrain;
 
-        ExtractOnlyFluidTank(IFluidTank delegate) {
-            this.delegate = delegate;
+        public TankFluidHandler(IFluidTank tank, boolean canFill, boolean canDrain) {
+            this.tank = tank;
+            this.canFill = canFill;
+            this.canDrain = canDrain;
         }
 
         @Override
-        @Nullable
-        public FluidStack getFluid() {
-            return delegate.getFluid();
-        }
-
-        @Override
-        public int getFluidAmount() {
-            return delegate.getFluidAmount();
-        }
-
-        @Override
-        public int getCapacity() {
-            return delegate.getCapacity();
-        }
-
-        @Override
-        public FluidTankInfo getInfo() {
-            return delegate.getInfo();
+        public IFluidTankProperties[] getTankProperties() {
+            return new IFluidTankProperties[] {
+                    new FluidTankProperties(tank.getFluid(), tank.getCapacity(), canFill, canDrain)
+            };
         }
 
         @Override
         public int fill(FluidStack resource, boolean doFill) {
-            return 0;
+            return canFill ? tank.fill(resource, doFill) : 0;
         }
 
-        @Override
         @Nullable
+        @Override
+        public FluidStack drain(FluidStack resource, boolean doDrain) {
+            if (!canDrain || resource.amount <= 0 || !canFluidsStack(resource, tank.getFluid())) {
+                return null;
+            }
+            return tank.drain(resource.amount, doDrain);
+        }
+
+        @Nullable
+        @Override
         public FluidStack drain(int maxDrain, boolean doDrain) {
-            return delegate.drain(maxDrain, doDrain);
+            return canDrain ? tank.drain(maxDrain, doDrain) : null;
         }
 
     }
