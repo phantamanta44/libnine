@@ -1,5 +1,6 @@
 package io.github.phantamanta44.libnine.util.format;
 
+import io.github.phantamanta44.libnine.util.math.MathUtils;
 import net.minecraft.nbt.*;
 import net.minecraftforge.common.util.Constants;
 
@@ -20,16 +21,16 @@ public class FormatUtils {
 
     @SuppressWarnings("DuplicatedCode")
     public static String formatSI(long num, String unit) {
-        if (num == 0) return "0 " + unit;
+        if (num == 0L) return "0 " + unit;
         int magnitude = (int)Math.floor(Math.log10(Math.abs(num)) / 3);
         if (magnitude == 0) return num + " " + unit;
         return String.format("%.2f %s%s", num / Math.pow(10, magnitude * 3), SI_PREFIXES[magnitude], unit);
     }
 
     public static String formatSI(double num, String unit) {
-        if (num == 0) return "0 " + unit;
+        if (MathUtils.fpEquals(num, 0D)) return "0 " + unit;
         double val = num * 1e9D;
-        int magnitude = (int)Math.floor(Math.log10(Math.abs(val)) / 3);
+        int magnitude = Math.max((int)Math.floor(Math.log10(Math.abs(val)) / 3), 0);
         return String.format("%.2f %s%s", val / Math.pow(10, magnitude * 3), SI_PREFIXES_FP[magnitude], unit);
     }
 

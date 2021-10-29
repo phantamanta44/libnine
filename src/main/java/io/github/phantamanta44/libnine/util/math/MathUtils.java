@@ -10,6 +10,16 @@ public class MathUtils {
     public static final float PI_F = 3.14159265358979F;
     public static final float R2D_F = 180F / PI_F;
     public static final float D2R_F = PI_F / 180F;
+    public static final float EPS_F = 1e-15F;
+    public static final double EPS_D = 1e-24D;
+    
+    public static boolean fpEquals(float a, float b) {
+        return Math.abs(a - b) <= EPS_F;
+    }
+
+    public static boolean fpEquals(double a, double b) {
+        return Math.abs(a - b) <= EPS_D;
+    }
 
     public static int clamp(int n, int lower, int upper) {
         return Math.max(Math.min(n, upper), lower);
