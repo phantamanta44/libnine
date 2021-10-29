@@ -4,10 +4,17 @@ import io.github.phantamanta44.libnine.item.L9ItemSubs;
 import io.github.phantamanta44.libnine.util.IDisplayableMatcher;
 import io.github.phantamanta44.libnine.util.world.WorldBlockPos;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
+
+import java.util.Iterator;
+import java.util.List;
 
 public class ItemUtils {
 
@@ -31,22 +38,18 @@ public class ItemUtils {
     }
 
     public static String getUnlocalizedBlockName(WorldBlockPos pos) {
-        Block block = pos.getBlock();
-        return Item.getItemFromBlock(block)
-                .getTranslationKey(block.getPickBlock(pos.getBlockState(), null, pos.getWorld(), pos.getPos(), null));
+        ItemStack stack = pos.getBlock().getPickBlock(pos.getBlockState(), null, pos.getWorld(), pos.getPos(), null);
+        return stack.getTranslationKey();
     }
 
     public static String getLocalizedBlockName(WorldBlockPos pos) {
-        Block block = pos.getBlock();
-        return Item.getItemFromBlock(block)
-                .getItemStackDisplayName(block.getPickBlock(pos.getBlockState(), null, pos.getWorld(), pos.getPos(), null));
+        ItemStack stack = pos.getBlock().getPickBlock(pos.getBlockState(), null, pos.getWorld(), pos.getPos(), null);
+        return stack.getItem().getItemStackDisplayName(stack);
     }
 
     public static String getColouredBlockName(WorldBlockPos pos) {
-        Block block = pos.getBlock();
-        Item item = Item.getItemFromBlock(block);
-        ItemStack stack = block.getPickBlock(pos.getBlockState(), null, pos.getWorld(), pos.getPos(), null);
-        return item.getForgeRarity(stack).getColor() + item.getItemStackDisplayName(stack);
+        return getColouredName(
+                pos.getBlock().getPickBlock(pos.getBlockState(), null, pos.getWorld(), pos.getPos(), null));
     }
 
     @SuppressWarnings("deprecation")
@@ -60,6 +63,25 @@ public class ItemUtils {
             stack.setTagCompound(tag = new NBTTagCompound());
         }
         return tag;
+    }
+
+    public static void getStackTooltip(ItemStack stack, List<String> tooltip, ITooltipFlag tooltipFlags) {
+        List<String> itemTooltip = stack.getTooltip(Minecraft.getMinecraft().player, tooltipFlags);
+        if (itemTooltip.isEmpty()) {
+            tooltip.add(stack.getItem().getForgeRarity(stack).getColor() + stack.getDisplayName());
+            return;
+        }
+        Iterator<String> iter = itemTooltip.iterator();
+        tooltip.add(stack.getItem().getForgeRarity(stack).getColor() + iter.next());
+        while (iter.hasNext()) {
+            tooltip.add(TextFormatting.GRAY + iter.next());
+        }
+    }
+
+    public static ItemStack getItemForBlock(IBlockState state) {
+        Block block = state.getBlock();
+        Item item = Item.getItemFromBlock(block);
+        return new ItemStack(item, 1, item.getMetadata(block.getMetaFromState(state))); // probably works?
     }
 
 }

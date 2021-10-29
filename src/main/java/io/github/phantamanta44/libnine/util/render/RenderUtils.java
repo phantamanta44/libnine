@@ -5,11 +5,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.Loader;
 import org.lwjgl.opengl.GL11;
+
+import javax.annotation.Nullable;
 
 public class RenderUtils {
 
@@ -76,8 +81,13 @@ public class RenderUtils {
                 entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks);
     }
 
+    public static ITooltipFlag getTooltipFlags() {
+        return Minecraft.getMinecraft().gameSettings.advancedItemTooltips
+                ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL;
+    }
+
     /*
-     * Renders
+     * World renders
      */
 
     public static void renderWorldOrtho(double x, double y, double z,
@@ -139,6 +149,33 @@ public class RenderUtils {
         GlStateManager.depthMask(true);
         GlStateManager.enableDepth();
         GlStateManager.enableAlpha();
+    }
+
+    /*
+     * GUI renders
+     */
+
+    public static void renderItemIntoGui(@Nullable EntityLivingBase owner, int x, int y, ItemStack stack,
+                                         @Nullable String countText) {
+        if (stack.isEmpty()) {
+            return;
+        }
+        GlStateManager.enableDepth();
+        RenderHelper.enableGUIStandardItemLighting();
+        Minecraft mc = Minecraft.getMinecraft();
+        RenderItem itemRenderer = mc.getRenderItem();
+        itemRenderer.renderItemAndEffectIntoGUI(owner, stack, x, y);
+        itemRenderer.renderItemOverlayIntoGUI(mc.fontRenderer, stack, x, y, countText);
+        GlStateManager.disableBlend();
+        RenderHelper.disableStandardItemLighting();
+    }
+
+    public static void renderItemIntoGui(@Nullable EntityLivingBase owner, int x, int y, ItemStack stack) {
+        renderItemIntoGui(owner, x, y, stack, null);
+    }
+
+    public static void renderItemIntoGui(int x, int y, ItemStack stack) {
+        renderItemIntoGui(null, x, y, stack);
     }
 
 }
