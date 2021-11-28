@@ -162,6 +162,8 @@ public class GuiComponentTextInput extends GuiComponent {
             int currentLength = value.length();
             if (currentLength < textLength && typed >= 32 && typed < 127) {
                 onTextCharInput(typed);
+            } else if (keyCode == Keyboard.KEY_DELETE) {
+                value = "";
             } else if (keyCode == Keyboard.KEY_BACK && !value.isEmpty()) {
                 if (InputUtils.checkModsNonExclusive(InputUtils.ModKey.CTRL)) {
                     int endIndex = 0;
