@@ -6,6 +6,8 @@ import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class GuiComponentManager {
 
@@ -55,7 +57,21 @@ public class GuiComponentManager {
                 break;
             }
         }
+        if (passThrough) {
+            passThrough = focusFirstTextFieldOnKeys(Arrays.asList(Keyboard.KEY_TAB, Keyboard.KEY_NUMPADENTER, Keyboard.KEY_RETURN), keyCode);
+        }
         return passThrough;
+    }
+
+    private boolean focusFirstTextFieldOnKeys(List<Integer> keys, int keyCode) {
+        if (!keys.contains(keyCode)) return true;
+        for (ComponentState componentState: comps) {
+            if (componentState.getComp() instanceof GuiComponentTextInput) {
+                ((GuiComponentTextInput) componentState.getComp()).setFocused(true);
+                return false;
+            }
+        }
+        return true;
     }
 
     private static class ComponentState {
@@ -66,6 +82,10 @@ public class GuiComponentManager {
         ComponentState(GuiComponent comp) {
             this.comp = comp;
             this.mouseOver = false;
+        }
+
+        public GuiComponent getComp() {
+            return comp;
         }
 
         void drawAndUpdate(float partialTicks, int mX, int mY) {

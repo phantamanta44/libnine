@@ -198,11 +198,16 @@ public class GuiComponentTextInput extends GuiComponent {
             case DIGITS_ONLY:
                 String val = value;
                 if (typed >= 48 && typed <= 57) { // digits 0..9
+                    if (typed == 48 && val.equals("")) return; // can't add "0" to empty
                     val += typed;
                 } else if (typed == 107) { // letter "k", add 000 (multiply by thousand) if can
-                    for (int i = 0; i < 3; i++) {
-                        if (val.length() >= textLength) break;
-                        val += "0";
+                    if (val.equals("")) {
+                        val = "1000";
+                    } else {
+                        for (int i = 0; i < 3; i++) {
+                            if (val.length() >= textLength) break;
+                            val += "0";
+                        }
                     }
                 }
 
