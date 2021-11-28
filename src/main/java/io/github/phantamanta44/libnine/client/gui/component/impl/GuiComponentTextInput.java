@@ -15,6 +15,7 @@ import java.util.function.Predicate;
 public class GuiComponentTextInput extends GuiComponent {
 
     private final int boxLength, textLength;
+    @Nullable
     private final TextureRegion btnTex, btnTexHover, btnTextDisabled;
     private final int validColour, invalidColour;
     private final Predicate<String> validator;
@@ -24,11 +25,15 @@ public class GuiComponentTextInput extends GuiComponent {
     @Nullable
     private final String tooltipKey;
 
-    public GuiComponentTextInput(int x, int y, int boxLength, int textLength,
-                                 TextureRegion btnTex, TextureRegion btnTexHover, TextureRegion btnTexDisabled,
-                                 int validColour, int invalidColour,
-                                 Predicate<String> validator, Consumer<String> callback,
-                                 String initialValue, @Nullable String tooltipKey) {
+
+    public GuiComponentTextInput(int x, int y, int boxLength, int textLength
+            , @Nullable TextureRegion btnTex
+            , @Nullable TextureRegion btnTexHover
+            , @Nullable TextureRegion btnTexDisabled
+            , int validColour, int invalidColour
+            , Predicate<String> validator, Consumer<String> callback
+            , String initialValue, @Nullable String tooltipKey
+    ) {
         super(x, y, boxLength + 9 + GuiUtils.getFontHeight(), GuiUtils.getFontHeight() + 4);
         this.boxLength = boxLength;
         this.textLength = textLength;
@@ -45,20 +50,28 @@ public class GuiComponentTextInput extends GuiComponent {
         updateValidity();
     }
 
-    public GuiComponentTextInput(int x, int y, int boxLength, int textLength,
-                                 TextureRegion btnTex, TextureRegion btnTexHover, TextureRegion btnTexDisabled,
-                                 int validColour, int invalidColour,
-                                 Predicate<String> validator, Consumer<String> callback, String initial) {
+    public GuiComponentTextInput(int x, int y, int boxLength, int textLength
+            , @Nullable TextureRegion btnTex
+            , @Nullable TextureRegion btnTexHover
+            , @Nullable TextureRegion btnTexDisabled
+            , int validColour, int invalidColour
+            , Predicate<String> validator, Consumer<String> callback, String initial
+    ) {
         this(x, y, boxLength, textLength,
-                btnTex, btnTexHover, btnTexDisabled, validColour, invalidColour, validator, callback, initial, null);
+                btnTex, btnTexHover, btnTexDisabled, validColour, invalidColour
+                , validator, callback, initial, null);
     }
 
-    public GuiComponentTextInput(int x, int y, int boxLength, int textLength,
-                                 TextureRegion btnTex, TextureRegion btnTexHover, TextureRegion btnTexDisabled,
-                                 int validColour, int invalidColour,
-                                 Predicate<String> validator, Consumer<String> callback) {
+    public GuiComponentTextInput(int x, int y, int boxLength, int textLength
+            , @Nullable TextureRegion btnTex
+            , @Nullable TextureRegion btnTexHover
+            , @Nullable TextureRegion btnTexDisabled
+            , int validColour, int invalidColour
+            , Predicate<String> validator, Consumer<String> callback
+    ) {
         this(x, y, boxLength, textLength,
-                btnTex, btnTexHover, btnTexDisabled, validColour, invalidColour, validator, callback, "");
+                btnTex, btnTexHover, btnTexDisabled, validColour, invalidColour
+                , validator, callback, "");
     }
 
     public void setValue(String value) {
@@ -66,8 +79,17 @@ public class GuiComponentTextInput extends GuiComponent {
         updateValidity();
     }
 
+    public String getValue() {
+        return value;
+    }
+
     private void updateValidity() {
         valid = validator.test(value);
+    }
+
+    private void updateValidityAndAccept() {
+        updateValidity();
+        if (valid) callback.accept(value);
     }
 
     private boolean isMouseOverButton(int mX, int mY) {
@@ -78,13 +100,18 @@ public class GuiComponentTextInput extends GuiComponent {
         return GuiUtils.isMouseOver(x, y, boxLength + 4, GuiUtils.getFontHeight() + 4, mX, mY);
     }
 
+    public void setFocused(boolean focused) {
+        this.focused = focused;
+    }
+
     public boolean isFocused() {
         return focused;
     }
 
     @Override
     public void render(float partialTicks, int mX, int mY, boolean mouseOver) {
-        (valid ? (isMouseOverButton(mX, mY) ? btnTexHover : btnTex) : btnTextDisabled).draw(x + boxLength + 5, y, 13, 13);
+        if (btnTex != null)
+            (valid ? (isMouseOverButton(mX, mY) ? btnTexHover : btnTex) : btnTextDisabled).draw(x + boxLength + 5, y, 13, 13);
         int colour = valid ? validColour : invalidColour;
         drawString(value, x + 2, y + 3, colour);
         if (focused && (System.currentTimeMillis() % 1000) < 500) {
@@ -126,7 +153,6 @@ public class GuiComponentTextInput extends GuiComponent {
             int currentLength = value.length();
             if (currentLength < textLength && typed >= 32 && typed < 127) {
                 value += typed;
-                updateValidity();
             } else if (keyCode == Keyboard.KEY_BACK && !value.isEmpty()) {
                 if (InputUtils.checkModsNonExclusive(InputUtils.ModKey.CTRL)) {
                     int endIndex = 0;
@@ -149,13 +175,8 @@ public class GuiComponentTextInput extends GuiComponent {
                 } else {
                     value = value.substring(0, currentLength - 1);
                 }
-                updateValidity();
-            } else if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_NUMPADENTER) {
-                updateValidity();
-                if (valid) callback.accept(value);
-            } else if (keyCode == Keyboard.KEY_ESCAPE) {
-                focused = false;
             }
+            updateValidityAndAccept();
             return true;
         }
         return false;
