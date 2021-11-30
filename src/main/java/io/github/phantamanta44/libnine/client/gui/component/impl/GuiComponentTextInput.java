@@ -201,7 +201,7 @@ public class GuiComponentTextInput extends GuiComponent {
                     if (typed == 48 && val.equals("")) return; // can't add "0" to empty
                     val += typed;
                 } else if (typed == 107) { // letter "k", add 000 (multiply by thousand) if can
-                    if (val.equals("")) {
+                    if (val.equals("") || val.equals("0")) {
                         val = "1000";
                     } else {
                         for (int i = 0; i < 3; i++) {
