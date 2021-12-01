@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public abstract class GuiComponent {
@@ -15,12 +16,25 @@ public abstract class GuiComponent {
     protected final int x, y, width, height;
     @SuppressWarnings("NotNullFieldNotInitialized")
     protected GuiScreen gui;
+    @Nullable
+    private GuiComponent nextComponentOnEnter;
+    @Nullable
+    private GuiComponent nextComponentOnTab;
 
-    public GuiComponent(int x, int y, int width, int height) {
+    public GuiComponent(int x, int y, int width, int height
+            , @Nullable GuiComponent nextComponentOnEnter
+            , @Nullable GuiComponent nextComponentOnTab
+    ) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.nextComponentOnEnter = nextComponentOnEnter;
+        this.nextComponentOnTab = nextComponentOnTab;
+    }
+
+    public GuiComponent(int x, int y, int width, int height) {
+        this(x, y, width, height, null, null);
     }
 
     public void setGui(GuiScreen gui) {
@@ -41,6 +55,24 @@ public abstract class GuiComponent {
 
     public int getHeight() {
         return height;
+    }
+
+    @Nullable
+    public GuiComponent getNextComponentOnEnter() {
+        return nextComponentOnEnter;
+    }
+
+    public void setNextComponentOnEnter(@Nullable GuiComponent nextComponentOnEnter) {
+        this.nextComponentOnEnter = nextComponentOnEnter;
+    }
+
+    @Nullable
+    public GuiComponent getNextComponentOnTab() {
+        return nextComponentOnTab;
+    }
+
+    public void setNextComponentOnTab(@Nullable GuiComponent nextComponentOnTab) {
+        this.nextComponentOnTab = nextComponentOnTab;
     }
 
     protected void bindTexture(ResourceLocation texture) {
