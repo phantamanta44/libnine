@@ -12,6 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Iterator;
 import java.util.List;
@@ -65,6 +67,7 @@ public class ItemUtils {
         return tag;
     }
 
+    @SideOnly(Side.CLIENT)
     public static void getStackTooltip(ItemStack stack, List<String> tooltip, ITooltipFlag tooltipFlags) {
         List<String> itemTooltip = stack.getTooltip(Minecraft.getMinecraft().player, tooltipFlags);
         if (itemTooltip.isEmpty()) {
