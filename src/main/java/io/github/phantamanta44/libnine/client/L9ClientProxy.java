@@ -75,6 +75,7 @@ public class L9ClientProxy extends L9CommonProxy {
     protected void onPreInit(FMLPreInitializationEvent event) {
         ShaderUtils.registerReloadHook();
         super.onPreInit(event);
+        L9Models.init();
         MinecraftForge.EVENT_BUS.register(new ClientTickHandler());
         MinecraftForge.EVENT_BUS.register(new MultiBlockDebugRenderHandler());
     }

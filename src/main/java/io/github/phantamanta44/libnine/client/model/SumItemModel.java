@@ -5,7 +5,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.github.phantamanta44.libnine.util.helper.ResourceUtils;
 import io.github.phantamanta44.libnine.util.render.model.BakedQuadList;
 import io.github.phantamanta44.libnine.util.world.WorldUtils;
 import net.minecraft.block.state.IBlockState;
@@ -16,14 +15,12 @@ import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.block.model.ItemOverrideList;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.common.model.IModelState;
@@ -103,23 +100,16 @@ public class SumItemModel implements IModel {
 
     }
 
-    public static class Loader implements ICustomModelLoader {
+    public static class Loader extends L9CachingModelLoader {
 
-        @Override
-        public void onResourceManagerReload(IResourceManager resourceManager) {
-            // NO-OP
+        public Loader() {
+            super("sum");
         }
 
         @Override
-        public boolean accepts(ResourceLocation modelLocation) {
-            return L9Models.isOfType(L9Models.getRealModelLocation(modelLocation), "sum");
-        }
-
-        @Override
-        public IModel loadModel(ResourceLocation modelLocation) throws Exception {
-            JsonObject dto = ResourceUtils.getAsJson(L9Models.getRealModelLocation(modelLocation)).getAsJsonObject();
+        public IModel parseModel(JsonObject modelDto) throws Exception {
             List<ModelPart> parts = new ArrayList<>();
-            for (JsonElement partDto : dto.getAsJsonArray("parts")) {
+            for (JsonElement partDto : modelDto.getAsJsonArray("parts")) {
                 ResourceLocation partPath = new ResourceLocation(partDto.getAsString());
                 parts.add(new ModelPart(ModelLoaderRegistry.getModel(partPath), partPath));
             }

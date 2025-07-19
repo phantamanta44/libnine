@@ -5,7 +5,6 @@ import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.github.phantamanta44.libnine.util.helper.ResourceUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResourceManager;
@@ -13,7 +12,6 @@ import net.minecraft.client.resources.IResourcePack;
 import net.minecraft.client.resources.data.IMetadataSection;
 import net.minecraft.client.resources.data.MetadataSerializer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.model.ICustomModelLoader;
 import net.minecraftforge.client.model.IModel;
 
 import javax.annotation.Nullable;
@@ -28,26 +26,21 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-public class ParameterizedItemModelLoader implements ICustomModelLoader {
+public class ParameterizedItemModelLoader extends L9CachingModelLoader {
 
     private final ResourceInjector resourceInjector;
 
     public ParameterizedItemModelLoader() {
+        super("pi");
         this.resourceInjector = new ResourceInjector();
         Minecraft.getMinecraft().defaultResourcePacks.add(this.resourceInjector);
     }
 
     @Override
-    public boolean accepts(ResourceLocation resource) {
-        return L9Models.isOfType(L9Models.getRealModelLocation(resource), "pi");
-    }
-
-    @Override
-    public IModel loadModel(ResourceLocation resource) throws Exception {
-        JsonObject model = ResourceUtils.getAsJson(L9Models.getRealModelLocation(resource)).getAsJsonObject();
-        JsonObject archetype = model.getAsJsonObject("archetype");
-        if (archetype == null) throw new NoSuchElementException("No archetype for PI model: " + resource);
-        JsonObject mutations = model.getAsJsonObject("mutations");
+    public IModel parseModel(JsonObject modelDto) {
+        JsonObject archetype = modelDto.getAsJsonObject("archetype");
+        if (archetype == null) throw new NoSuchElementException("No archetype for PI model!");
+        JsonObject mutations = modelDto.getAsJsonObject("mutations");
         Table<String, String, JsonElement> mutationTable = null;
         if (mutations != null) {
             mutationTable = Tables.newCustomTable(new HashMap<>(), HashMap::new);
@@ -62,6 +55,7 @@ public class ParameterizedItemModelLoader implements ICustomModelLoader {
 
     @Override
     public void onResourceManagerReload(IResourceManager resourceManager) {
+        super.onResourceManagerReload(resourceManager);
         resourceInjector.flush();
     }
 
